@@ -12,6 +12,7 @@
     "url": "https://github.com/samuelgoto/deeplearn.jsonld/issues"
   },
   "dependencies": {
+    "@tensorflow/tfjs": "^0.12.5",
     "@tensorflow/tfjs-node": "^0.1.13"
   },
   "devDependencies": {
