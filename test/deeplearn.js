@@ -127,6 +127,16 @@ describe("Deeplearn", function() {
 
    });
 
+  it.skip("image", async function() {
+    let img = await load("./test/eiffel.jpg");
+    console.log(img);
+
+    const out = fs.createWriteStream(__dirname + '/test.jpeg');
+    const stream = img.createJPEGStream();
+    stream.pipe(out);
+    out.on('finish', () =>  console.log('The JPEG file was created.'));
+   });
+
   it("nasnet", async function() {
     // https://tfhub.dev/google/delf/1
     const MODEL_URL = "file://./test/nasnet/tensorflowjs_model.pb";
@@ -187,7 +197,7 @@ describe("Deeplearn", function() {
     const model = await loadFrozenModel(MODEL_URL, WEIGHTS_URL);
 
     let result = await model.execute({
-      images: await image("./test/eiffel.jpg")
+      images: await image("./test/church.jpg")
      });
 
     console.log(getTopKClasses(result, 5));
