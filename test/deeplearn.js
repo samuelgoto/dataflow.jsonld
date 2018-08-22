@@ -8,7 +8,7 @@ const canvas = require("canvas");
 
 const {IMAGENET_CLASSES} = require("./imagenet_classes.js");
 
-async function load(url) {
+async function load(url, size = 224) {
  return new Promise(function(resolve, reject) {
    fs.readFile(url, (err, data) => {
      // return;
@@ -25,10 +25,10 @@ async function load(url) {
       // console.log("hello");
       // resolve(img);
 
-      let foo = new canvas(224, 224);
+      let foo = new canvas(size, size);
       let context = foo.getContext("2d");
       // context.drawImage(img, 0, 0, img.width / 4, img.height / 4);
-      context.drawImage(img, 0, 0, 224, 224);
+      context.drawImage(img, 0, 0, size, size);
 
       resolve(foo);
      }
@@ -150,8 +150,36 @@ describe("Deeplearn", function() {
     console.log(getTopKClasses(result, 5));
    });
 
-  async function image(url) {
-   let img = await load(url);
+  it("resnet", async function() {
+    this.timeout(5000);
+
+    const MODEL_URL = "file://./test/resnet/tensorflowjs_model.pb";
+    const WEIGHTS_URL = "file://./test/resnet/weights_manifest.json";
+    const model = await loadFrozenModel(MODEL_URL, WEIGHTS_URL);
+
+    let result = await model.execute({
+      images: await image("./test/church.jpg")
+     });
+
+    console.log(getTopKClasses(result, 5));
+   });
+
+  it("pnasnet", async function() {
+    this.timeout(10000);
+
+    const MODEL_URL = "file://./test/pnasnet/tensorflowjs_model.pb";
+    const WEIGHTS_URL = "file://./test/pnasnet/weights_manifest.json";
+    const model = await loadFrozenModel(MODEL_URL, WEIGHTS_URL);
+
+    let result = await model.execute({
+      images: await image("./test/church.jpg", 331)
+     });
+
+    console.log(getTopKClasses(result, 5));
+   });
+
+  async function image(url, size = 224) {
+   let img = await load(url, size);
 
    let input = tf.fromPixels(img);
    const PREPROCESS_DIVISOR = tf.scalar(255 / 2);
