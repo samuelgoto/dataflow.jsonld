@@ -13,7 +13,10 @@
   },
   "dependencies": {
     "@tensorflow/tfjs": "^0.12.5",
-    "@tensorflow/tfjs-node": "^0.1.13"
+    "@tensorflow/tfjs-converter": "^0.5.7",
+    "@tensorflow/tfjs-node": "^0.1.13",
+    "canvas": "^1.6.11",
+    "get-image-data": "^3.0.1"
   },
   "devDependencies": {
     "chai": "^4.1.0",
