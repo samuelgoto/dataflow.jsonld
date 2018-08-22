@@ -191,6 +191,32 @@ describe("Deeplearn", function() {
     // [[0.9983829, 0.0003967, 0.0000629, 0.0009483, 0.0002092],]
    });
 
+  it.only("family", async function() {
+    this.timeout(5000);
+
+    const MODEL_URL = "file://./test/family/tensorflowjs_model.pb";
+    const WEIGHTS_URL = "file://./test/family/weights_manifest.json";
+    const model = await loadFrozenModel(MODEL_URL, WEIGHTS_URL);
+
+    // 82% accuracy on training and 50% accuracy on validation
+    let result = await model.execute({
+      Placeholder: await image("./test/leo.jpg", 224)
+     });
+
+    result.print();
+
+    result = await model.execute({
+      Placeholder: await image("./test/anna.jpg", 224)
+     });
+
+    result.print();
+
+    // Indeces here mean:
+    //
+    // anna
+    // leo
+   });
+
   it("resnet", async function() {
     this.timeout(5000);
 
