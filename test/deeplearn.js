@@ -127,7 +127,7 @@ describe("Deeplearn", function() {
 
    });
 
-  it("image", async function() {
+  it.skip("image", async function() {
     let img = await load("./test/daisy.jpg", 299);
     console.log(img);
 
@@ -151,6 +151,16 @@ describe("Deeplearn", function() {
    });
 
   it("flowers", async function() {
+    // creating the model:
+    // https://www.tensorflow.org/hub/tutorials/image_retraining
+    //
+    // converting it to the js model:
+    // tensorflowjs_converter 
+    //    --input_format=tf_frozen_model
+    //    --output_node_names="final_result"
+    //    --saved_model_tags=serve 
+    //    /tmp/output_graph.pb foobar
+
     this.timeout(5000);
 
     const MODEL_URL = "file://./test/flowers/tensorflowjs_model.pb";
