@@ -127,8 +127,8 @@ describe("Deeplearn", function() {
 
    });
 
-  it.skip("image", async function() {
-    let img = await load("./test/eiffel.jpg");
+  it("image", async function() {
+    let img = await load("./test/daisy.jpg", 299);
     console.log(img);
 
     const out = fs.createWriteStream(__dirname + '/test.jpeg');
@@ -148,6 +148,37 @@ describe("Deeplearn", function() {
      });
 
     console.log(getTopKClasses(result, 5));
+   });
+
+  it("flowers", async function() {
+    this.timeout(5000);
+
+    const MODEL_URL = "file://./test/flowers/tensorflowjs_model.pb";
+    const WEIGHTS_URL = "file://./test/flowers/weights_manifest.json";
+    const model = await loadFrozenModel(MODEL_URL, WEIGHTS_URL);
+
+    let result = await model.execute({
+      Placeholder: await image("./test/daisy.jpg", 299)
+     });
+
+    // python benchmark:
+    //
+    // daisy 0.9980768
+    // sunflowers 0.0010952335
+    // dandelion 0.000464226
+    // tulips 0.00028436302
+    // roses 7.940252e-05
+
+    result.print();
+
+    // Indeces here mean:
+    //
+    // daisy
+    // dandelion
+    // roses
+    // sunflowers
+    // tulips
+    // [[0.9983829, 0.0003967, 0.0000629, 0.0009483, 0.0002092],]
    });
 
   it("resnet", async function() {
@@ -179,15 +210,16 @@ describe("Deeplearn", function() {
    });
 
   async function image(url, size = 224) {
+   // normalization based on 
+   // https://github.com/tensorflow/tensorflow/blob/master/tensorflow/examples/label_image/label_image.py#L38
    let img = await load(url, size);
 
-   let input = tf.fromPixels(img);
-   const PREPROCESS_DIVISOR = tf.scalar(255 / 2);
+   let input = tf.fromPixels(img).asType("float32").expandDims();
+
+   const mean = 0;
+   const std = 255;
    
-   const preprocessedInput = tf.div(tf.sub(input.asType('float32'), 
-                                           PREPROCESS_DIVISOR),PREPROCESS_DIVISOR);
-   const reshapedInput =
-    preprocessedInput.reshape([1, ...preprocessedInput.shape]);
+   return tf.div(tf.sub(input, mean), std);
 
    return reshapedInput;
   }
