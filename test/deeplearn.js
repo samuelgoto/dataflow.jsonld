@@ -4,22 +4,9 @@ const Assert = require("assert");
 const tf = require('@tensorflow/tfjs');
 const {loadFrozenModel} = require("@tensorflow/tfjs-converter");
 require("@tensorflow/tfjs-node");
-const image = require("get-image-data");
 const canvas = require("canvas");
 
-const {IMAGENET_CLASSES} = require("./imagenet_classes.js")
-
-async function fetch(url) {
- return new Promise(function(resolve, reject) {
-   image(url, function(error, info) {
-     if (error) {
-      reject(error);
-      return;
-     }
-     resolve(info);
-    });
-  });
-}
+const {IMAGENET_CLASSES} = require("./imagenet_classes.js");
 
 async function load(url) {
  return new Promise(function(resolve, reject) {
@@ -140,11 +127,57 @@ describe("Deeplearn", function() {
 
    });
 
-  it.only("tensorflow converter", async function() {
+  it("nasnet", async function() {
+    // https://tfhub.dev/google/delf/1
+    const MODEL_URL = "file://./test/nasnet/tensorflowjs_model.pb";
+    const WEIGHTS_URL = "file://./test/nasnet/weights_manifest.json";
+    const model = await loadFrozenModel(MODEL_URL, WEIGHTS_URL);
 
-    /// console.log(canvas);
-    // let canvas = new canvas.Canvas(200, 200);
+    let result = await model.execute({
+      images: await image("./test/church.jpg")
+     });
 
+    console.log(getTopKClasses(result, 5));
+   });
+
+  async function image(url) {
+   let img = await load(url);
+
+   let input = tf.fromPixels(img);
+   const PREPROCESS_DIVISOR = tf.scalar(255 / 2);
+   
+   const preprocessedInput = tf.div(tf.sub(input.asType('float32'), 
+                                           PREPROCESS_DIVISOR),PREPROCESS_DIVISOR);
+   const reshapedInput =
+    preprocessedInput.reshape([1, ...preprocessedInput.shape]);
+
+   return reshapedInput;
+  }
+
+  function getTopKClasses(logits, topK) {
+   const predictions = tf.tidy(() => {
+     return tf.softmax(logits);
+    });
+
+   const values = predictions.dataSync();
+   predictions.dispose();
+
+   let predictionList = [];
+   for (let i = 0; i < values.length; i++) {
+    predictionList.push({value: values[i], index: i});
+   }
+   predictionList = predictionList
+    .sort((a, b) => {
+      return b.value - a.value;
+     })
+    .slice(0, topK);
+   
+   return predictionList.map(x => {
+     return {label: IMAGENET_CLASSES[x.index], value: x.value};
+    });
+  }
+
+  it("mobilenet", async function() {
     // tensorflowjs_converter
     //    --input_format=tf_hub
     //    'https://tfhub.dev/google/imagenet/mobilenet_v1_100_224/classification/1'
@@ -152,51 +185,10 @@ describe("Deeplearn", function() {
     const MODEL_URL = "file://./test/mobilenet/tensorflowjs_model.pb";
     const WEIGHTS_URL = "file://./test/mobilenet/weights_manifest.json";
     const model = await loadFrozenModel(MODEL_URL, WEIGHTS_URL);
-    // console.log(model);
 
-
-    let image = await load("./test/eiffel.jpg");
-
-    let input = tf.fromPixels(image);
-    const PREPROCESS_DIVISOR = tf.scalar(255 / 2);
-    
-    // console.log(image);
-    // console.log(tf.fromPixels(image).expandDims().shape);
-
-    const preprocessedInput = tf.div(tf.sub(input.asType('float32'), 
-                                            PREPROCESS_DIVISOR),PREPROCESS_DIVISOR);
-    const reshapedInput =
-     preprocessedInput.reshape([1, ...preprocessedInput.shape]);
-
-    // return;
     let result = await model.execute({
-      // images: tf.fromPixels(image).expandDims().toFloat()
-      images: reshapedInput
+      images: await image("./test/eiffel.jpg")
      });
-
-
-    function getTopKClasses(logits, topK) {
-     const predictions = tf.tidy(() => {
-       return tf.softmax(logits);
-      });
-
-     const values = predictions.dataSync();
-     predictions.dispose();
-
-     let predictionList = [];
-     for (let i = 0; i < values.length; i++) {
-      predictionList.push({value: values[i], index: i});
-     }
-     predictionList = predictionList
-      .sort((a, b) => {
-        return b.value - a.value;
-       })
-      .slice(0, topK);
-
-     return predictionList.map(x => {
-       return {label: IMAGENET_CLASSES[x.index], value: x.value};
-      });
-    }
 
     console.log(getTopKClasses(result, 5));
    });
