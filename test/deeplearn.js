@@ -191,7 +191,7 @@ describe("Deeplearn", function() {
     // [[0.9983829, 0.0003967, 0.0000629, 0.0009483, 0.0002092],]
    });
 
-  it.only("family", async function() {
+  it("family", async function() {
     this.timeout(5000);
 
     const MODEL_URL = "file://./test/family/tensorflowjs_model.pb";
@@ -297,6 +297,25 @@ describe("Deeplearn", function() {
      });
 
     console.log(getTopKClasses(result, 5));
+   });
+
+  it.only("mobilenet-features", async function() {
+    // tensorflowjs_converter
+    //    --input_format=tf_hub
+    //    'https://tfhub.dev/google/imagenet/mobilenet_v1_100_224/classification/1'
+    //    mobilenet
+    const MODEL_URL = "file://./test/mobilenet-features/tensorflowjs_model.pb";
+    const WEIGHTS_URL = "file://./test/mobilenet-features/weights_manifest.json";
+    const model = await loadFrozenModel(MODEL_URL, WEIGHTS_URL);
+
+    let result = await model.execute({
+      images: await image("./test/church.jpg")
+     });
+    
+    // console.log(result.shape);
+    result.print();
+
+    //console.log(getTopKClasses(result, 5));
    });
 
 
