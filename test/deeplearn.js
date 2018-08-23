@@ -8,6 +8,8 @@ const canvas = require("canvas");
 
 const {IMAGENET_CLASSES} = require("./imagenet_classes.js");
 
+const knn = require("@tensorflow-models/knn-classifier");
+
 async function load(url, size = 224) {
  return new Promise(function(resolve, reject) {
    fs.readFile(url, (err, data) => {
@@ -300,10 +302,6 @@ describe("Deeplearn", function() {
    });
 
   it.only("mobilenet-features", async function() {
-    // tensorflowjs_converter
-    //    --input_format=tf_hub
-    //    'https://tfhub.dev/google/imagenet/mobilenet_v1_100_224/classification/1'
-    //    mobilenet
     const MODEL_URL = "file://./test/mobilenet-features/tensorflowjs_model.pb";
     const WEIGHTS_URL = "file://./test/mobilenet-features/weights_manifest.json";
     const model = await loadFrozenModel(MODEL_URL, WEIGHTS_URL);
@@ -313,9 +311,15 @@ describe("Deeplearn", function() {
      });
     
     // console.log(result.shape);
-    result.print();
+    // result.print();
 
-    //console.log(getTopKClasses(result, 5));
+    let classifier = knn.create();
+
+    classifier.addExample(result, 0);
+
+    let prediction = await classifier.predictClass(result);
+
+    console.log(prediction);
    });
 
 
