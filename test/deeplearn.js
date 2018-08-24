@@ -1,48 +1,52 @@
 const fs = require("fs");
 const Assert = require("assert");
-
 const tf = require('@tensorflow/tfjs');
 const {loadFrozenModel} = require("@tensorflow/tfjs-converter");
-require("@tensorflow/tfjs-node");
+const tfjs = require("@tensorflow/tfjs-node");
 const canvas = require("canvas");
-
 const {IMAGENET_CLASSES} = require("./imagenet_classes.js");
-
 const knn = require("@tensorflow-models/knn-classifier");
+const request = require("request");
+const http = require("http");
+const fetch = require("node-fetch");
+const readline = require("readline");
+const sscanf = require("sscanf");
 
 async function load(url, size = 224) {
  return new Promise(function(resolve, reject) {
-   fs.readFile(url, (err, data) => {
-     // return;
+   let callback = (err, data) => {
+    // return;
+    // console.log("hi");
+    if (err) {
+     // console.log(err);
+     reject(err);
+     throw err;
+    }
+    // console.log(data);
+    const img = new canvas.Image()
+    // img.onload = () => ctx.drawImage(img, 0, 0)
+    img.onload = () => {
+     // console.log("hello");
+     // resolve(img);
+     
+     let foo = new canvas(size, size);
+     let context = foo.getContext("2d");
+     // context.drawImage(img, 0, 0, img.width / 4, img.height / 4);
+     context.drawImage(img, 0, 0, size, size);
+
+     resolve(foo);
+    }
+    img.onerror = (err) => { 
      // console.log("hi");
-     if (err) {
-      // console.log(err);
-      reject(err);
-      throw err;
-     }
-     // console.log(data);
-     const img = new canvas.Image()
-     // img.onload = () => ctx.drawImage(img, 0, 0)
-     img.onload = () => {
-      // console.log("hello");
-      // resolve(img);
+     console.log(err);
+     reject(err);
+     // throw err;
+    }
+    img.src = data;
+    // console.log(img);
+   };
 
-      let foo = new canvas(size, size);
-      let context = foo.getContext("2d");
-      // context.drawImage(img, 0, 0, img.width / 4, img.height / 4);
-      context.drawImage(img, 0, 0, size, size);
-
-      resolve(foo);
-     }
-     img.onerror = (err) => { 
-      // console.log("hi");
-      console.log(err);
-      reject(err);
-      // throw err;
-     }
-     img.src = data;
-     // console.log(img);
-    });
+   fs.readFile(url, callback);    
  });
 }
 
@@ -127,6 +131,89 @@ describe("Deeplearn", function() {
     result.print(); // Output: 24
 
 
+   });
+
+  it.skip("download", async function() {
+    this.timeout(1000000000);
+
+    async function save(id, url) {
+
+     let result = await new Promise(function(resolve, reject) {
+       // console.log("hello");
+
+       fetch(url).then((data) => {
+         if (!data.ok) {
+          reject("fetch");
+          return;
+         }
+         // console.log("");
+         data.buffer().then((buffer) => {
+           if (buffer.length <= 0) {
+            reject("empty");
+            return;
+           }
+           let stream = fs.createWriteStream(`/tmp/imagenet/${id}_${encodeURIComponent(url)}`);
+           stream.write(buffer);
+           stream.end();
+           resolve(url);
+          });
+        }).catch(e => {
+          // console.log(e);
+          reject("fetch");
+         });
+
+       return;
+
+       http.get(url, function(res) {
+         // console.log("hi");
+         res.pipe(stream);
+         resolve(true);
+        });
+      });
+
+     return result;
+    }
+
+    let lines = require("fs")
+     .readFileSync("/tmp/foo.head")
+     .toString()
+     .split("\n");
+
+    //try {
+    // await save("", "http://www.web07.cn/uploads/Photo/c101122/12Z3Y54RZ-22027.jpg");
+    //} catch (e) {
+    // console.log(e);
+    //}
+
+    // return;
+
+    for (let line of lines) {
+     console.log(line);
+
+     let img = sscanf(line, "%s %s", "id", "url");
+
+     try {
+      await save(img.id, img.url);
+     } catch (e) {
+      console.log(e);
+     }
+    }
+
+    return;
+
+    var lineReader = require("readline").createInterface({
+      input: require("fs").createReadStream("/tmp/foo")
+     });
+
+    lineReader.on("line", async function (line) {
+      // console.log('Line from file:', line);
+      // console.log(img);
+      await save(img.id, img.url);
+     });
+
+    // let url = "http://farm4.static.flickr.com/3441/3815746584_4f7a288042.jpg";
+
+    // let img = await load("");
    });
 
   it.skip("image", async function() {
@@ -301,13 +388,13 @@ describe("Deeplearn", function() {
     console.log(getTopKClasses(result, 5));
    });
 
-  it.only("mobilenet-features", async function() {
+  it("mobilenet-features", async function() {
     const MODEL_URL = "file://./test/mobilenet-features/tensorflowjs_model.pb";
     const WEIGHTS_URL = "file://./test/mobilenet-features/weights_manifest.json";
     const model = await loadFrozenModel(MODEL_URL, WEIGHTS_URL);
 
     let result = await model.execute({
-      images: await image("./test/church.jpg")
+      images: await image("./test/anna.jpg")
      });
     
     // console.log(result.shape);
