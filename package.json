@@ -2,7 +2,7 @@
   "name": "deeplearn.jsonld",
   "scripts": {
     "test": "mocha -w",
-    "build": "npx webpack dataflow.js"
+    "build": "watchify dataflow.js -o build/index.js -s module"
   },
   "repository": {
     "type": "git",

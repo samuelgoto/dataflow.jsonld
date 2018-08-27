@@ -1,16 +1,21 @@
 <html>
   <head>
-    <script src="dist/main.js"></script>
+    <script src="index.js"></script>
   </head>
   <body>
     hello world
+
+
+    <script>
+      const {Flickr} = module;
+
+      new Flickr().search("coke").then(photos => console.log(photos));
+    </script>
 
     <button onclick="register()">register</button>
     <button onclick="signin()">signin</button>
 
     <script>
-      console.log("hello world");
-
       async function register() {
         console.log("registering");
         //let credentials = new FederatedCredential({
