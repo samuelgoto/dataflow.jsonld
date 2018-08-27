@@ -1,10 +1,40 @@
 <html>
   <head>
     <script src="index.js"></script>
+    <style>
+    input {
+      border-color: black;
+      padding: 10px;
+    }
+    button {
+      padding: 10px;
+    }
+    </style>
   </head>
   <body>
-    hello world
 
+    <h1>Welcome to the image dataset generator!</h1>
+
+    <p>Using this website, you can create image datasets landmarks. Here is how it works:</p>
+
+    <ol>
+      <li>You search for pictures on flickr</li>
+      <li>We'll show you the pictures and you tell us if they match what you are trying to trigger on or not</li>
+      <li>Using the data you collected, we'll create a JSON-LD that you can embed as a landmark</li>
+    </ol>
+
+    <p>Ready? Set? </p> <input id="search" placeholder="coke can"><button onclick="go()">go!</button>
+
+    <p>Here is the result:</p>
+
+    <textarea rows="30" cols="80">{
+  "@context": "schema.org/",
+  "@type": "TrackedObject",
+  "positive": [
+  ],
+  "negative": [
+  ]
+}</textarea>
 
     <script>
       const {Flickr} = module;
@@ -12,8 +42,10 @@
       new Flickr().search("coke").then(photos => console.log(photos));
     </script>
 
+    <!--
     <button onclick="register()">register</button>
     <button onclick="signin()">signin</button>
+    -->
 
     <script>
       async function register() {
