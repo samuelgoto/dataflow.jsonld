@@ -388,23 +388,94 @@ describe("Deeplearn", function() {
     console.log(getTopKClasses(result, 5));
    });
 
-  it("mobilenet-features", async function() {
+  it("knn", async function() {
+    let path = "/tmp/family/";
+
+    async function readdir(path) {
+     return new Promise(function(resolve) {
+       fs.readdir(path, function(err, dirs) {
+         resolve(dirs);
+        });
+     });
+    } 
+
+    // console.log(await readdir());
+
+    for (let dir of await readdir(path)) {
+     // console.log(dir);
+     for (let file of await readdir(path + dir)) {
+      // console.log(file);
+     }
+    }
+
+    let file = "MVIMG_20180819_154756.jpg";
+
     const MODEL_URL = "file://./test/mobilenet-features/tensorflowjs_model.pb";
     const WEIGHTS_URL = "file://./test/mobilenet-features/weights_manifest.json";
     const model = await loadFrozenModel(MODEL_URL, WEIGHTS_URL);
 
-    let result = await model.execute({
-      images: await image("./test/anna.jpg")
-     });
-    
-    // console.log(result.shape);
-    // result.print();
+    let id = async (url) => {
+     return model.execute({
+       images: await image(url)
+      })
+    };
+
+    let img = await id(path + "leo/" + file);
+    img.print();
+    console.log(img);
+   });
+
+  it("flickr", async function() {
+    let {Flickr} = require("./../dataflow.js");
+    let photos = new Flickr().search("coke can");
+
+    return;
+
+    let endpoint = "https://api.flickr.com/services/rest"; 
+    let method = "method=flickr.photos.search";
+    let key = "73dcc158504f1a4c3c95203a1b55e235";
+    let format = "format=json&nojsoncallback=1";
+    let size = "40";
+    let text = encodeURIComponent("coke can");
+    let api = `${endpoint}/?${method}&api_key=${key}&text=${text}&${format}&per_page=${size}&sort=relevance`;
+
+    let result = await fetch(api);
+    let data = await result.json();
+    // console.log(JSON.stringify(data, undefined, 2));
+    for (let photo of data.photos.photo) {
+     // console.log(photo);
+     let url = `https://farm${photo.farm}.staticflickr.com/${photo.server}/${photo.id}_${photo.secret}.jpg`;
+     console.log(url);
+    }
+  });
+
+  it("mobilenet-features", async function() {
+    this.timeout(10000);
+
+    const MODEL_URL = "file://./test/mobilenet-features/tensorflowjs_model.pb";
+    const WEIGHTS_URL = "file://./test/mobilenet-features/weights_manifest.json";
+    const model = await loadFrozenModel(MODEL_URL, WEIGHTS_URL);
+
+    let id = async (url) => {
+     return model.execute({
+       images: await image(url)
+      })
+    };
 
     let classifier = knn.create();
 
-    classifier.addExample(result, 0);
+    classifier.addExample(await id("./test/anna.jpg"), 0);
+    classifier.addExample(await id("./test/anna2.jpg"), 0);
+    classifier.addExample(await id("./test/leo.jpg"), 1);
+    classifier.addExample(await id("./test/leo2.jpg"), 1);
+    classifier.addExample(await id("./test/church.jpg"), 2);
+    classifier.addExample(await id("./test/church2.jpg"), 2);
+    classifier.addExample(await id("./test/eiffel.jpg"), 3);
 
-    let prediction = await classifier.predictClass(result);
+    let query = await id("./test/eiffel.jpg");
+    let prediction = await classifier.predictClass(query);
+
+    classifier.similarities(query).print();
 
     console.log(prediction);
    });
