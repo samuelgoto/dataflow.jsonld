@@ -1,9 +1,9 @@
 {
   "name": "deeplearn.jsonld",
   "scripts": {
-    "test": "mocha -w"
+    "test": "mocha -w",
+    "build": "npx webpack dataflow.js"
   },
-  "main": "dataflow.js",
   "repository": {
     "type": "git",
     "url": "git+https://github.com/samuelgoto/deeplearn.jsonld.git"

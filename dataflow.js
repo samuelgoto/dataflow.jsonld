@@ -1,5 +1,10 @@
 const fetch = require("node-fetch");
 
+console.log("hello from flickr!");
+
+
+
+
 class Flickr {
  async search() {
   let endpoint = "https://api.flickr.com/services/rest";

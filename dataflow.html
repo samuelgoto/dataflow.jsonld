@@ -1,0 +1,51 @@
+<html>
+  <head>
+    <script src="dist/main.js"></script>
+  </head>
+  <body>
+    hello world
+
+    <button onclick="register()">register</button>
+    <button onclick="signin()">signin</button>
+
+    <script>
+      console.log("hello world");
+
+      async function register() {
+        console.log("registering");
+        //let credentials = new FederatedCredential({
+        //  id: "",
+        //  name: "Sam Goto",
+        //  provider: "https://sgo.to",
+        //  iconURL: "https://pbs.twimg.com/profile_images/920758039325564928/vp0Px4kC_bigger.jpg"
+        // });
+
+        const credentials = new PasswordCredential({
+          id: "reader",
+          name: "Arnelle Balane",
+          password: "myawesomepassword",
+          iconURL: "https://pbs.twimg.com/profile_images/920758039325564928/vp0Px4kC_bigger.jpg"
+        });
+
+        // console.log(cred);
+
+        let result = await navigator.credentials.store(credentials);
+        console.log(result);
+      }
+
+      async function signin() {
+        console.log("signing in");
+        let result = await navigator.credentials.get({
+          password: true,
+          federated: {
+            providers: ["https://sgo.to"]
+          }
+          });
+        console.log(result);
+      }
+
+
+    </script>
+    
+  </body>
+</html>
