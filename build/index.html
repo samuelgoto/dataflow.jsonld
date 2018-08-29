@@ -13,22 +13,23 @@
   </head>
   <body>
 
-    <h1>Welcome to the image dataset generator!</h1>
+    <h1>Welcome to the tracked object generator!</h1>
 
-    <p>Using this website, you can create image datasets landmarks. Here is how it works:</p>
+    <p>Using this website, you can <a href="https://github.com/samuelgoto/arpub">AR landmarks</a> from images. Here is how it works:</p>
 
     <ol>
       <li>You search for pictures on flickr</li>
       <li>We'll show you the pictures and you tell us if they match what you are trying to trigger on or not</li>
-      <li>Using the data you collected, we'll create a JSON-LD that you can embed as a landmark</li>
+      <li>Using the data you collected, we'll create a JSON-LD that you can embed as a <a href="https://github.com/samuelgoto/arpub">landmark</a></li>
+      <li>Using your web camera, you can see if it works</li>
     </ol>
 
-    <p>Ready? Set? </p> <input id="search" placeholder="coke can"><button onclick="go()">go!</button>
+    <p>Ready? Set? </p> <input id="search" value="coke can"><button onclick="go()">go!</button>
 
     <p>Here is the result:</p>
 
-    <textarea rows="30" cols="80">{
-  "@context": "schema.org/",
+    <textarea id="result" rows="30" cols="80">{
+  "@context": "http://schema.org/TrackedObject",
   "@type": "TrackedObject",
   "positive": [
   ],
@@ -36,10 +37,105 @@
   ]
 }</textarea>
 
+    <style>
+    #result {
+      font-family: "Droid Sans Mono", "Courier New", monospace;
+      font-size: 14px;
+    }
+    .fullscreen {
+      display: none;
+    }
+    .fullscreen[enabled] {
+      display: block;
+      position: absolute;
+      width: 100%;
+      height: 100%;
+      background-color: black;
+      top: 0;
+      left: 0;
+      text-align: center;
+      vertical-align: middle;
+    }
+    .image {
+      position: relative;
+      top: 50%;
+      transform: perspective(1px) translateY(-50%);
+    }
+    .instructions {
+      color: green;
+      font-family: "Droid Sans Mono", "Courier New", monospace;
+      position: absolute;
+      right: 30px;
+      top: 20px;
+      font-weight: strong;
+    }
+    </style>
+
+    <div id="fullscreen" class="fullscreen">
+      <div class="instructions">Press "J" if this image matches what you want to trigger on and "K" if it doesn't. ESC to leave the training.</div>
+      <img id="image" class="image">
+    </div>
+
     <script>
       const {Flickr} = module;
 
-      new Flickr().search("coke").then(photos => console.log(photos));
+      async function go() {
+        let query = document.getElementById("search").value;
+
+        if (!query) {
+          alert(`invalid query [${query}]`);
+          return;
+        }
+
+        document.getElementById("fullscreen").setAttribute("enabled", "true");
+
+        let photos = await new Flickr().search(query);
+        console.log(photos);
+
+        let i = 0;
+       
+        let image = (index) => {
+          document.getElementById("image").src = photos[index];
+        };
+
+        image(i);      
+
+        let good = [];
+        let bad = [];
+
+        function keyboard(e) {
+          // e.keyCode == 27 is ESC
+          let char = String.fromCharCode(e.keyCode);
+          if (e.keyCode == 27 || i == (photos.length - 1)) {
+            document.body.removeEventListener("keydown", keyboard);
+            document.getElementById("fullscreen").removeAttribute("enabled");
+
+            document.getElementById("result").innerText = `
+{
+  "@context": "http://schema.org/",
+  "@type: "TrackedObject",
+  "@id": "${document.location.href}/${query}",
+  "name": "${query}",
+  "positive": ${JSON.stringify(good, undefined, 4)},
+  "negative": ${JSON.stringify(bad, undefined, 4)}
+}
+`;
+
+          } else if (char == "J" || char == "K") {
+            i++;
+            image(i);
+            let bucket = char == "J" ? good : bad;
+            bucket.push(photos[i]);
+          } else {
+            // alert("unknown key: press J/K or ESC");
+          }
+        }
+  
+        document.body.addEventListener("keydown", keyboard);
+      }
+
+      // go();
+
     </script>
 
     <!--
