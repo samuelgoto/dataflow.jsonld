@@ -3,7 +3,7 @@ const Assert = require("assert");
 const tf = require('@tensorflow/tfjs');
 const {loadFrozenModel} = require("@tensorflow/tfjs-converter");
 const tfjs = require("@tensorflow/tfjs-node");
-const canvas = require("canvas");
+const Canvas = require("canvas");
 const {IMAGENET_CLASSES} = require("./imagenet_classes.js");
 const knn = require("@tensorflow-models/knn-classifier");
 const request = require("request");
@@ -11,7 +11,34 @@ const http = require("http");
 const fetch = require("node-fetch");
 const readline = require("readline");
 const sscanf = require("sscanf");
-const {DataFlow, image, load} = require("./../dataflow.js");
+const {DataFlow, image} = require("./../dataflow.js");
+
+async function load(url, size = 224) {
+ return new Promise(function(resolve, reject) {
+   let callback = (err, data) => {
+    if (err) {
+     reject(err);
+     throw err;
+    }
+    const img = new Canvas.Image()
+    img.onload = () => {
+     
+     let foo = new Canvas(size, size);
+     let context = foo.getContext("2d");
+     context.drawImage(img, 0, 0, size, size);
+
+     resolve(foo);
+    }
+    img.onerror = (err) => { 
+     reject(err);
+    }
+    img.src = data;
+   };
+
+   fs.readFile(url, callback);
+ });
+}
+
 
 describe("Deeplearn", function() {
   it.skip("training", async function() {
@@ -406,16 +433,17 @@ describe("Deeplearn", function() {
     let dataflow = new DataFlow(MODEL_URL, WEIGHTS_URL);
     await dataflow.load();
 
-    await dataflow.addExample("./test/anna.jpg", 0);
-    await dataflow.addExample("./test/anna2.jpg", 0);
-    await dataflow.addExample("./test/leo.jpg", 1);
-    await dataflow.addExample("./test/leo2.jpg", 1);
-    await dataflow.addExample("./test/church.jpg", 2);
-    await dataflow.addExample("./test/church2.jpg", 2);
-    await dataflow.addExample("./test/eiffel.jpg", 3);
+    await dataflow.addExample(await load("./test/anna.jpg"), 0);
+    await dataflow.addExample(await load("./test/anna2.jpg"), 0);
+    await dataflow.addExample(await load("./test/leo.jpg"), 1);
+    await dataflow.addExample(await load("./test/leo2.jpg"), 1);
+    await dataflow.addExample(await load("./test/church.jpg"), 2);
+    await dataflow.addExample(await load("./test/church2.jpg"), 2);
+    await dataflow.addExample(await load("./test/eiffel.jpg"), 3);
 
-    let prediction = dataflow.predict("./test/eiffel.jpg");
+    let prediction = await dataflow.predict(await load("./test/eiffel.jpg"));
 
+    console.log(prediction);
    });
 
   it("mobilenet-features", async function() {
