@@ -29,7 +29,7 @@
     <p>Here is the result:</p>
 
     <textarea id="result" rows="30" cols="80">{
-  "@context": "http://schema.org/TrackedObject",
+  "@context": "http://w3c.org/ns/ar",
   "@type": "TrackedObject",
   "positive": [
   ],
@@ -112,7 +112,7 @@
 
             document.getElementById("result").innerText = `
 {
-  "@context": "http://schema.org/",
+  "@context": "http://w3c.org/ns/ar",
   "@type: "TrackedObject",
   "@id": "${document.location.href}/${query}",
   "name": "${query}",
