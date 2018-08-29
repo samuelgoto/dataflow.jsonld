@@ -11,45 +11,7 @@ const http = require("http");
 const fetch = require("node-fetch");
 const readline = require("readline");
 const sscanf = require("sscanf");
-
-async function load(url, size = 224) {
- return new Promise(function(resolve, reject) {
-   let callback = (err, data) => {
-    // return;
-    // console.log("hi");
-    if (err) {
-     // console.log(err);
-     reject(err);
-     throw err;
-    }
-    // console.log(data);
-    const img = new canvas.Image()
-    // img.onload = () => ctx.drawImage(img, 0, 0)
-    img.onload = () => {
-     // console.log("hello");
-     // resolve(img);
-     
-     let foo = new canvas(size, size);
-     let context = foo.getContext("2d");
-     // context.drawImage(img, 0, 0, img.width / 4, img.height / 4);
-     context.drawImage(img, 0, 0, size, size);
-
-     resolve(foo);
-    }
-    img.onerror = (err) => { 
-     // console.log("hi");
-     console.log(err);
-     reject(err);
-     // throw err;
-    }
-    img.src = data;
-    // console.log(img);
-   };
-
-   fs.readFile(url, callback);    
- });
-}
-
+const {DataFlow, image, load} = require("./../dataflow.js");
 
 describe("Deeplearn", function() {
   it.skip("training", async function() {
@@ -334,20 +296,6 @@ describe("Deeplearn", function() {
     console.log(getTopKClasses(result, 5));
    });
 
-  async function image(url, size = 224) {
-   // normalization based on 
-   // https://github.com/tensorflow/tensorflow/blob/master/tensorflow/examples/label_image/label_image.py#L38
-   let img = await load(url, size);
-
-   let input = tf.fromPixels(img).asType("float32").expandDims();
-
-   const mean = 0;
-   const std = 255;
-   
-   return tf.div(tf.sub(input, mean), std);
-
-   return reshapedInput;
-  }
 
   function getTopKClasses(logits, topK) {
    const predictions = tf.tidy(() => {
@@ -426,7 +374,7 @@ describe("Deeplearn", function() {
    });
 
   it("flickr", async function() {
-    let {Flickr} = require("./../dataflow.js");
+    let {Flickr} = require("./../flickr.js");
     let photos = new Flickr().search("coke can");
 
     return;
@@ -448,6 +396,27 @@ describe("Deeplearn", function() {
      console.log(url);
     }
   });
+
+  it.only("dataflow", async function() {
+    this.timeout(10000);
+
+    const MODEL_URL = "file://./test/mobilenet-features/tensorflowjs_model.pb";
+    const WEIGHTS_URL = "file://./test/mobilenet-features/weights_manifest.json";
+
+    let dataflow = new DataFlow(MODEL_URL, WEIGHTS_URL);
+    await dataflow.load();
+
+    await dataflow.addExample("./test/anna.jpg", 0);
+    await dataflow.addExample("./test/anna2.jpg", 0);
+    await dataflow.addExample("./test/leo.jpg", 1);
+    await dataflow.addExample("./test/leo2.jpg", 1);
+    await dataflow.addExample("./test/church.jpg", 2);
+    await dataflow.addExample("./test/church2.jpg", 2);
+    await dataflow.addExample("./test/eiffel.jpg", 3);
+
+    let prediction = dataflow.predict("./test/eiffel.jpg");
+
+   });
 
   it("mobilenet-features", async function() {
     this.timeout(10000);
