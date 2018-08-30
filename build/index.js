@@ -2,7 +2,7 @@
 // const fs = require("fs");
 const tf = require('@tensorflow/tfjs');
 const {loadFrozenModel} = require("@tensorflow/tfjs-converter");
-const tfjs = require("@tensorflow/tfjs-node");
+// const tfjs = require("@tensorflow/tfjs-node");
 // const Canvas = require("canvas");
 const knn = require("@tensorflow-models/knn-classifier");
 // const request = require("request");
@@ -25,21 +25,22 @@ async function image(bin, size = 224) {
 }
 
 class DataFlow {
- constructor(model, weights) {
+ constructor(graph, weights) {
   this.classifier = knn.create();
-  this.model = model;
+  this.graph = graph;
   this.weights = weights;
  }
 
  async load() {
-  this.model = await loadFrozenModel(this.model, this.weights);
+  this.model = await loadFrozenModel(this.graph, this.weights);
  }
 
  async addExample(bin, label) {
-  let id = this.model.execute({
+  let id = await this.model.execute({
     images: await image(bin)
    });
   this.classifier.addExample(id, label);
+  return id;
  }
 
  async predict(bin) {
@@ -58,7 +59,7 @@ module.exports = {
  image: image
 };
 
-},{"@tensorflow-models/knn-classifier":10,"@tensorflow/tfjs":239,"@tensorflow/tfjs-converter":17,"@tensorflow/tfjs-node":232}],2:[function(require,module,exports){
+},{"@tensorflow-models/knn-classifier":11,"@tensorflow/tfjs":233,"@tensorflow/tfjs-converter":18}],2:[function(require,module,exports){
 const fetch = require("node-fetch");
 
 class Flickr {
@@ -85,7 +86,16 @@ module.exports = {
  Flickr: Flickr
 };
 
-},{"node-fetch":242}],3:[function(require,module,exports){
+},{"node-fetch":235}],3:[function(require,module,exports){
+const {Flickr} = require("./flickr.js");
+const {DataFlow} = require("./dataflow.js");
+
+module.exports = {
+ Flickr: Flickr
+ ,DataFlow: DataFlow
+};
+
+},{"./dataflow.js":1,"./flickr.js":2}],4:[function(require,module,exports){
 "use strict";
 module.exports = asPromise;
 
@@ -139,7 +149,7 @@ function asPromise(fn, ctx/*, varargs */) {
     });
 }
 
-},{}],4:[function(require,module,exports){
+},{}],5:[function(require,module,exports){
 "use strict";
 
 /**
@@ -280,7 +290,7 @@ base64.test = function test(string) {
     return /^(?:[A-Za-z0-9+/]{4})*(?:[A-Za-z0-9+/]{2}==|[A-Za-z0-9+/]{3}=)?$/.test(string);
 };
 
-},{}],5:[function(require,module,exports){
+},{}],6:[function(require,module,exports){
 "use strict";
 module.exports = EventEmitter;
 
@@ -358,7 +368,7 @@ EventEmitter.prototype.emit = function emit(evt) {
     return this;
 };
 
-},{}],6:[function(require,module,exports){
+},{}],7:[function(require,module,exports){
 "use strict";
 
 module.exports = factory(factory);
@@ -695,7 +705,7 @@ function readUintBE(buf, pos) {
           | buf[pos + 3]) >>> 0;
 }
 
-},{}],7:[function(require,module,exports){
+},{}],8:[function(require,module,exports){
 "use strict";
 module.exports = inquire;
 
@@ -714,7 +724,7 @@ function inquire(moduleName) {
     return null;
 }
 
-},{}],8:[function(require,module,exports){
+},{}],9:[function(require,module,exports){
 "use strict";
 module.exports = pool;
 
@@ -764,7 +774,7 @@ function pool(alloc, slice, size) {
     };
 }
 
-},{}],9:[function(require,module,exports){
+},{}],10:[function(require,module,exports){
 "use strict";
 
 /**
@@ -871,7 +881,7 @@ utf8.write = function utf8_write(string, buffer, offset) {
     return offset - start;
 };
 
-},{}],10:[function(require,module,exports){
+},{}],11:[function(require,module,exports){
 "use strict";
 var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, generator) {
     return new (P || (P = Promise))(function (resolve, reject) {
@@ -1097,7 +1107,7 @@ function create() {
 }
 exports.create = create;
 
-},{"./util":11,"@tensorflow/tfjs":239}],11:[function(require,module,exports){
+},{"./util":12,"@tensorflow/tfjs":233}],12:[function(require,module,exports){
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
 function concatWithNulls(ndarray1, ndarray2) {
@@ -1131,7 +1141,7 @@ function topK(values, k) {
 }
 exports.topK = topK;
 
-},{}],12:[function(require,module,exports){
+},{}],13:[function(require,module,exports){
 /*eslint-disable block-scoped-var, no-redeclare, no-control-regex, no-prototype-builtins*/
 "use strict";
 
@@ -2856,7 +2866,7 @@ $root.tensorflow = (function() {
 
 module.exports = $root;
 
-},{"protobufjs/minimal":243}],13:[function(require,module,exports){
+},{"protobufjs/minimal":236}],14:[function(require,module,exports){
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
 var ExecutionContext = (function () {
@@ -2961,7 +2971,7 @@ var ExecutionContext = (function () {
 }());
 exports.ExecutionContext = ExecutionContext;
 
-},{}],14:[function(require,module,exports){
+},{}],15:[function(require,module,exports){
 "use strict";
 var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, generator) {
     return new (P || (P = Promise))(function (resolve, reject) {
@@ -3179,7 +3189,7 @@ function loadFrozenModel(modelUrl, weightsManifestUrl, requestOption) {
 }
 exports.loadFrozenModel = loadFrozenModel;
 
-},{"../data/compiled_api":12,"../operations/operation_mapper":50,"./graph_executor":15,"@tensorflow/tfjs-core":59}],15:[function(require,module,exports){
+},{"../data/compiled_api":13,"../operations/operation_mapper":51,"./graph_executor":16,"@tensorflow/tfjs-core":60}],16:[function(require,module,exports){
 "use strict";
 var __assign = (this && this.__assign) || Object.assign || function(t) {
     for (var s, i = 1, n = arguments.length; i < n; i++) {
@@ -3487,7 +3497,7 @@ var GraphExecutor = (function () {
 }());
 exports.GraphExecutor = GraphExecutor;
 
-},{"../operations/executors/utils":33,"../operations/operation_executor":49,"./execution_context":13,"@tensorflow/tfjs-core":59}],16:[function(require,module,exports){
+},{"../operations/executors/utils":34,"../operations/operation_executor":50,"./execution_context":14,"@tensorflow/tfjs-core":60}],17:[function(require,module,exports){
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
 var tfjs_core_1 = require("@tensorflow/tfjs-core");
@@ -3659,7 +3669,7 @@ var TensorArray = (function () {
 }());
 exports.TensorArray = TensorArray;
 
-},{"@tensorflow/tfjs-core":59}],17:[function(require,module,exports){
+},{"@tensorflow/tfjs-core":60}],18:[function(require,module,exports){
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
 var frozen_model_1 = require("./executor/frozen_model");
@@ -3668,7 +3678,7 @@ exports.loadFrozenModel = frozen_model_1.loadFrozenModel;
 var version_1 = require("./version");
 exports.version_converter = version_1.version;
 
-},{"./executor/frozen_model":14,"./version":51}],18:[function(require,module,exports){
+},{"./executor/frozen_model":15,"./version":52}],19:[function(require,module,exports){
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
 var tfc = require("@tensorflow/tfjs-core");
@@ -3712,7 +3722,7 @@ exports.executeOp = function (node, tensorMap, context) {
 };
 exports.CATEGORY = 'arithmetic';
 
-},{"./utils":33,"@tensorflow/tfjs-core":59}],19:[function(require,module,exports){
+},{"./utils":34,"@tensorflow/tfjs-core":60}],20:[function(require,module,exports){
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
 var tfc = require("@tensorflow/tfjs-core");
@@ -3801,7 +3811,7 @@ exports.executeOp = function (node, tensorMap, context) {
 };
 exports.CATEGORY = 'basic_math';
 
-},{"./utils":33,"@tensorflow/tfjs-core":59}],20:[function(require,module,exports){
+},{"./utils":34,"@tensorflow/tfjs-core":60}],21:[function(require,module,exports){
 "use strict";
 var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, generator) {
     return new (P || (P = Promise))(function (resolve, reject) {
@@ -3954,7 +3964,7 @@ function executeOp(node, tensorMap, context) {
 exports.executeOp = executeOp;
 exports.CATEGORY = 'control';
 
-},{"../../executor/tensor_array":16,"./utils":33,"@tensorflow/tfjs-core":59}],21:[function(require,module,exports){
+},{"../../executor/tensor_array":17,"./utils":34,"@tensorflow/tfjs-core":60}],22:[function(require,module,exports){
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
 var tfc = require("@tensorflow/tfjs-core");
@@ -4009,7 +4019,7 @@ exports.executeOp = function (node, tensorMap, context) {
 };
 exports.CATEGORY = 'convolution';
 
-},{"./utils":33,"@tensorflow/tfjs-core":59}],22:[function(require,module,exports){
+},{"./utils":34,"@tensorflow/tfjs-core":60}],23:[function(require,module,exports){
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
 var tfc = require("@tensorflow/tfjs-core");
@@ -4069,7 +4079,7 @@ exports.executeOp = function (node, tensorMap, context) {
 };
 exports.CATEGORY = 'creation';
 
-},{"./utils":33,"@tensorflow/tfjs-core":59}],23:[function(require,module,exports){
+},{"./utils":34,"@tensorflow/tfjs-core":60}],24:[function(require,module,exports){
 "use strict";
 var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, generator) {
     return new (P || (P = Promise))(function (resolve, reject) {
@@ -4139,7 +4149,7 @@ function executeOp(node, tensorMap, context) {
 exports.executeOp = executeOp;
 exports.CATEGORY = 'dynamic';
 
-},{"./utils":33,"@tensorflow/tfjs-core":59}],24:[function(require,module,exports){
+},{"./utils":34,"@tensorflow/tfjs-core":60}],25:[function(require,module,exports){
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
 var tfc = require("@tensorflow/tfjs-core");
@@ -4159,7 +4169,7 @@ exports.executeOp = function (node, tensorMap, context) {
 };
 exports.CATEGORY = 'evaluation';
 
-},{"./utils":33,"@tensorflow/tfjs-core":59}],25:[function(require,module,exports){
+},{"./utils":34,"@tensorflow/tfjs-core":60}],26:[function(require,module,exports){
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
 var tfc = require("@tensorflow/tfjs-core");
@@ -4205,7 +4215,7 @@ exports.executeOp = function (node, tensorMap, context) {
 };
 exports.CATEGORY = 'graph';
 
-},{"./utils":33,"@tensorflow/tfjs-core":59}],26:[function(require,module,exports){
+},{"./utils":34,"@tensorflow/tfjs-core":60}],27:[function(require,module,exports){
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
 var tfc = require("@tensorflow/tfjs-core");
@@ -4230,7 +4240,7 @@ exports.executeOp = function (node, tensorMap, context) {
 };
 exports.CATEGORY = 'image';
 
-},{"./utils":33,"@tensorflow/tfjs-core":59}],27:[function(require,module,exports){
+},{"./utils":34,"@tensorflow/tfjs-core":60}],28:[function(require,module,exports){
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
 var tfc = require("@tensorflow/tfjs-core");
@@ -4273,7 +4283,7 @@ exports.executeOp = function (node, tensorMap, context) {
 };
 exports.CATEGORY = 'logical';
 
-},{"./utils":33,"@tensorflow/tfjs-core":59}],28:[function(require,module,exports){
+},{"./utils":34,"@tensorflow/tfjs-core":60}],29:[function(require,module,exports){
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
 var tfc = require("@tensorflow/tfjs-core");
@@ -4290,7 +4300,7 @@ exports.executeOp = function (node, tensorMap, context) {
 };
 exports.CATEGORY = 'matrices';
 
-},{"./utils":33,"@tensorflow/tfjs-core":59}],29:[function(require,module,exports){
+},{"./utils":34,"@tensorflow/tfjs-core":60}],30:[function(require,module,exports){
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
 var tfc = require("@tensorflow/tfjs-core");
@@ -4312,7 +4322,7 @@ exports.executeOp = function (node, tensorMap, context) {
 };
 exports.CATEGORY = 'normalization';
 
-},{"./utils":33,"@tensorflow/tfjs-core":59}],30:[function(require,module,exports){
+},{"./utils":34,"@tensorflow/tfjs-core":60}],31:[function(require,module,exports){
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
 var tfc = require("@tensorflow/tfjs-core");
@@ -4363,7 +4373,7 @@ exports.executeOp = function (node, tensorMap, context) {
 };
 exports.CATEGORY = 'reduction';
 
-},{"./utils":33,"@tensorflow/tfjs-core":59}],31:[function(require,module,exports){
+},{"./utils":34,"@tensorflow/tfjs-core":60}],32:[function(require,module,exports){
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
 var tfc = require("@tensorflow/tfjs-core");
@@ -4449,7 +4459,7 @@ exports.executeOp = function (node, tensorMap, context) {
 };
 exports.CATEGORY = 'slice_join';
 
-},{"./utils":33,"@tensorflow/tfjs-core":59}],32:[function(require,module,exports){
+},{"./utils":34,"@tensorflow/tfjs-core":60}],33:[function(require,module,exports){
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
 var tfc = require("@tensorflow/tfjs-core");
@@ -4489,7 +4499,7 @@ exports.executeOp = function (node, tensorMap, context) {
 };
 exports.CATEGORY = 'transformation';
 
-},{"./utils":33,"@tensorflow/tfjs-core":59}],33:[function(require,module,exports){
+},{"./utils":34,"@tensorflow/tfjs-core":60}],34:[function(require,module,exports){
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
 function getParamValue(paramName, node, tensorMap, context) {
@@ -4551,7 +4561,7 @@ function split(arr, size) {
 }
 exports.split = split;
 
-},{}],34:[function(require,module,exports){
+},{}],35:[function(require,module,exports){
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.json = [
@@ -4726,7 +4736,7 @@ exports.json = [
     }
 ];
 
-},{}],35:[function(require,module,exports){
+},{}],36:[function(require,module,exports){
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.json = [
@@ -5193,7 +5203,7 @@ exports.json = [
     }
 ];
 
-},{}],36:[function(require,module,exports){
+},{}],37:[function(require,module,exports){
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.json = [
@@ -5409,7 +5419,7 @@ exports.json = [
     }
 ];
 
-},{}],37:[function(require,module,exports){
+},{}],38:[function(require,module,exports){
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.json = [
@@ -5577,7 +5587,7 @@ exports.json = [
     }
 ];
 
-},{}],38:[function(require,module,exports){
+},{}],39:[function(require,module,exports){
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.json = [
@@ -5761,7 +5771,7 @@ exports.json = [
     }
 ];
 
-},{}],39:[function(require,module,exports){
+},{}],40:[function(require,module,exports){
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.json = [
@@ -5803,7 +5813,7 @@ exports.json = [
     }
 ];
 
-},{}],40:[function(require,module,exports){
+},{}],41:[function(require,module,exports){
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.json = [{
@@ -5817,7 +5827,7 @@ exports.json = [{
         ]
     }];
 
-},{}],41:[function(require,module,exports){
+},{}],42:[function(require,module,exports){
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.json = [
@@ -5913,7 +5923,7 @@ exports.json = [
     }
 ];
 
-},{}],42:[function(require,module,exports){
+},{}],43:[function(require,module,exports){
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.json = [
@@ -5957,7 +5967,7 @@ exports.json = [
     }
 ];
 
-},{}],43:[function(require,module,exports){
+},{}],44:[function(require,module,exports){
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.json = [
@@ -6103,7 +6113,7 @@ exports.json = [
     }
 ];
 
-},{}],44:[function(require,module,exports){
+},{}],45:[function(require,module,exports){
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.json = [
@@ -6149,7 +6159,7 @@ exports.json = [
     }
 ];
 
-},{}],45:[function(require,module,exports){
+},{}],46:[function(require,module,exports){
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.json = [
@@ -6238,7 +6248,7 @@ exports.json = [
     }
 ];
 
-},{}],46:[function(require,module,exports){
+},{}],47:[function(require,module,exports){
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.json = [
@@ -6322,7 +6332,7 @@ exports.json = [
     }
 ];
 
-},{}],47:[function(require,module,exports){
+},{}],48:[function(require,module,exports){
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.json = [
@@ -6531,7 +6541,7 @@ exports.json = [
     }
 ];
 
-},{}],48:[function(require,module,exports){
+},{}],49:[function(require,module,exports){
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.json = [
@@ -6634,7 +6644,7 @@ exports.json = [
     }
 ];
 
-},{}],49:[function(require,module,exports){
+},{}],50:[function(require,module,exports){
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
 var arithmetic = require("./executors/arithmetic_executor");
@@ -6690,7 +6700,7 @@ function executeOp(node, tensorMap, context) {
 }
 exports.executeOp = executeOp;
 
-},{"./executors/arithmetic_executor":18,"./executors/basic_math_executor":19,"./executors/control_executor":20,"./executors/convolution_executor":21,"./executors/creation_executor":22,"./executors/dynamic_executor":23,"./executors/evaluation_executor":24,"./executors/graph_executor":25,"./executors/image_executor":26,"./executors/logical_executor":27,"./executors/matrices_executor":28,"./executors/normalization_executor":29,"./executors/reduction_executor":30,"./executors/slice_join_executor":31,"./executors/transformation_executor":32}],50:[function(require,module,exports){
+},{"./executors/arithmetic_executor":19,"./executors/basic_math_executor":20,"./executors/control_executor":21,"./executors/convolution_executor":22,"./executors/creation_executor":23,"./executors/dynamic_executor":24,"./executors/evaluation_executor":25,"./executors/graph_executor":26,"./executors/image_executor":27,"./executors/logical_executor":28,"./executors/matrices_executor":29,"./executors/normalization_executor":30,"./executors/reduction_executor":31,"./executors/slice_join_executor":32,"./executors/transformation_executor":33}],51:[function(require,module,exports){
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
 var compiled_api_1 = require("../data/compiled_api");
@@ -6909,13 +6919,13 @@ var OperationMapper = (function () {
 }());
 exports.OperationMapper = OperationMapper;
 
-},{"../data/compiled_api":12,"./executors/utils":33,"./op_list/arithmetic":34,"./op_list/basic_math":35,"./op_list/control":36,"./op_list/convolution":37,"./op_list/creation":38,"./op_list/dynamic":39,"./op_list/evaluation":40,"./op_list/graph":41,"./op_list/image":42,"./op_list/logical":43,"./op_list/matrices":44,"./op_list/normalization":45,"./op_list/reduction":46,"./op_list/slice_join":47,"./op_list/transformation":48}],51:[function(require,module,exports){
+},{"../data/compiled_api":13,"./executors/utils":34,"./op_list/arithmetic":35,"./op_list/basic_math":36,"./op_list/control":37,"./op_list/convolution":38,"./op_list/creation":39,"./op_list/dynamic":40,"./op_list/evaluation":41,"./op_list/graph":42,"./op_list/image":43,"./op_list/logical":44,"./op_list/matrices":45,"./op_list/normalization":46,"./op_list/reduction":47,"./op_list/slice_join":48,"./op_list/transformation":49}],52:[function(require,module,exports){
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
 var version = '0.5.7';
 exports.version = version;
 
-},{}],52:[function(require,module,exports){
+},{}],53:[function(require,module,exports){
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
 var delayCallback = typeof requestAnimationFrame !== 'undefined' ?
@@ -6926,7 +6936,7 @@ function nextFrame() {
 }
 exports.nextFrame = nextFrame;
 
-},{}],53:[function(require,module,exports){
+},{}],54:[function(require,module,exports){
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
 function isMobile() {
@@ -6938,7 +6948,7 @@ function isMobile() {
 }
 exports.isMobile = isMobile;
 
-},{}],54:[function(require,module,exports){
+},{}],55:[function(require,module,exports){
 "use strict";
 var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, generator) {
     return new (P || (P = Promise))(function (resolve, reject) {
@@ -7315,7 +7325,7 @@ function ones(shape) {
     return tensor_1.Tensor.make(shape, { values: values });
 }
 
-},{"./profiler":170,"./tape":172,"./tensor":173,"./tensor_util":175,"./util":180}],55:[function(require,module,exports){
+},{"./profiler":171,"./tape":173,"./tensor":174,"./tensor_util":176,"./util":181}],56:[function(require,module,exports){
 (function (process){
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
@@ -7551,7 +7561,7 @@ function getOrMakeEnvironment() {
 exports.ENV = getOrMakeEnvironment();
 
 }).call(this,require('_process'))
-},{"./device_util":53,"./engine":54,"./environment_util":56,"./tensor":173,"./tensor_util":175,"_process":268}],56:[function(require,module,exports){
+},{"./device_util":54,"./engine":55,"./environment_util":57,"./tensor":174,"./tensor_util":176,"_process":259}],57:[function(require,module,exports){
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
 var Type;
@@ -7752,7 +7762,7 @@ function decodeParam(params, name, value) {
     params[decodeURIComponent(name)] = decodeURIComponent(value || '');
 }
 
-},{}],57:[function(require,module,exports){
+},{}],58:[function(require,module,exports){
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
 var environment_1 = require("./environment");
@@ -7768,7 +7778,7 @@ exports.keep = environment_1.Environment.keep;
 exports.dispose = environment_1.Environment.dispose;
 exports.time = environment_1.Environment.time;
 
-},{"./environment":55,"./gradients":58}],58:[function(require,module,exports){
+},{"./environment":56,"./gradients":59}],59:[function(require,module,exports){
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
 var environment_1 = require("./environment");
@@ -7881,7 +7891,7 @@ function checkGrads(grads) {
     }
 }
 
-},{"./environment":55,"./tensor":173,"./util":180}],59:[function(require,module,exports){
+},{"./environment":56,"./tensor":174,"./util":181}],60:[function(require,module,exports){
 "use strict";
 function __export(m) {
     for (var p in m) if (!exports.hasOwnProperty(p)) exports[p] = m[p];
@@ -7945,7 +7955,7 @@ exports.memory = environment_1.Environment.memory;
 var ops = require("./ops/ops");
 tensor_1.setOpHandler(ops);
 
-},{"./browser_util":52,"./environment":55,"./globals":57,"./io/io":63,"./kernels/backend_cpu":71,"./kernels/backend_webgl":73,"./ops/loss_ops":135,"./ops/ops":142,"./optimizers/adadelta_optimizer":160,"./optimizers/adagrad_optimizer":161,"./optimizers/adam_optimizer":162,"./optimizers/adamax_optimizer":163,"./optimizers/momentum_optimizer":164,"./optimizers/optimizer":165,"./optimizers/rmsprop_optimizer":168,"./optimizers/sgd_optimizer":169,"./serialization":171,"./tensor":173,"./test_util":177,"./train":178,"./types":179,"./util":180,"./version":181,"./webgl":182}],60:[function(require,module,exports){
+},{"./browser_util":53,"./environment":56,"./globals":58,"./io/io":64,"./kernels/backend_cpu":72,"./kernels/backend_webgl":74,"./ops/loss_ops":136,"./ops/ops":143,"./optimizers/adadelta_optimizer":161,"./optimizers/adagrad_optimizer":162,"./optimizers/adam_optimizer":163,"./optimizers/adamax_optimizer":164,"./optimizers/momentum_optimizer":165,"./optimizers/optimizer":166,"./optimizers/rmsprop_optimizer":169,"./optimizers/sgd_optimizer":170,"./serialization":172,"./tensor":174,"./test_util":178,"./train":179,"./types":180,"./util":181,"./version":182,"./webgl":183}],61:[function(require,module,exports){
 "use strict";
 var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, generator) {
     return new (P || (P = Promise))(function (resolve, reject) {
@@ -8186,7 +8196,7 @@ function browserFiles(files) {
 }
 exports.browserFiles = browserFiles;
 
-},{"../environment":55,"./io_utils":64,"./router_registry":68}],61:[function(require,module,exports){
+},{"../environment":56,"./io_utils":65,"./router_registry":69}],62:[function(require,module,exports){
 "use strict";
 var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, generator) {
     return new (P || (P = Promise))(function (resolve, reject) {
@@ -8434,7 +8444,7 @@ function browserHTTPRequest(path, requestInit) {
 }
 exports.browserHTTPRequest = browserHTTPRequest;
 
-},{"../util":180,"./io_utils":64,"./router_registry":68,"./weights_loader":70}],62:[function(require,module,exports){
+},{"../util":181,"./io_utils":65,"./router_registry":69,"./weights_loader":71}],63:[function(require,module,exports){
 "use strict";
 var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, generator) {
     return new (P || (P = Promise))(function (resolve, reject) {
@@ -8744,7 +8754,7 @@ if (environment_1.ENV.get('IS_BROWSER')) {
     }
 }
 
-},{"../environment":55,"./io_utils":64,"./model_management":66,"./router_registry":68}],63:[function(require,module,exports){
+},{"../environment":56,"./io_utils":65,"./model_management":67,"./router_registry":69}],64:[function(require,module,exports){
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
 require("./indexed_db");
@@ -8778,7 +8788,7 @@ exports.listModels = model_management_1.listModels;
 exports.moveModel = model_management_1.moveModel;
 exports.removeModel = model_management_1.removeModel;
 
-},{"./browser_files":60,"./browser_http":61,"./indexed_db":62,"./io_utils":64,"./local_storage":65,"./model_management":66,"./passthrough":67,"./router_registry":68,"./weights_loader":70}],64:[function(require,module,exports){
+},{"./browser_files":61,"./browser_http":62,"./indexed_db":63,"./io_utils":65,"./local_storage":66,"./model_management":67,"./passthrough":68,"./router_registry":69,"./weights_loader":71}],65:[function(require,module,exports){
 (function (Buffer){
 "use strict";
 var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, generator) {
@@ -9015,7 +9025,7 @@ function getModelArtifactsInfoForJSON(modelArtifacts) {
 exports.getModelArtifactsInfoForJSON = getModelArtifactsInfoForJSON;
 
 }).call(this,require("buffer").Buffer)
-},{"../ops/tensor_ops":156,"../util":180,"./types":69,"buffer":265}],65:[function(require,module,exports){
+},{"../ops/tensor_ops":157,"../util":181,"./types":70,"buffer":257}],66:[function(require,module,exports){
 "use strict";
 var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, generator) {
     return new (P || (P = Promise))(function (resolve, reject) {
@@ -9263,7 +9273,7 @@ if (environment_1.ENV.get('IS_BROWSER')) {
     }
 }
 
-},{"../environment":55,"../util":180,"./io_utils":64,"./model_management":66,"./router_registry":68}],66:[function(require,module,exports){
+},{"../environment":56,"../util":181,"./io_utils":65,"./model_management":67,"./router_registry":69}],67:[function(require,module,exports){
 "use strict";
 var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, generator) {
     return new (P || (P = Promise))(function (resolve, reject) {
@@ -9467,7 +9477,7 @@ function moveModel(sourceURL, destURL) {
 }
 exports.moveModel = moveModel;
 
-},{"../util":180,"./router_registry":68}],67:[function(require,module,exports){
+},{"../util":181,"./router_registry":69}],68:[function(require,module,exports){
 "use strict";
 var __assign = (this && this.__assign) || Object.assign || function(t) {
     for (var s, i = 1, n = arguments.length; i < n; i++) {
@@ -9561,7 +9571,7 @@ function withSaveHandler(saveHandler) {
 }
 exports.withSaveHandler = withSaveHandler;
 
-},{}],68:[function(require,module,exports){
+},{}],69:[function(require,module,exports){
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
 var IORouterRegistry = (function () {
@@ -9603,7 +9613,7 @@ var IORouterRegistry = (function () {
 }());
 exports.IORouterRegistry = IORouterRegistry;
 
-},{}],69:[function(require,module,exports){
+},{}],70:[function(require,module,exports){
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.DTYPE_VALUE_SIZE_MAP = {
@@ -9614,7 +9624,7 @@ exports.DTYPE_VALUE_SIZE_MAP = {
     'bool': 1,
 };
 
-},{}],70:[function(require,module,exports){
+},{}],71:[function(require,module,exports){
 "use strict";
 var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, generator) {
     return new (P || (P = Promise))(function (resolve, reject) {
@@ -9815,7 +9825,7 @@ function loadWeights(manifest, filePathPrefix, weightNames, requestOptions) {
 }
 exports.loadWeights = loadWeights;
 
-},{"../ops/ops":142,"../util":180,"./types":69}],71:[function(require,module,exports){
+},{"../ops/ops":143,"../util":181,"./types":70}],72:[function(require,module,exports){
 "use strict";
 var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, generator) {
     return new (P || (P = Promise))(function (resolve, reject) {
@@ -11649,7 +11659,7 @@ var MathBackendCPU = (function () {
 exports.MathBackendCPU = MathBackendCPU;
 environment_1.ENV.registerBackend('cpu', function () { return new MathBackendCPU(); }, 1, tensor_1.setTensorTracker);
 
-},{"../environment":55,"../log":119,"../ops/array_ops_util":121,"../ops/axis_util":122,"../ops/broadcast_util":125,"../ops/concat_util":128,"../ops/erf_util":131,"../ops/ops":142,"../ops/selu_util":151,"../ops/slice_util":153,"../tensor":173,"../types":179,"../util":180,"./backend_util":72,"./non_max_suppression_impl":74,"./topk_impl":75,"./where_impl":118,"seedrandom":254}],72:[function(require,module,exports){
+},{"../environment":56,"../log":120,"../ops/array_ops_util":122,"../ops/axis_util":123,"../ops/broadcast_util":126,"../ops/concat_util":129,"../ops/erf_util":132,"../ops/ops":143,"../ops/selu_util":152,"../ops/slice_util":154,"../tensor":174,"../types":180,"../util":181,"./backend_util":73,"./non_max_suppression_impl":75,"./topk_impl":76,"./where_impl":119,"seedrandom":247}],73:[function(require,module,exports){
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
 var tensor_ops_1 = require("../ops/tensor_ops");
@@ -11675,7 +11685,7 @@ function reshapeTensor(x, shape) {
 }
 exports.reshapeTensor = reshapeTensor;
 
-},{"../ops/tensor_ops":156,"../tensor":173,"../util":180}],73:[function(require,module,exports){
+},{"../ops/tensor_ops":157,"../tensor":174,"../util":181}],74:[function(require,module,exports){
 "use strict";
 var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, generator) {
     return new (P || (P = Promise))(function (resolve, reject) {
@@ -12815,7 +12825,7 @@ function typedArrayToFloat32(a, dtype) {
     return (a instanceof Float32Array) ? a : new Float32Array(a);
 }
 
-},{"../environment":55,"../log":119,"../ops/array_ops_util":121,"../ops/axis_util":122,"../ops/reduce_util":145,"../ops/segment_util":150,"../ops/slice_util":153,"../ops/softmax":154,"../ops/tensor_ops":156,"../tensor":173,"../types":179,"../util":180,"./backend_util":72,"./non_max_suppression_impl":74,"./topk_impl":75,"./webgl/argminmax_gpu":76,"./webgl/avg_pool_backprop_gpu":77,"./webgl/batchnorm_gpu":78,"./webgl/binaryop_gpu":79,"./webgl/clip_gpu":80,"./webgl/concat_gpu":81,"./webgl/conv_backprop_gpu":82,"./webgl/conv_backprop_gpu_depthwise":83,"./webgl/conv_gpu":84,"./webgl/conv_gpu_depthwise":85,"./webgl/cumsum_gpu":86,"./webgl/encode_float_gpu":87,"./webgl/from_pixels_gpu":88,"./webgl/gather_gpu":89,"./webgl/gpgpu_context":90,"./webgl/gpgpu_math":91,"./webgl/gpgpu_util":92,"./webgl/lrn_gpu":93,"./webgl/lrn_grad_gpu":94,"./webgl/max_pool_backprop_gpu":95,"./webgl/mulmat_gpu":96,"./webgl/multinomial_gpu":97,"./webgl/onehot_gpu":98,"./webgl/pad_gpu":99,"./webgl/pool_gpu":100,"./webgl/reduce_gpu":101,"./webgl/resize_bilinear_backprop_gpu":102,"./webgl/resize_bilinear_gpu":103,"./webgl/resize_nearest_neighbor_backprop_gpu":104,"./webgl/resize_nearest_neighbor_gpu":105,"./webgl/reverse_gpu":106,"./webgl/segment_gpu":107,"./webgl/select_gpu":108,"./webgl/slice_gpu":110,"./webgl/strided_slice_gpu":111,"./webgl/tex_util":112,"./webgl/texture_manager":113,"./webgl/tile_gpu":114,"./webgl/transpose_gpu":115,"./webgl/unaryop_gpu":116,"./webgl/webgl_util":117,"./where_impl":118}],74:[function(require,module,exports){
+},{"../environment":56,"../log":120,"../ops/array_ops_util":122,"../ops/axis_util":123,"../ops/reduce_util":146,"../ops/segment_util":151,"../ops/slice_util":154,"../ops/softmax":155,"../ops/tensor_ops":157,"../tensor":174,"../types":180,"../util":181,"./backend_util":73,"./non_max_suppression_impl":75,"./topk_impl":76,"./webgl/argminmax_gpu":77,"./webgl/avg_pool_backprop_gpu":78,"./webgl/batchnorm_gpu":79,"./webgl/binaryop_gpu":80,"./webgl/clip_gpu":81,"./webgl/concat_gpu":82,"./webgl/conv_backprop_gpu":83,"./webgl/conv_backprop_gpu_depthwise":84,"./webgl/conv_gpu":85,"./webgl/conv_gpu_depthwise":86,"./webgl/cumsum_gpu":87,"./webgl/encode_float_gpu":88,"./webgl/from_pixels_gpu":89,"./webgl/gather_gpu":90,"./webgl/gpgpu_context":91,"./webgl/gpgpu_math":92,"./webgl/gpgpu_util":93,"./webgl/lrn_gpu":94,"./webgl/lrn_grad_gpu":95,"./webgl/max_pool_backprop_gpu":96,"./webgl/mulmat_gpu":97,"./webgl/multinomial_gpu":98,"./webgl/onehot_gpu":99,"./webgl/pad_gpu":100,"./webgl/pool_gpu":101,"./webgl/reduce_gpu":102,"./webgl/resize_bilinear_backprop_gpu":103,"./webgl/resize_bilinear_gpu":104,"./webgl/resize_nearest_neighbor_backprop_gpu":105,"./webgl/resize_nearest_neighbor_gpu":106,"./webgl/reverse_gpu":107,"./webgl/segment_gpu":108,"./webgl/select_gpu":109,"./webgl/slice_gpu":111,"./webgl/strided_slice_gpu":112,"./webgl/tex_util":113,"./webgl/texture_manager":114,"./webgl/tile_gpu":115,"./webgl/transpose_gpu":116,"./webgl/unaryop_gpu":117,"./webgl/webgl_util":118,"./where_impl":119}],75:[function(require,module,exports){
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
 var tensor_ops_1 = require("../ops/tensor_ops");
@@ -12873,7 +12883,7 @@ function intersectionOverUnion(boxes, i, j) {
     return intersectionArea / (areaI + areaJ - intersectionArea);
 }
 
-},{"../ops/tensor_ops":156}],75:[function(require,module,exports){
+},{"../ops/tensor_ops":157}],76:[function(require,module,exports){
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
 var tensor_ops_1 = require("../ops/tensor_ops");
@@ -12908,7 +12918,7 @@ function topkImpl(x, xShape, xDtype, k, sorted) {
 }
 exports.topkImpl = topkImpl;
 
-},{"../ops/tensor_ops":156,"../util":180}],76:[function(require,module,exports){
+},{"../ops/tensor_ops":157,"../util":181}],77:[function(require,module,exports){
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
 var ArgMinMaxProgram = (function () {
@@ -12932,7 +12942,7 @@ var ArgMinMaxProgram = (function () {
 }());
 exports.ArgMinMaxProgram = ArgMinMaxProgram;
 
-},{}],77:[function(require,module,exports){
+},{}],78:[function(require,module,exports){
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
 var AvgPool2DBackpropProgram = (function () {
@@ -12952,7 +12962,7 @@ var AvgPool2DBackpropProgram = (function () {
 }());
 exports.AvgPool2DBackpropProgram = AvgPool2DBackpropProgram;
 
-},{}],78:[function(require,module,exports){
+},{}],79:[function(require,module,exports){
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
 var broadcast_util = require("../../ops/broadcast_util");
@@ -12982,7 +12992,7 @@ var BatchNormProgram = (function () {
 }());
 exports.BatchNormProgram = BatchNormProgram;
 
-},{"../../ops/broadcast_util":125}],79:[function(require,module,exports){
+},{"../../ops/broadcast_util":126}],80:[function(require,module,exports){
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
 var broadcast_util = require("../../ops/broadcast_util");
@@ -13031,7 +13041,7 @@ var BinaryOpProgram = (function () {
 }());
 exports.BinaryOpProgram = BinaryOpProgram;
 
-},{"../../ops/broadcast_util":125}],80:[function(require,module,exports){
+},{"../../ops/broadcast_util":126}],81:[function(require,module,exports){
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
 var ClipProgram = (function () {
@@ -13046,7 +13056,7 @@ var ClipProgram = (function () {
 }());
 exports.ClipProgram = ClipProgram;
 
-},{}],81:[function(require,module,exports){
+},{}],82:[function(require,module,exports){
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
 var concat_util = require("../../ops/concat_util");
@@ -13062,7 +13072,7 @@ var ConcatProgram = (function () {
 }());
 exports.ConcatProgram = ConcatProgram;
 
-},{"../../ops/concat_util":128}],82:[function(require,module,exports){
+},{"../../ops/concat_util":129}],83:[function(require,module,exports){
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
 var Conv2DDerFilterProgram = (function () {
@@ -13094,7 +13104,7 @@ var Conv2DDerInputProgram = (function () {
 }());
 exports.Conv2DDerInputProgram = Conv2DDerInputProgram;
 
-},{}],83:[function(require,module,exports){
+},{}],84:[function(require,module,exports){
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
 var DepthwiseConv2DDerFilterProgram = (function () {
@@ -13128,7 +13138,7 @@ var DepthwiseConv2DDerInputProgram = (function () {
 }());
 exports.DepthwiseConv2DDerInputProgram = DepthwiseConv2DDerInputProgram;
 
-},{}],84:[function(require,module,exports){
+},{}],85:[function(require,module,exports){
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
 var Conv2DProgram = (function () {
@@ -13151,7 +13161,7 @@ var Conv2DProgram = (function () {
 }());
 exports.Conv2DProgram = Conv2DProgram;
 
-},{}],85:[function(require,module,exports){
+},{}],86:[function(require,module,exports){
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
 var DepthwiseConv2DProgram = (function () {
@@ -13175,7 +13185,7 @@ var DepthwiseConv2DProgram = (function () {
 }());
 exports.DepthwiseConv2DProgram = DepthwiseConv2DProgram;
 
-},{}],86:[function(require,module,exports){
+},{}],87:[function(require,module,exports){
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
 var shader_compiler_1 = require("./shader_compiler");
@@ -13226,7 +13236,7 @@ function getFinalCoord(rank, name) {
     }
 }
 
-},{"./shader_compiler":109}],87:[function(require,module,exports){
+},{"./shader_compiler":110}],88:[function(require,module,exports){
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
 var EncodeFloatProgram = (function () {
@@ -13239,7 +13249,7 @@ var EncodeFloatProgram = (function () {
 }());
 exports.EncodeFloatProgram = EncodeFloatProgram;
 
-},{}],88:[function(require,module,exports){
+},{}],89:[function(require,module,exports){
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
 var FromPixelsProgram = (function () {
@@ -13253,7 +13263,7 @@ var FromPixelsProgram = (function () {
 }());
 exports.FromPixelsProgram = FromPixelsProgram;
 
-},{}],89:[function(require,module,exports){
+},{}],90:[function(require,module,exports){
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
 var shader_compiler_1 = require("./shader_compiler");
@@ -13292,7 +13302,7 @@ function getSourceCoords(aShape, axis) {
     return sourceCoords.join();
 }
 
-},{"./shader_compiler":109}],90:[function(require,module,exports){
+},{"./shader_compiler":110}],91:[function(require,module,exports){
 "use strict";
 var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, generator) {
     return new (P || (P = Promise))(function (resolve, reject) {
@@ -13772,7 +13782,7 @@ function binSearchLastTrue(arr) {
 }
 exports.binSearchLastTrue = binSearchLastTrue;
 
-},{"../../environment":55,"../../util":180,"./gpgpu_util":92,"./tex_util":112,"./webgl_util":117}],91:[function(require,module,exports){
+},{"../../environment":56,"../../util":181,"./gpgpu_util":93,"./tex_util":113,"./webgl_util":118}],92:[function(require,module,exports){
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
 var util = require("../../util");
@@ -13886,7 +13896,7 @@ function makeShaderKey(program, inputs, output) {
 }
 exports.makeShaderKey = makeShaderKey;
 
-},{"../../util":180,"./shader_compiler":109}],92:[function(require,module,exports){
+},{"../../util":181,"./shader_compiler":110}],93:[function(require,module,exports){
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
 var environment_1 = require("../../environment");
@@ -14113,7 +14123,7 @@ function downloadMatrixFromPackedOutputTexture(gl, rows, columns, textureConfig)
 }
 exports.downloadMatrixFromPackedOutputTexture = downloadMatrixFromPackedOutputTexture;
 
-},{"../../environment":55,"./tex_util":112,"./webgl_util":117}],93:[function(require,module,exports){
+},{"../../environment":56,"./tex_util":113,"./webgl_util":118}],94:[function(require,module,exports){
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
 var LRNProgram = (function () {
@@ -14140,7 +14150,7 @@ var LRNProgram = (function () {
 }());
 exports.LRNProgram = LRNProgram;
 
-},{}],94:[function(require,module,exports){
+},{}],95:[function(require,module,exports){
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
 var LRNGradProgram = (function () {
@@ -14159,7 +14169,7 @@ var LRNGradProgram = (function () {
 }());
 exports.LRNGradProgram = LRNGradProgram;
 
-},{}],95:[function(require,module,exports){
+},{}],96:[function(require,module,exports){
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
 var MaxPool2DBackpropProgram = (function () {
@@ -14179,7 +14189,7 @@ var MaxPool2DBackpropProgram = (function () {
 }());
 exports.MaxPool2DBackpropProgram = MaxPool2DBackpropProgram;
 
-},{}],96:[function(require,module,exports){
+},{}],97:[function(require,module,exports){
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
 var MatMulProgram = (function () {
@@ -14207,7 +14217,7 @@ var MatMulProgram = (function () {
 }());
 exports.MatMulProgram = MatMulProgram;
 
-},{}],97:[function(require,module,exports){
+},{}],98:[function(require,module,exports){
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
 var MultinomialProgram = (function () {
@@ -14229,7 +14239,7 @@ var MultinomialProgram = (function () {
 }());
 exports.MultinomialProgram = MultinomialProgram;
 
-},{}],98:[function(require,module,exports){
+},{}],99:[function(require,module,exports){
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
 var OneHotProgram = (function () {
@@ -14242,7 +14252,7 @@ var OneHotProgram = (function () {
 }());
 exports.OneHotProgram = OneHotProgram;
 
-},{}],99:[function(require,module,exports){
+},{}],100:[function(require,module,exports){
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
 var shader_compiler_1 = require("./shader_compiler");
@@ -14265,7 +14275,7 @@ var PadProgram = (function () {
 }());
 exports.PadProgram = PadProgram;
 
-},{"./shader_compiler":109}],100:[function(require,module,exports){
+},{"./shader_compiler":110}],101:[function(require,module,exports){
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
 var Pool2DProgram = (function () {
@@ -14306,7 +14316,7 @@ var Pool2DProgram = (function () {
 }());
 exports.Pool2DProgram = Pool2DProgram;
 
-},{}],101:[function(require,module,exports){
+},{}],102:[function(require,module,exports){
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
 var ReduceProgram = (function () {
@@ -14362,7 +14372,7 @@ var ReduceProgram = (function () {
 }());
 exports.ReduceProgram = ReduceProgram;
 
-},{}],102:[function(require,module,exports){
+},{}],103:[function(require,module,exports){
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
 var ResizeBilinearBackpropProgram = (function () {
@@ -14392,7 +14402,7 @@ var ResizeBilinearBackpropProgram = (function () {
 }());
 exports.ResizeBilinearBackpropProgram = ResizeBilinearBackpropProgram;
 
-},{}],103:[function(require,module,exports){
+},{}],104:[function(require,module,exports){
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
 var ResizeBilinearProgram = (function () {
@@ -14415,7 +14425,7 @@ var ResizeBilinearProgram = (function () {
 }());
 exports.ResizeBilinearProgram = ResizeBilinearProgram;
 
-},{}],104:[function(require,module,exports){
+},{}],105:[function(require,module,exports){
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
 var ResizeNearestNeigborBackpropProgram = (function () {
@@ -14445,7 +14455,7 @@ var ResizeNearestNeigborBackpropProgram = (function () {
 }());
 exports.ResizeNearestNeigborBackpropProgram = ResizeNearestNeigborBackpropProgram;
 
-},{}],105:[function(require,module,exports){
+},{}],106:[function(require,module,exports){
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
 var ResizeNearestNeighborProgram = (function () {
@@ -14469,7 +14479,7 @@ var ResizeNearestNeighborProgram = (function () {
 }());
 exports.ResizeNearestNeighborProgram = ResizeNearestNeighborProgram;
 
-},{}],106:[function(require,module,exports){
+},{}],107:[function(require,module,exports){
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
 var shader_compiler_1 = require("./shader_compiler");
@@ -14499,7 +14509,7 @@ var ReverseProgram = (function () {
 }());
 exports.ReverseProgram = ReverseProgram;
 
-},{"./shader_compiler":109}],107:[function(require,module,exports){
+},{"./shader_compiler":110}],108:[function(require,module,exports){
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
 var SegmentOpProgram = (function () {
@@ -14530,7 +14540,7 @@ var SegmentOpProgram = (function () {
 }());
 exports.SegmentOpProgram = SegmentOpProgram;
 
-},{}],108:[function(require,module,exports){
+},{}],109:[function(require,module,exports){
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
 var shader_compiler_1 = require("./shader_compiler");
@@ -14567,7 +14577,7 @@ var SelectProgram = (function () {
 }());
 exports.SelectProgram = SelectProgram;
 
-},{"./shader_compiler":109}],109:[function(require,module,exports){
+},{"./shader_compiler":110}],110:[function(require,module,exports){
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
 var broadcast_util = require("../../ops/broadcast_util");
@@ -14982,7 +14992,7 @@ function getSqueezedParams(params, keptDims) {
     return keptDims.map(function (d) { return params[d]; }).join(', ');
 }
 
-},{"../../ops/broadcast_util":125,"../../util":180}],110:[function(require,module,exports){
+},{"../../ops/broadcast_util":126,"../../util":181}],111:[function(require,module,exports){
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
 var shader_compiler_1 = require("./shader_compiler");
@@ -15046,7 +15056,7 @@ function getCoords(rank) {
     }
 }
 
-},{"./shader_compiler":109}],111:[function(require,module,exports){
+},{"./shader_compiler":110}],112:[function(require,module,exports){
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
 var shader_compiler_1 = require("./shader_compiler");
@@ -15084,7 +15094,7 @@ var StridedSliceProgram = (function () {
 }());
 exports.StridedSliceProgram = StridedSliceProgram;
 
-},{"./shader_compiler":109}],112:[function(require,module,exports){
+},{"./shader_compiler":110}],113:[function(require,module,exports){
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
 var TextureUsage;
@@ -15277,7 +15287,7 @@ function decodeMatrixFromPackedRGBA(packedRGBA, rows, columns, matrix) {
 }
 exports.decodeMatrixFromPackedRGBA = decodeMatrixFromPackedRGBA;
 
-},{}],113:[function(require,module,exports){
+},{}],114:[function(require,module,exports){
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
 var environment_1 = require("../../environment");
@@ -15399,7 +15409,7 @@ function getKeyFromTextureShape(shapeRowsCol, physicalTexType) {
     return shapeRowsCol[0] + "_" + shapeRowsCol[1] + "_" + physicalTexType;
 }
 
-},{"../../environment":55,"./tex_util":112}],114:[function(require,module,exports){
+},{"../../environment":56,"./tex_util":113}],115:[function(require,module,exports){
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
 var shader_compiler_1 = require("./shader_compiler");
@@ -15435,7 +15445,7 @@ function getSourceCoords(aShape) {
     return sourceCoords.join();
 }
 
-},{"./shader_compiler":109}],115:[function(require,module,exports){
+},{"./shader_compiler":110}],116:[function(require,module,exports){
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
 var shader_compiler_1 = require("./shader_compiler");
@@ -15468,7 +15478,7 @@ function getSwitchedCoords(newDim) {
     return switchedCoords.join();
 }
 
-},{"./shader_compiler":109}],116:[function(require,module,exports){
+},{"./shader_compiler":110}],117:[function(require,module,exports){
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
 var erf_util = require("../../ops/erf_util");
@@ -15535,7 +15545,7 @@ exports.RECIPROCAL = "return 1.0 / x;";
 exports.LOGICAL_NOT = "return float(!(x >= 1.0));";
 exports.TO_INT = "return float(int(x));";
 
-},{"../../ops/erf_util":131,"../../ops/selu_util":151}],117:[function(require,module,exports){
+},{"../../ops/erf_util":132,"../../ops/selu_util":152}],118:[function(require,module,exports){
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
 var MAX_TEXTURE_SIZE = null;
@@ -15846,7 +15856,7 @@ function getTextureShapeFromLogicalShape(gl, logShape) {
 }
 exports.getTextureShapeFromLogicalShape = getTextureShapeFromLogicalShape;
 
-},{"../../environment":55,"../../util":180}],118:[function(require,module,exports){
+},{"../../environment":56,"../../util":181}],119:[function(require,module,exports){
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
 var array_ops_1 = require("../ops/array_ops");
@@ -15868,7 +15878,7 @@ function whereImpl(condShape, condVals) {
 }
 exports.whereImpl = whereImpl;
 
-},{"../ops/array_ops":120}],119:[function(require,module,exports){
+},{"../ops/array_ops":121}],120:[function(require,module,exports){
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
 var environment_1 = require("./environment");
@@ -15893,7 +15903,7 @@ function log() {
 }
 exports.log = log;
 
-},{"./environment":55}],120:[function(require,module,exports){
+},{"./environment":56}],121:[function(require,module,exports){
 "use strict";
 var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, generator) {
     return new (P || (P = Promise))(function (resolve, reject) {
@@ -16426,7 +16436,7 @@ exports.unstack = operation_1.op({ unstack_: unstack_ });
 exports.batchToSpaceND = operation_1.op({ batchToSpaceND_: batchToSpaceND_ });
 exports.spaceToBatchND = operation_1.op({ spaceToBatchND_: spaceToBatchND_ });
 
-},{"../environment":55,"../tensor":173,"../tensor_util_env":176,"../util":180,"./axis_util":122,"./concat":127,"./operation":141,"./rand":144,"./tensor_ops":156}],121:[function(require,module,exports){
+},{"../environment":56,"../tensor":174,"../tensor_util_env":177,"../util":181,"./axis_util":123,"./concat":128,"./operation":142,"./rand":145,"./tensor_ops":157}],122:[function(require,module,exports){
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
 function getReshaped(inputShape, blockShape, prod, batchToSpace) {
@@ -16524,7 +16534,7 @@ function getSliceSize(uncroppedShape, crops, blockShape) {
 }
 exports.getSliceSize = getSliceSize;
 
-},{}],122:[function(require,module,exports){
+},{}],123:[function(require,module,exports){
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
 var util = require("../util");
@@ -16614,7 +16624,7 @@ function getInnerMostAxes(numAxes, rank) {
 }
 exports.getInnerMostAxes = getInnerMostAxes;
 
-},{"../util":180}],123:[function(require,module,exports){
+},{"../util":181}],124:[function(require,module,exports){
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
 var environment_1 = require("../environment");
@@ -16834,7 +16844,7 @@ exports.batchNormalization3d = operation_1.op({ batchNormalization3d_: batchNorm
 exports.batchNormalization4d = operation_1.op({ batchNormalization4d_: batchNormalization4d_ });
 exports.batchNormalization = operation_1.op({ batchNormalization_: batchNormalization_ });
 
-},{"../environment":55,"../tensor_util_env":176,"../util":180,"./array_ops":120,"./broadcast_util":125,"./operation":141,"./tensor_ops":156,"./unary_ops":159}],124:[function(require,module,exports){
+},{"../environment":56,"../tensor_util_env":177,"../util":181,"./array_ops":121,"./broadcast_util":126,"./operation":142,"./tensor_ops":157,"./unary_ops":160}],125:[function(require,module,exports){
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
 var environment_1 = require("../environment");
@@ -17200,7 +17210,7 @@ exports.squaredDifferenceStrict = operation_1.op({ squaredDifferenceStrict_: squ
 exports.sub = operation_1.op({ sub_: sub_ });
 exports.subStrict = operation_1.op({ subStrict_: subStrict_ });
 
-},{"../environment":55,"../tensor_util":175,"../tensor_util_env":176,"../types":179,"../util":180,"./broadcast_util":125,"./operation":141,"./tensor_ops":156,"./unary_ops":159}],125:[function(require,module,exports){
+},{"../environment":56,"../tensor_util":176,"../tensor_util_env":177,"../types":180,"../util":181,"./broadcast_util":126,"./operation":142,"./tensor_ops":157,"./unary_ops":160}],126:[function(require,module,exports){
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
 function getBroadcastDims(inShape, outShape) {
@@ -17270,7 +17280,7 @@ function assertAndGetBroadcastShape(shapeA, shapeB) {
 }
 exports.assertAndGetBroadcastShape = assertAndGetBroadcastShape;
 
-},{}],126:[function(require,module,exports){
+},{}],127:[function(require,module,exports){
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
 var environment_1 = require("../environment");
@@ -17370,7 +17380,7 @@ exports.lessStrict = operation_1.op({ lessStrict_: lessStrict_ });
 exports.notEqual = operation_1.op({ notEqual_: notEqual_ });
 exports.notEqualStrict = operation_1.op({ notEqualStrict_: notEqualStrict_ });
 
-},{"../environment":55,"../tensor_util":175,"../tensor_util_env":176,"../util":180,"./broadcast_util":125,"./operation":141}],127:[function(require,module,exports){
+},{"../environment":56,"../tensor_util":176,"../tensor_util_env":177,"../util":181,"./broadcast_util":126,"./operation":142}],128:[function(require,module,exports){
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
 var environment_1 = require("../environment");
@@ -17429,7 +17439,7 @@ exports.concat2d = operation_1.op({ concat2d_: concat2d_ });
 exports.concat3d = operation_1.op({ concat3d_: concat3d_ });
 exports.concat4d = operation_1.op({ concat4d_: concat4d_ });
 
-},{"../environment":55,"../tensor_util_env":176,"../util":180,"./axis_util":122,"./concat_util":128,"./operation":141,"./tensor_ops":156}],128:[function(require,module,exports){
+},{"../environment":56,"../tensor_util_env":177,"../util":181,"./axis_util":123,"./concat_util":129,"./operation":142,"./tensor_ops":157}],129:[function(require,module,exports){
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
 var util = require("../util");
@@ -17464,7 +17474,7 @@ function computeGradientSliceShapes(aShape, bShape) {
 }
 exports.computeGradientSliceShapes = computeGradientSliceShapes;
 
-},{"../util":180}],129:[function(require,module,exports){
+},{"../util":181}],130:[function(require,module,exports){
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
 var environment_1 = require("../environment");
@@ -17732,7 +17742,7 @@ exports.depthwiseConv2d = operation_1.op({ depthwiseConv2d_: depthwiseConv2d_ })
 exports.separableConv2d = operation_1.op({ separableConv2d_: separableConv2d_ });
 exports.conv2dTranspose = operation_1.op({ conv2dTranspose_: conv2dTranspose_ });
 
-},{"../environment":55,"../tensor_util_env":176,"../util":180,"./conv_util":130,"./operation":141}],130:[function(require,module,exports){
+},{"../environment":56,"../tensor_util_env":177,"../util":181,"./conv_util":131,"./operation":142}],131:[function(require,module,exports){
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
 var util = require("../util");
@@ -17879,7 +17889,7 @@ function conditionalRound(value, roundingMode) {
     }
 }
 
-},{"../util":180}],131:[function(require,module,exports){
+},{"../util":181}],132:[function(require,module,exports){
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.ERF_P = 0.3275911;
@@ -17889,7 +17899,7 @@ exports.ERF_A3 = 1.421413741;
 exports.ERF_A4 = -1.453152027;
 exports.ERF_A5 = 1.061405429;
 
-},{}],132:[function(require,module,exports){
+},{}],133:[function(require,module,exports){
 "use strict";
 var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, generator) {
     return new (P || (P = Promise))(function (resolve, reject) {
@@ -18058,7 +18068,7 @@ exports.resizeNearestNeighbor = operation_1.op({ resizeNearestNeighbor_: resizeN
 exports.nonMaxSuppression = operation_1.op({ nonMaxSuppression_: nonMaxSuppression_ });
 exports.nonMaxSuppressionAsync = nonMaxSuppressionAsync_;
 
-},{"../environment":55,"../kernels/non_max_suppression_impl":74,"../tensor_util_env":176,"../util":180,"./operation":141}],133:[function(require,module,exports){
+},{"../environment":56,"../kernels/non_max_suppression_impl":75,"../tensor_util_env":177,"../util":181,"./operation":142}],134:[function(require,module,exports){
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
 var environment_1 = require("../environment");
@@ -18203,7 +18213,7 @@ function qr2d(x, fullMatrices) {
 exports.gramSchmidt = operation_1.op({ gramSchmidt_: gramSchmidt_ });
 exports.qr = operation_1.op({ qr_: qr_ });
 
-},{"../environment":55,"../globals":57,"../util":180,"./array_ops":120,"./norm":140,"./operation":141,"./reduction_ops":146,"./tensor_ops":156}],134:[function(require,module,exports){
+},{"../environment":56,"../globals":58,"../util":181,"./array_ops":121,"./norm":141,"./operation":142,"./reduction_ops":147,"./tensor_ops":157}],135:[function(require,module,exports){
 "use strict";
 var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, generator) {
     return new (P || (P = Promise))(function (resolve, reject) {
@@ -18320,7 +18330,7 @@ exports.logicalXor = operation_1.op({ logicalXor_: logicalXor_ });
 exports.where = operation_1.op({ where_: where_ });
 exports.whereAsync = whereAsync_;
 
-},{"../environment":55,"../kernels/where_impl":118,"../tensor_util_env":176,"../util":180,"./broadcast_util":125,"./operation":141,"./tensor_ops":156}],135:[function(require,module,exports){
+},{"../environment":56,"../kernels/where_impl":119,"../tensor_util_env":177,"../util":181,"./broadcast_util":126,"./operation":142,"./tensor_ops":157}],136:[function(require,module,exports){
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
 var globals_1 = require("../globals");
@@ -18545,7 +18555,7 @@ exports.meanSquaredError = operation_1.op({ meanSquaredError_: meanSquaredError_
 exports.sigmoidCrossEntropy = operation_1.op({ sigmoidCrossEntropy_: sigmoidCrossEntropy_ });
 exports.softmaxCrossEntropy = operation_1.op({ softmaxCrossEntropy_: softmaxCrossEntropy_ });
 
-},{"../globals":57,"../tensor_util_env":176,"../util":180,"./axis_util":122,"./binary_ops":124,"./operation":141,"./tensor_ops":156}],136:[function(require,module,exports){
+},{"../globals":58,"../tensor_util_env":177,"../util":181,"./axis_util":123,"./binary_ops":125,"./operation":142,"./tensor_ops":157}],137:[function(require,module,exports){
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
 var environment_1 = require("../environment");
@@ -18582,7 +18592,7 @@ function localResponseNormalization_(x, depthRadius, bias, alpha, beta) {
 }
 exports.localResponseNormalization = operation_1.op({ localResponseNormalization_: localResponseNormalization_ });
 
-},{"../environment":55,"../tensor_util_env":176,"../util":180,"./operation":141}],137:[function(require,module,exports){
+},{"../environment":56,"../tensor_util_env":177,"../util":181,"./operation":142}],138:[function(require,module,exports){
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
 var tensor_util_env_1 = require("../tensor_util_env");
@@ -18631,7 +18641,7 @@ function basicLSTMCell_(forgetBias, lstmKernel, lstmBias, data, c, h) {
 exports.basicLSTMCell = operation_1.op({ basicLSTMCell_: basicLSTMCell_ });
 exports.multiRNNCell = operation_1.op({ multiRNNCell_: multiRNNCell_ });
 
-},{"../tensor_util_env":176,"./operation":141}],138:[function(require,module,exports){
+},{"../tensor_util_env":177,"./operation":142}],139:[function(require,module,exports){
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
 var environment_1 = require("../environment");
@@ -18712,7 +18722,7 @@ exports.matMul = operation_1.op({ matMul_: matMul_ });
 exports.dot = operation_1.op({ dot_: dot_ });
 exports.outerProduct = operation_1.op({ outerProduct_: outerProduct_ });
 
-},{"../environment":55,"../tensor_util_env":176,"../util":180,"./operation":141}],139:[function(require,module,exports){
+},{"../environment":56,"../tensor_util_env":177,"../util":181,"./operation":142}],140:[function(require,module,exports){
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
 var tensor_util_1 = require("../tensor_util");
@@ -18740,7 +18750,7 @@ function movingAverage_(v, x, decay, step, zeroDebias) {
 }
 exports.movingAverage = operation_1.op({ movingAverage_: movingAverage_ });
 
-},{"../tensor_util":175,"../tensor_util_env":176,"../util":180,"./binary_ops":124,"./operation":141,"./tensor_ops":156}],140:[function(require,module,exports){
+},{"../tensor_util":176,"../tensor_util_env":177,"../util":181,"./binary_ops":125,"./operation":142,"./tensor_ops":157}],141:[function(require,module,exports){
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
 var tensor_util_env_1 = require("../tensor_util_env");
@@ -18803,7 +18813,7 @@ function normImpl(x, p, axis) {
 }
 exports.norm = operation_1.op({ norm_: norm_ });
 
-},{"../tensor_util_env":176,"./axis_util":122,"./operation":141,"./tensor_ops":156}],141:[function(require,module,exports){
+},{"../tensor_util_env":177,"./axis_util":123,"./operation":142,"./tensor_ops":157}],142:[function(require,module,exports){
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
 var environment_1 = require("../environment");
@@ -18843,7 +18853,7 @@ function op(f) {
 }
 exports.op = op;
 
-},{"../environment":55}],142:[function(require,module,exports){
+},{"../environment":56}],143:[function(require,module,exports){
 "use strict";
 function __export(m) {
     for (var p in m) if (!exports.hasOwnProperty(p)) exports[p] = m[p];
@@ -18882,7 +18892,7 @@ exports.linalg = linalg;
 var image = require("./image_ops");
 exports.image = image;
 
-},{"./array_ops":120,"./batchnorm":123,"./binary_ops":124,"./compare":126,"./concat":127,"./conv":129,"./image_ops":132,"./linalg_ops":133,"./logical_ops":134,"./loss_ops":135,"./lrn":136,"./lstm":137,"./matmul":138,"./moving_average":139,"./norm":140,"./operation":141,"./pool":143,"./reduction_ops":146,"./relu_ops":147,"./reverse":148,"./segment_ops":149,"./slice":152,"./softmax":154,"./strided_slice":155,"./tensor_ops":156,"./topk":157,"./transpose":158,"./unary_ops":159}],143:[function(require,module,exports){
+},{"./array_ops":121,"./batchnorm":124,"./binary_ops":125,"./compare":127,"./concat":128,"./conv":130,"./image_ops":133,"./linalg_ops":134,"./logical_ops":135,"./loss_ops":136,"./lrn":137,"./lstm":138,"./matmul":139,"./moving_average":140,"./norm":141,"./operation":142,"./pool":144,"./reduction_ops":147,"./relu_ops":148,"./reverse":149,"./segment_ops":150,"./slice":153,"./softmax":155,"./strided_slice":156,"./tensor_ops":157,"./topk":158,"./transpose":159,"./unary_ops":160}],144:[function(require,module,exports){
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
 var environment_1 = require("../environment");
@@ -18986,7 +18996,7 @@ function avgPoolBackprop(dy, input, filterSize, strides, pad) {
 exports.maxPool = operation_1.op({ maxPool_: maxPool_ });
 exports.avgPool = operation_1.op({ avgPool_: avgPool_ });
 
-},{"../environment":55,"../tensor_util_env":176,"../util":180,"./conv_util":130,"./operation":141}],144:[function(require,module,exports){
+},{"../environment":56,"../tensor_util_env":177,"../util":181,"./conv_util":131,"./operation":142}],145:[function(require,module,exports){
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
 var seedrandom = require("seedrandom");
@@ -19044,7 +19054,7 @@ var MPRandGauss = (function () {
 }());
 exports.MPRandGauss = MPRandGauss;
 
-},{"seedrandom":254}],145:[function(require,module,exports){
+},{"seedrandom":247}],146:[function(require,module,exports){
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
 var util_1 = require("../util");
@@ -19057,7 +19067,7 @@ function computeOptimalWindowSize(inSize) {
 }
 exports.computeOptimalWindowSize = computeOptimalWindowSize;
 
-},{"../util":180}],146:[function(require,module,exports){
+},{"../util":181}],147:[function(require,module,exports){
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
 var environment_1 = require("../environment");
@@ -19271,7 +19281,7 @@ exports.min = operation_1.op({ min_: min_ });
 exports.moments = operation_1.op({ moments_: moments_ });
 exports.sum = operation_1.op({ sum_: sum_ });
 
-},{"../environment":55,"../globals":57,"../tensor_util_env":176,"../util":180,"./axis_util":122,"./operation":141,"./tensor_ops":156}],147:[function(require,module,exports){
+},{"../environment":56,"../globals":58,"../tensor_util_env":177,"../util":181,"./axis_util":123,"./operation":142,"./tensor_ops":157}],148:[function(require,module,exports){
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
 var environment_1 = require("../environment");
@@ -19337,7 +19347,7 @@ exports.prelu = operation_1.op({ prelu_: prelu_ });
 exports.relu = operation_1.op({ relu_: relu_ });
 exports.selu = operation_1.op({ selu_: selu_ });
 
-},{"../environment":55,"../tensor_util_env":176,"./binary_ops":124,"./logical_ops":134,"./operation":141,"./selu_util":151,"./tensor_ops":156}],148:[function(require,module,exports){
+},{"../environment":56,"../tensor_util_env":177,"./binary_ops":125,"./logical_ops":135,"./operation":142,"./selu_util":152,"./tensor_ops":157}],149:[function(require,module,exports){
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
 var environment_1 = require("../environment");
@@ -19383,7 +19393,7 @@ exports.reverse2d = operation_1.op({ reverse2d_: reverse2d_ });
 exports.reverse3d = operation_1.op({ reverse3d_: reverse3d_ });
 exports.reverse4d = operation_1.op({ reverse4d_: reverse4d_ });
 
-},{"../environment":55,"../tensor_util_env":176,"../util":180,"./axis_util":122,"./operation":141}],149:[function(require,module,exports){
+},{"../environment":56,"../tensor_util_env":177,"../util":181,"./axis_util":123,"./operation":142}],150:[function(require,module,exports){
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
 var environment_1 = require("../environment");
@@ -19475,7 +19485,7 @@ function gatherDropNegatives(x, indices) {
 exports.gather = operation_1.op({ gather_: gather_ });
 exports.unsortedSegmentSum = operation_1.op({ unsortedSegmentSum_: unsortedSegmentSum_ });
 
-},{"../environment":55,"../tensor_util_env":176,"../util":180,"./array_ops":120,"./axis_util":122,"./binary_ops":124,"./compare":126,"./logical_ops":134,"./operation":141,"./tensor_ops":156}],150:[function(require,module,exports){
+},{"../environment":56,"../tensor_util_env":177,"../util":181,"./array_ops":121,"./axis_util":123,"./binary_ops":125,"./compare":127,"./logical_ops":135,"./operation":142,"./tensor_ops":157}],151:[function(require,module,exports){
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
 var util_1 = require("../util");
@@ -19517,13 +19527,13 @@ function computeOutShape(aShape, axis, numSegments) {
 }
 exports.computeOutShape = computeOutShape;
 
-},{"../util":180,"./reduce_util":145}],151:[function(require,module,exports){
+},{"../util":181,"./reduce_util":146}],152:[function(require,module,exports){
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.SELU_SCALEALPHA = 1.7580993408473768599402175208123;
 exports.SELU_SCALE = 1.0507009873554804934193349852946;
 
-},{}],152:[function(require,module,exports){
+},{}],153:[function(require,module,exports){
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
 var environment_1 = require("../environment");
@@ -19605,7 +19615,7 @@ exports.slice2d = operation_1.op({ slice2d_: slice2d_ });
 exports.slice3d = operation_1.op({ slice3d_: slice3d_ });
 exports.slice4d = operation_1.op({ slice4d_: slice4d_ });
 
-},{"../environment":55,"../tensor_util_env":176,"../util":180,"./operation":141,"./slice_util":153}],153:[function(require,module,exports){
+},{"../environment":56,"../tensor_util_env":177,"../util":181,"./operation":142,"./slice_util":154}],154:[function(require,module,exports){
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
 var util = require("../util");
@@ -19696,7 +19706,7 @@ function stopForAxis(endMask, stopIndices, strides, inputShape, axis) {
 }
 exports.stopForAxis = stopForAxis;
 
-},{"../util":180}],154:[function(require,module,exports){
+},{"../util":181}],155:[function(require,module,exports){
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
 var gradients_1 = require("../gradients");
@@ -19728,7 +19738,7 @@ function softmax_(logits, dim) {
 }
 exports.softmax = operation_1.op({ softmax_: softmax_ });
 
-},{"../gradients":58,"../tensor_util_env":176,"./operation":141}],155:[function(require,module,exports){
+},{"../gradients":59,"../tensor_util_env":177,"./operation":142}],156:[function(require,module,exports){
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
 var environment_1 = require("../environment");
@@ -19751,7 +19761,7 @@ function stridedSlice_(x, begin, end, strides, beginMask, endMask, ellipsisMask,
 }
 exports.stridedSlice = operation_1.op({ stridedSlice_: stridedSlice_ });
 
-},{"../environment":55,"../tensor_util_env":176,"./operation":141}],156:[function(require,module,exports){
+},{"../environment":56,"../tensor_util_env":177,"./operation":142}],157:[function(require,module,exports){
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
 var environment_1 = require("../environment");
@@ -19960,7 +19970,7 @@ exports.range = range;
 exports.onesLike = operation_1.op({ onesLike_: onesLike_ });
 exports.zerosLike = operation_1.op({ zerosLike_: zerosLike_ });
 
-},{"../environment":55,"../tensor":173,"../tensor_util_env":176,"../util":180,"./operation":141}],157:[function(require,module,exports){
+},{"../environment":56,"../tensor":174,"../tensor_util_env":177,"../util":181,"./operation":142}],158:[function(require,module,exports){
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
 var environment_1 = require("../environment");
@@ -19983,7 +19993,7 @@ function topk_(x, k, sorted) {
 }
 exports.topk = operation_1.op({ topk_: topk_ });
 
-},{"../environment":55,"../tensor_util_env":176,"./operation":141}],158:[function(require,module,exports){
+},{"../environment":56,"../tensor_util_env":177,"./operation":142}],159:[function(require,module,exports){
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
 var environment_1 = require("../environment");
@@ -20013,7 +20023,7 @@ function transpose_(x, perm) {
 }
 exports.transpose = operation_1.op({ transpose_: transpose_ });
 
-},{"../environment":55,"../tensor_util_env":176,"../util":180,"./axis_util":122,"./operation":141}],159:[function(require,module,exports){
+},{"../environment":56,"../tensor_util_env":177,"../util":181,"./axis_util":123,"./operation":142}],160:[function(require,module,exports){
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
 var environment_1 = require("../environment");
@@ -20303,7 +20313,7 @@ exports.step = operation_1.op({ step_: step_ });
 exports.tan = operation_1.op({ tan_: tan_ });
 exports.tanh = operation_1.op({ tanh_: tanh_ });
 
-},{"../environment":55,"../tensor_util_env":176,"../util":180,"./operation":141,"./tensor_ops":156}],160:[function(require,module,exports){
+},{"../environment":56,"../tensor_util_env":177,"../util":181,"./operation":142,"./tensor_ops":157}],161:[function(require,module,exports){
 "use strict";
 var __extends = (this && this.__extends) || (function () {
     var extendStatics = Object.setPrototypeOf ||
@@ -20411,7 +20421,7 @@ var AdadeltaOptimizer = (function (_super) {
 exports.AdadeltaOptimizer = AdadeltaOptimizer;
 serialization_1.SerializationMap.register(AdadeltaOptimizer);
 
-},{"../environment":55,"../globals":57,"../ops/ops":142,"../serialization":171,"./optimizer":165,"./optimizer_utils":167}],161:[function(require,module,exports){
+},{"../environment":56,"../globals":58,"../ops/ops":143,"../serialization":172,"./optimizer":166,"./optimizer_utils":168}],162:[function(require,module,exports){
 "use strict";
 var __extends = (this && this.__extends) || (function () {
     var extendStatics = Object.setPrototypeOf ||
@@ -20495,7 +20505,7 @@ var AdagradOptimizer = (function (_super) {
 exports.AdagradOptimizer = AdagradOptimizer;
 serialization_1.SerializationMap.register(AdagradOptimizer);
 
-},{"../environment":55,"../globals":57,"../ops/ops":142,"../serialization":171,"./optimizer":165,"./optimizer_utils":167}],162:[function(require,module,exports){
+},{"../environment":56,"../globals":58,"../ops/ops":143,"../serialization":172,"./optimizer":166,"./optimizer_utils":168}],163:[function(require,module,exports){
 "use strict";
 var __extends = (this && this.__extends) || (function () {
     var extendStatics = Object.setPrototypeOf ||
@@ -20615,7 +20625,7 @@ var AdamOptimizer = (function (_super) {
 exports.AdamOptimizer = AdamOptimizer;
 serialization_1.SerializationMap.register(AdamOptimizer);
 
-},{"../environment":55,"../globals":57,"../ops/ops":142,"../serialization":171,"./optimizer":165,"./optimizer_utils":167}],163:[function(require,module,exports){
+},{"../environment":56,"../globals":58,"../ops/ops":143,"../serialization":172,"./optimizer":166,"./optimizer_utils":168}],164:[function(require,module,exports){
 "use strict";
 var __extends = (this && this.__extends) || (function () {
     var extendStatics = Object.setPrototypeOf ||
@@ -20737,7 +20747,7 @@ var AdamaxOptimizer = (function (_super) {
 exports.AdamaxOptimizer = AdamaxOptimizer;
 serialization_1.SerializationMap.register(AdamaxOptimizer);
 
-},{"../environment":55,"../globals":57,"../ops/ops":142,"../serialization":171,"./optimizer":165,"./optimizer_utils":167}],164:[function(require,module,exports){
+},{"../environment":56,"../globals":58,"../ops/ops":143,"../serialization":172,"./optimizer":166,"./optimizer_utils":168}],165:[function(require,module,exports){
 "use strict";
 var __extends = (this && this.__extends) || (function () {
     var extendStatics = Object.setPrototypeOf ||
@@ -20827,7 +20837,7 @@ var MomentumOptimizer = (function (_super) {
 exports.MomentumOptimizer = MomentumOptimizer;
 serialization_1.SerializationMap.register(MomentumOptimizer);
 
-},{"../environment":55,"../globals":57,"../ops/ops":142,"../serialization":171,"./sgd_optimizer":169}],165:[function(require,module,exports){
+},{"../environment":56,"../globals":58,"../ops/ops":143,"../serialization":172,"./sgd_optimizer":170}],166:[function(require,module,exports){
 "use strict";
 var __extends = (this && this.__extends) || (function () {
     var extendStatics = Object.setPrototypeOf ||
@@ -20868,7 +20878,7 @@ var Optimizer = (function (_super) {
 }(serialization_1.Serializable));
 exports.Optimizer = Optimizer;
 
-},{"../globals":57,"../serialization":171}],166:[function(require,module,exports){
+},{"../globals":58,"../serialization":172}],167:[function(require,module,exports){
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
 var adadelta_optimizer_1 = require("./adadelta_optimizer");
@@ -20924,7 +20934,7 @@ var OptimizerConstructors = (function () {
 }());
 exports.OptimizerConstructors = OptimizerConstructors;
 
-},{"./adadelta_optimizer":160,"./adagrad_optimizer":161,"./adam_optimizer":162,"./adamax_optimizer":163,"./momentum_optimizer":164,"./rmsprop_optimizer":168,"./sgd_optimizer":169}],167:[function(require,module,exports){
+},{"./adadelta_optimizer":161,"./adagrad_optimizer":162,"./adam_optimizer":163,"./adamax_optimizer":164,"./momentum_optimizer":165,"./rmsprop_optimizer":169,"./sgd_optimizer":170}],168:[function(require,module,exports){
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
 var environment_1 = require("../environment");
@@ -20938,7 +20948,7 @@ function getOptimizerDefaultEpsilonValue() {
 }
 exports.getOptimizerDefaultEpsilonValue = getOptimizerDefaultEpsilonValue;
 
-},{"../environment":55}],168:[function(require,module,exports){
+},{"../environment":56}],169:[function(require,module,exports){
 "use strict";
 var __extends = (this && this.__extends) || (function () {
     var extendStatics = Object.setPrototypeOf ||
@@ -21083,7 +21093,7 @@ var RMSPropOptimizer = (function (_super) {
 exports.RMSPropOptimizer = RMSPropOptimizer;
 serialization_1.SerializationMap.register(RMSPropOptimizer);
 
-},{"../environment":55,"../globals":57,"../ops/ops":142,"../serialization":171,"./optimizer":165,"./optimizer_utils":167}],169:[function(require,module,exports){
+},{"../environment":56,"../globals":58,"../ops/ops":143,"../serialization":172,"./optimizer":166,"./optimizer_utils":168}],170:[function(require,module,exports){
 "use strict";
 var __extends = (this && this.__extends) || (function () {
     var extendStatics = Object.setPrototypeOf ||
@@ -21143,7 +21153,7 @@ var SGDOptimizer = (function (_super) {
 exports.SGDOptimizer = SGDOptimizer;
 serialization_1.SerializationMap.register(SGDOptimizer);
 
-},{"../environment":55,"../globals":57,"../ops/ops":142,"../serialization":171,"./optimizer":165}],170:[function(require,module,exports){
+},{"../environment":56,"../globals":58,"../ops/ops":143,"../serialization":172,"./optimizer":166}],171:[function(require,module,exports){
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
 var util = require("./util");
@@ -21190,7 +21200,7 @@ var Logger = (function () {
 }());
 exports.Logger = Logger;
 
-},{"./util":180}],171:[function(require,module,exports){
+},{"./util":181}],172:[function(require,module,exports){
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
 var Serializable = (function () {
@@ -21224,7 +21234,7 @@ var SerializationMap = (function () {
 }());
 exports.SerializationMap = SerializationMap;
 
-},{}],172:[function(require,module,exports){
+},{}],173:[function(require,module,exports){
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
 var util = require("./util");
@@ -21325,7 +21335,7 @@ function backpropagateGradients(tensorAccumulatedGradientMap, filteredTape) {
 }
 exports.backpropagateGradients = backpropagateGradients;
 
-},{"./util":180}],173:[function(require,module,exports){
+},{"./util":181}],174:[function(require,module,exports){
 "use strict";
 var __extends = (this && this.__extends) || (function () {
     var extendStatics = Object.setPrototypeOf ||
@@ -22174,7 +22184,7 @@ Object.defineProperty(Variable, Symbol.hasInstance, {
 var variable = Variable.variable;
 exports.variable = variable;
 
-},{"./tensor_format":174,"./util":180}],174:[function(require,module,exports){
+},{"./tensor_format":175,"./util":181}],175:[function(require,module,exports){
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
 var util_1 = require("./util");
@@ -22280,7 +22290,7 @@ function subTensorToString(vals, shape, strides, padPerCol, isLast) {
     return lines;
 }
 
-},{"./util":180}],175:[function(require,module,exports){
+},{"./util":181}],176:[function(require,module,exports){
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
 var tensor_1 = require("./tensor");
@@ -22355,7 +22365,7 @@ function isIterable(obj) {
     return Array.isArray(obj) || typeof obj === 'object';
 }
 
-},{"./tensor":173,"./util":180}],176:[function(require,module,exports){
+},{"./tensor":174,"./util":181}],177:[function(require,module,exports){
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
 var environment_1 = require("./environment");
@@ -22389,7 +22399,7 @@ function convertToTensorArray(arg, argName, functionName) {
 }
 exports.convertToTensorArray = convertToTensorArray;
 
-},{"./environment":55,"./tensor":173,"./util":180}],177:[function(require,module,exports){
+},{"./environment":56,"./tensor":174,"./util":181}],178:[function(require,module,exports){
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
 var environment_1 = require("./environment");
@@ -22510,7 +22520,7 @@ function expectArrayBuffersEqual(actual, expected) {
 }
 exports.expectArrayBuffersEqual = expectArrayBuffersEqual;
 
-},{"./environment":55,"./tensor":173,"./util":180}],178:[function(require,module,exports){
+},{"./environment":56,"./tensor":174,"./util":181}],179:[function(require,module,exports){
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
 var adadelta_optimizer_1 = require("./optimizers/adadelta_optimizer");
@@ -22533,7 +22543,7 @@ exports.train = {
     adam: optimizer_constructors_1.OptimizerConstructors.adam
 };
 
-},{"./optimizers/adadelta_optimizer":160,"./optimizers/adagrad_optimizer":161,"./optimizers/adam_optimizer":162,"./optimizers/adamax_optimizer":163,"./optimizers/momentum_optimizer":164,"./optimizers/optimizer_constructors":166,"./optimizers/rmsprop_optimizer":168,"./optimizers/sgd_optimizer":169}],179:[function(require,module,exports){
+},{"./optimizers/adadelta_optimizer":161,"./optimizers/adagrad_optimizer":162,"./optimizers/adam_optimizer":163,"./optimizers/adamax_optimizer":164,"./optimizers/momentum_optimizer":165,"./optimizers/optimizer_constructors":167,"./optimizers/rmsprop_optimizer":169,"./optimizers/sgd_optimizer":170}],180:[function(require,module,exports){
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
 var DType;
@@ -22584,7 +22594,7 @@ function sumOutType(type) {
 }
 exports.sumOutType = sumOutType;
 
-},{}],180:[function(require,module,exports){
+},{}],181:[function(require,module,exports){
 (function (process){
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
@@ -23008,13 +23018,13 @@ function now() {
 exports.now = now;
 
 }).call(this,require('_process'))
-},{"_process":268}],181:[function(require,module,exports){
+},{"_process":259}],182:[function(require,module,exports){
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
 var version = '0.12.11';
 exports.version = version;
 
-},{}],182:[function(require,module,exports){
+},{}],183:[function(require,module,exports){
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
 var gpgpu_util = require("./kernels/webgl/gpgpu_util");
@@ -23026,7 +23036,7 @@ exports.MathBackendWebGL = backend_webgl_1.MathBackendWebGL;
 var gpgpu_context_1 = require("./kernels/webgl/gpgpu_context");
 exports.GPGPUContext = gpgpu_context_1.GPGPUContext;
 
-},{"./kernels/backend_webgl":73,"./kernels/webgl/gpgpu_context":90,"./kernels/webgl/gpgpu_util":92,"./kernels/webgl/webgl_util":117}],183:[function(require,module,exports){
+},{"./kernels/backend_webgl":74,"./kernels/webgl/gpgpu_context":91,"./kernels/webgl/gpgpu_util":93,"./kernels/webgl/webgl_util":118}],184:[function(require,module,exports){
 "use strict";
 var __extends = (this && this.__extends) || (function () {
     var extendStatics = Object.setPrototypeOf ||
@@ -23227,7 +23237,7 @@ function getActivation(identifier) {
 }
 exports.getActivation = getActivation;
 
-},{"./backend/state":185,"./backend/tfjs_backend":186,"./utils/generic_utils":224,"@tensorflow/tfjs-core":59}],184:[function(require,module,exports){
+},{"./backend/state":186,"./backend/tfjs_backend":187,"./utils/generic_utils":225,"@tensorflow/tfjs-core":60}],185:[function(require,module,exports){
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
 var _epsilon = 1e-7;
@@ -23244,7 +23254,7 @@ function imageDataFormat() {
 }
 exports.imageDataFormat = imageDataFormat;
 
-},{}],185:[function(require,module,exports){
+},{}],186:[function(require,module,exports){
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
 var tfjs_core_1 = require("@tensorflow/tfjs-core");
@@ -23289,7 +23299,7 @@ function disposeScalarCache() {
 }
 exports.disposeScalarCache = disposeScalarCache;
 
-},{"@tensorflow/tfjs-core":59}],186:[function(require,module,exports){
+},{"@tensorflow/tfjs-core":60}],187:[function(require,module,exports){
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
 var tfc = require("@tensorflow/tfjs-core");
@@ -23686,7 +23696,7 @@ function inTrainPhase(x, alt, training) {
 }
 exports.inTrainPhase = inTrainPhase;
 
-},{"../backend/state":185,"../common":189,"../errors":196,"../utils/math_utils":226,"./common":184,"@tensorflow/tfjs-core":59}],187:[function(require,module,exports){
+},{"../backend/state":186,"../common":190,"../errors":197,"../utils/math_utils":227,"./common":185,"@tensorflow/tfjs-core":60}],188:[function(require,module,exports){
 "use strict";
 var __extends = (this && this.__extends) || (function () {
     var extendStatics = Object.setPrototypeOf ||
@@ -24388,7 +24398,7 @@ function standardizeCallbacks(callbacks) {
 }
 exports.standardizeCallbacks = standardizeCallbacks;
 
-},{"./backend/state":185,"./logs":217,"./utils/generic_utils":224,"@tensorflow/tfjs-core":59}],188:[function(require,module,exports){
+},{"./backend/state":186,"./logs":218,"./utils/generic_utils":225,"@tensorflow/tfjs-core":60}],189:[function(require,module,exports){
 "use strict";
 var __extends = (this && this.__extends) || (function () {
     var extendStatics = Object.setPrototypeOf ||
@@ -24420,7 +24430,7 @@ var Callback = (function (_super) {
 }(base_callbacks_1.BaseCallback));
 exports.Callback = Callback;
 
-},{"./base_callbacks":187,"./engine/training":195}],189:[function(require,module,exports){
+},{"./base_callbacks":188,"./engine/training":196}],190:[function(require,module,exports){
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
 var generic_utils_1 = require("./utils/generic_utils");
@@ -24495,7 +24505,7 @@ function isValidTensorName(name) {
 }
 exports.isValidTensorName = isValidTensorName;
 
-},{"./utils/generic_utils":224}],190:[function(require,module,exports){
+},{"./utils/generic_utils":225}],191:[function(require,module,exports){
 "use strict";
 var __extends = (this && this.__extends) || (function () {
     var extendStatics = Object.setPrototypeOf ||
@@ -24659,7 +24669,7 @@ function getConstraint(identifier) {
 }
 exports.getConstraint = getConstraint;
 
-},{"./backend/common":184,"./backend/state":185,"./utils/generic_utils":224,"@tensorflow/tfjs-core":59}],191:[function(require,module,exports){
+},{"./backend/common":185,"./backend/state":186,"./utils/generic_utils":225,"@tensorflow/tfjs-core":60}],192:[function(require,module,exports){
 "use strict";
 var __extends = (this && this.__extends) || (function () {
     var extendStatics = Object.setPrototypeOf ||
@@ -25585,7 +25595,7 @@ var Container = (function (_super) {
 }(topology_1.Layer));
 exports.Container = Container;
 
-},{"../backend/state":185,"../errors":196,"../layers/serialization":215,"../utils/generic_utils":224,"../utils/serialization_utils":227,"../utils/types_utils":228,"../variables":230,"../version":231,"./input_layer":193,"./topology":194,"@tensorflow/tfjs-core":59}],192:[function(require,module,exports){
+},{"../backend/state":186,"../errors":197,"../layers/serialization":216,"../utils/generic_utils":225,"../utils/serialization_utils":228,"../utils/types_utils":229,"../variables":231,"../version":232,"./input_layer":194,"./topology":195,"@tensorflow/tfjs-core":60}],193:[function(require,module,exports){
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
 var tfjs_core_1 = require("@tensorflow/tfjs-core");
@@ -25719,7 +25729,7 @@ function getNodeOutputs(fetch) {
     return layerOutputs;
 }
 
-},{"../errors":196,"./input_layer":193,"@tensorflow/tfjs-core":59}],193:[function(require,module,exports){
+},{"../errors":197,"./input_layer":194,"@tensorflow/tfjs-core":60}],194:[function(require,module,exports){
 "use strict";
 var __extends = (this && this.__extends) || (function () {
     var extendStatics = Object.setPrototypeOf ||
@@ -25846,7 +25856,7 @@ function Input(config) {
 }
 exports.Input = Input;
 
-},{"../backend/state":185,"../errors":196,"./topology":194,"@tensorflow/tfjs-core":59}],194:[function(require,module,exports){
+},{"../backend/state":186,"../errors":197,"./topology":195,"@tensorflow/tfjs-core":60}],195:[function(require,module,exports){
 "use strict";
 var __extends = (this && this.__extends) || (function () {
     var extendStatics = Object.setPrototypeOf ||
@@ -26582,7 +26592,7 @@ function getSourceInputs(tensor, layer, nodeIndex) {
 }
 exports.getSourceInputs = getSourceInputs;
 
-},{"../backend/state":185,"../common":189,"../errors":196,"../utils/generic_utils":224,"../utils/types_utils":228,"../utils/variable_utils":229,"../variables":230,"@tensorflow/tfjs-core":59}],195:[function(require,module,exports){
+},{"../backend/state":186,"../common":190,"../errors":197,"../utils/generic_utils":225,"../utils/types_utils":229,"../utils/variable_utils":230,"../variables":231,"@tensorflow/tfjs-core":60}],196:[function(require,module,exports){
 "use strict";
 var __extends = (this && this.__extends) || (function () {
     var extendStatics = Object.setPrototypeOf ||
@@ -27756,7 +27766,7 @@ var Model = (function (_super) {
 exports.Model = Model;
 tfjs_core_1.serialization.SerializationMap.register(Model);
 
-},{"../backend/state":185,"../backend/tfjs_backend":186,"../base_callbacks":187,"../common":189,"../errors":196,"../logs":217,"../losses":218,"../metrics":219,"../optimizers":221,"../utils/generic_utils":224,"../utils/layer_utils":225,"../utils/math_utils":226,"./container":191,"./executor":192,"@tensorflow/tfjs-core":59}],196:[function(require,module,exports){
+},{"../backend/state":186,"../backend/tfjs_backend":187,"../base_callbacks":188,"../common":190,"../errors":197,"../logs":218,"../losses":219,"../metrics":220,"../optimizers":222,"../utils/generic_utils":225,"../utils/layer_utils":226,"../utils/math_utils":227,"./container":192,"./executor":193,"@tensorflow/tfjs-core":60}],197:[function(require,module,exports){
 "use strict";
 var __extends = (this && this.__extends) || (function () {
     var extendStatics = Object.setPrototypeOf ||
@@ -27830,7 +27840,7 @@ var IndexError = (function (_super) {
 }(Error));
 exports.IndexError = IndexError;
 
-},{}],197:[function(require,module,exports){
+},{}],198:[function(require,module,exports){
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
 var input_layer_1 = require("./engine/input_layer");
@@ -27854,7 +27864,7 @@ function input(config) {
 }
 exports.input = input;
 
-},{"./engine/input_layer":193,"./engine/training":195,"./models":220}],198:[function(require,module,exports){
+},{"./engine/input_layer":194,"./engine/training":196,"./models":221}],199:[function(require,module,exports){
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
 var constraints_1 = require("./constraints");
@@ -27875,7 +27885,7 @@ function minMaxNorm(config) {
 }
 exports.minMaxNorm = minMaxNorm;
 
-},{"./constraints":190}],199:[function(require,module,exports){
+},{"./constraints":191}],200:[function(require,module,exports){
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
 var initializers_1 = require("./initializers");
@@ -27932,7 +27942,7 @@ function orthogonal(config) {
 }
 exports.orthogonal = orthogonal;
 
-},{"./initializers":204}],200:[function(require,module,exports){
+},{"./initializers":205}],201:[function(require,module,exports){
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
 var input_layer_1 = require("./engine/input_layer");
@@ -28158,7 +28168,7 @@ exports.globalMaxPool2d = globalMaxPooling2d;
 exports.maxPool1d = maxPooling1d;
 exports.maxPool2d = maxPooling2d;
 
-},{"./engine/input_layer":193,"./engine/topology":194,"./exports":197,"./layers/advanced_activations":205,"./layers/convolutional":206,"./layers/convolutional_depthwise":207,"./layers/core":208,"./layers/embeddings":209,"./layers/merge":210,"./layers/normalization":211,"./layers/padding":212,"./layers/pooling":213,"./layers/recurrent":214,"./layers/wrappers":216}],201:[function(require,module,exports){
+},{"./engine/input_layer":194,"./engine/topology":195,"./exports":198,"./layers/advanced_activations":206,"./layers/convolutional":207,"./layers/convolutional_depthwise":208,"./layers/core":209,"./layers/embeddings":210,"./layers/merge":211,"./layers/normalization":212,"./layers/padding":213,"./layers/pooling":214,"./layers/recurrent":215,"./layers/wrappers":217}],202:[function(require,module,exports){
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
 var losses = require("./losses");
@@ -28212,7 +28222,7 @@ function mse(yTrue, yPred) {
 }
 exports.mse = mse;
 
-},{"./losses":218,"./metrics":219}],202:[function(require,module,exports){
+},{"./losses":219,"./metrics":220}],203:[function(require,module,exports){
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
 var regularizers = require("./regularizers");
@@ -28230,7 +28240,7 @@ function l2(config) {
 }
 exports.l2 = l2;
 
-},{"./regularizers":222}],203:[function(require,module,exports){
+},{"./regularizers":223}],204:[function(require,module,exports){
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
 var constraints = require("./exports_constraints");
@@ -28267,7 +28277,7 @@ exports.LayerVariable = variables_1.LayerVariable;
 var version_1 = require("./version");
 exports.version_layers = version_1.version;
 
-},{"./base_callbacks":187,"./callbacks":188,"./engine/topology":194,"./engine/training":195,"./exports":197,"./exports_constraints":198,"./exports_initializers":199,"./exports_layers":200,"./exports_metrics":201,"./exports_regularizers":202,"./layers/recurrent":214,"./models":220,"./variables":230,"./version":231}],204:[function(require,module,exports){
+},{"./base_callbacks":188,"./callbacks":189,"./engine/topology":195,"./engine/training":196,"./exports":198,"./exports_constraints":199,"./exports_initializers":200,"./exports_layers":201,"./exports_metrics":202,"./exports_regularizers":203,"./layers/recurrent":215,"./models":221,"./variables":231,"./version":232}],205:[function(require,module,exports){
 "use strict";
 var __extends = (this && this.__extends) || (function () {
     var extendStatics = Object.setPrototypeOf ||
@@ -28706,7 +28716,7 @@ function getInitializer(identifier) {
 }
 exports.getInitializer = getInitializer;
 
-},{"./backend/state":185,"./backend/tfjs_backend":186,"./common":189,"./errors":196,"./utils/generic_utils":224,"./utils/math_utils":226,"@tensorflow/tfjs-core":59}],205:[function(require,module,exports){
+},{"./backend/state":186,"./backend/tfjs_backend":187,"./common":190,"./errors":197,"./utils/generic_utils":225,"./utils/math_utils":227,"@tensorflow/tfjs-core":60}],206:[function(require,module,exports){
 "use strict";
 var __extends = (this && this.__extends) || (function () {
     var extendStatics = Object.setPrototypeOf ||
@@ -28849,7 +28859,7 @@ var Softmax = (function (_super) {
 exports.Softmax = Softmax;
 tfjs_core_1.serialization.SerializationMap.register(Softmax);
 
-},{"../activations":183,"../backend/state":185,"../backend/tfjs_backend":186,"../engine/topology":194,"../errors":196,"../utils/types_utils":228,"@tensorflow/tfjs-core":59}],206:[function(require,module,exports){
+},{"../activations":184,"../backend/state":186,"../backend/tfjs_backend":187,"../engine/topology":195,"../errors":197,"../utils/types_utils":229,"@tensorflow/tfjs-core":60}],207:[function(require,module,exports){
 "use strict";
 var __extends = (this && this.__extends) || (function () {
     var extendStatics = Object.setPrototypeOf ||
@@ -29546,7 +29556,7 @@ var UpSampling2D = (function (_super) {
 exports.UpSampling2D = UpSampling2D;
 tfjs_core_1.serialization.SerializationMap.register(UpSampling2D);
 
-},{"../activations":183,"../backend/common":184,"../backend/tfjs_backend":186,"../common":189,"../constraints":190,"../engine/topology":194,"../errors":196,"../initializers":204,"../regularizers":222,"../utils/conv_utils":223,"../utils/generic_utils":224,"../utils/types_utils":228,"@tensorflow/tfjs-core":59}],207:[function(require,module,exports){
+},{"../activations":184,"../backend/common":185,"../backend/tfjs_backend":187,"../common":190,"../constraints":191,"../engine/topology":195,"../errors":197,"../initializers":205,"../regularizers":223,"../utils/conv_utils":224,"../utils/generic_utils":225,"../utils/types_utils":229,"@tensorflow/tfjs-core":60}],208:[function(require,module,exports){
 "use strict";
 var __extends = (this && this.__extends) || (function () {
     var extendStatics = Object.setPrototypeOf ||
@@ -29679,7 +29689,7 @@ var DepthwiseConv2D = (function (_super) {
 exports.DepthwiseConv2D = DepthwiseConv2D;
 tfjs_core_1.serialization.SerializationMap.register(DepthwiseConv2D);
 
-},{"../backend/common":184,"../backend/tfjs_backend":186,"../common":189,"../constraints":190,"../errors":196,"../initializers":204,"../regularizers":222,"../utils/conv_utils":223,"../utils/types_utils":228,"./convolutional":206,"@tensorflow/tfjs-core":59}],208:[function(require,module,exports){
+},{"../backend/common":185,"../backend/tfjs_backend":187,"../common":190,"../constraints":191,"../errors":197,"../initializers":205,"../regularizers":223,"../utils/conv_utils":224,"../utils/types_utils":229,"./convolutional":207,"@tensorflow/tfjs-core":60}],209:[function(require,module,exports){
 "use strict";
 var __extends = (this && this.__extends) || (function () {
     var extendStatics = Object.setPrototypeOf ||
@@ -30074,7 +30084,7 @@ var Permute = (function (_super) {
 exports.Permute = Permute;
 tfjs_core_1.serialization.SerializationMap.register(Permute);
 
-},{"../activations":183,"../backend/state":185,"../backend/tfjs_backend":186,"../constraints":190,"../engine/topology":194,"../errors":196,"../initializers":204,"../regularizers":222,"../utils/math_utils":226,"../utils/types_utils":228,"@tensorflow/tfjs-core":59}],209:[function(require,module,exports){
+},{"../activations":184,"../backend/state":186,"../backend/tfjs_backend":187,"../constraints":191,"../engine/topology":195,"../errors":197,"../initializers":205,"../regularizers":223,"../utils/math_utils":227,"../utils/types_utils":229,"@tensorflow/tfjs-core":60}],210:[function(require,module,exports){
 "use strict";
 var __extends = (this && this.__extends) || (function () {
     var extendStatics = Object.setPrototypeOf ||
@@ -30193,7 +30203,7 @@ var Embedding = (function (_super) {
 exports.Embedding = Embedding;
 tfjs_core_1.serialization.SerializationMap.register(Embedding);
 
-},{"../backend/tfjs_backend":186,"../constraints":190,"../engine/topology":194,"../errors":196,"../initializers":204,"../regularizers":222,"../utils/generic_utils":224,"../utils/types_utils":228,"@tensorflow/tfjs-core":59}],210:[function(require,module,exports){
+},{"../backend/tfjs_backend":187,"../constraints":191,"../engine/topology":195,"../errors":197,"../initializers":205,"../regularizers":223,"../utils/generic_utils":225,"../utils/types_utils":229,"@tensorflow/tfjs-core":60}],211:[function(require,module,exports){
 "use strict";
 var __extends = (this && this.__extends) || (function () {
     var extendStatics = Object.setPrototypeOf ||
@@ -30640,7 +30650,7 @@ function concatenate(config) {
 }
 exports.concatenate = concatenate;
 
-},{"../backend/state":185,"../backend/tfjs_backend":186,"../engine/topology":194,"../errors":196,"../utils/generic_utils":224,"../utils/math_utils":226,"../utils/types_utils":228,"@tensorflow/tfjs-core":59}],211:[function(require,module,exports){
+},{"../backend/state":186,"../backend/tfjs_backend":187,"../engine/topology":195,"../errors":197,"../utils/generic_utils":225,"../utils/math_utils":227,"../utils/types_utils":229,"@tensorflow/tfjs-core":60}],212:[function(require,module,exports){
 "use strict";
 var __extends = (this && this.__extends) || (function () {
     var extendStatics = Object.setPrototypeOf ||
@@ -30843,7 +30853,7 @@ var BatchNormalization = (function (_super) {
 exports.BatchNormalization = BatchNormalization;
 tfjs_core_1.serialization.SerializationMap.register(BatchNormalization);
 
-},{"../backend/state":185,"../constraints":190,"../engine/topology":194,"../errors":196,"../initializers":204,"../regularizers":222,"../utils/generic_utils":224,"../utils/math_utils":226,"../utils/types_utils":228,"@tensorflow/tfjs-core":59}],212:[function(require,module,exports){
+},{"../backend/state":186,"../constraints":191,"../engine/topology":195,"../errors":197,"../initializers":205,"../regularizers":223,"../utils/generic_utils":225,"../utils/math_utils":227,"../utils/types_utils":229,"@tensorflow/tfjs-core":60}],213:[function(require,module,exports){
 "use strict";
 var __extends = (this && this.__extends) || (function () {
     var extendStatics = Object.setPrototypeOf ||
@@ -31015,7 +31025,7 @@ var ZeroPadding2D = (function (_super) {
 exports.ZeroPadding2D = ZeroPadding2D;
 tfjs_core_1.serialization.SerializationMap.register(ZeroPadding2D);
 
-},{"../backend/common":184,"../engine/topology":194,"../errors":196,"../utils/types_utils":228,"@tensorflow/tfjs-core":59}],213:[function(require,module,exports){
+},{"../backend/common":185,"../engine/topology":195,"../errors":197,"../utils/types_utils":229,"@tensorflow/tfjs-core":60}],214:[function(require,module,exports){
 "use strict";
 var __extends = (this && this.__extends) || (function () {
     var extendStatics = Object.setPrototypeOf ||
@@ -31396,7 +31406,7 @@ var GlobalMaxPooling2D = (function (_super) {
 exports.GlobalMaxPooling2D = GlobalMaxPooling2D;
 tfjs_core_1.serialization.SerializationMap.register(GlobalMaxPooling2D);
 
-},{"../backend/common":184,"../backend/tfjs_backend":186,"../common":189,"../engine/topology":194,"../errors":196,"../utils/conv_utils":223,"../utils/types_utils":228,"./convolutional":206,"@tensorflow/tfjs-core":59}],214:[function(require,module,exports){
+},{"../backend/common":185,"../backend/tfjs_backend":187,"../common":190,"../engine/topology":195,"../errors":197,"../utils/conv_utils":224,"../utils/types_utils":229,"./convolutional":207,"@tensorflow/tfjs-core":60}],215:[function(require,module,exports){
 "use strict";
 var __extends = (this && this.__extends) || (function () {
     var extendStatics = Object.setPrototypeOf ||
@@ -33025,7 +33035,7 @@ function generateDropoutMask(ones, rate, training, count) {
     }
 }
 
-},{"../activations":183,"../backend/state":185,"../backend/tfjs_backend":186,"../constraints":190,"../engine/topology":194,"../errors":196,"../initializers":204,"../regularizers":222,"../utils/math_utils":226,"../utils/types_utils":228,"../variables":230,"./serialization":215,"@tensorflow/tfjs-core":59}],215:[function(require,module,exports){
+},{"../activations":184,"../backend/state":186,"../backend/tfjs_backend":187,"../constraints":191,"../engine/topology":195,"../errors":197,"../initializers":205,"../regularizers":223,"../utils/math_utils":227,"../utils/types_utils":229,"../variables":231,"./serialization":216,"@tensorflow/tfjs-core":60}],216:[function(require,module,exports){
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
 var tfjs_core_1 = require("@tensorflow/tfjs-core");
@@ -33036,7 +33046,7 @@ function deserialize(config, customObjects) {
 }
 exports.deserialize = deserialize;
 
-},{"../utils/generic_utils":224,"@tensorflow/tfjs-core":59}],216:[function(require,module,exports){
+},{"../utils/generic_utils":225,"@tensorflow/tfjs-core":60}],217:[function(require,module,exports){
 "use strict";
 var __extends = (this && this.__extends) || (function () {
     var extendStatics = Object.setPrototypeOf ||
@@ -33453,7 +33463,7 @@ var Bidirectional = (function (_super) {
 exports.Bidirectional = Bidirectional;
 tfjs_core_1.serialization.SerializationMap.register(Bidirectional);
 
-},{"../backend/state":185,"../backend/tfjs_backend":186,"../common":189,"../engine/topology":194,"../errors":196,"../utils/generic_utils":224,"../utils/types_utils":228,"./recurrent":214,"./serialization":215,"@tensorflow/tfjs-core":59}],217:[function(require,module,exports){
+},{"../backend/state":186,"../backend/tfjs_backend":187,"../common":190,"../engine/topology":195,"../errors":197,"../utils/generic_utils":225,"../utils/types_utils":229,"./recurrent":215,"./serialization":216,"@tensorflow/tfjs-core":60}],218:[function(require,module,exports){
 "use strict";
 var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, generator) {
     return new (P || (P = Promise))(function (resolve, reject) {
@@ -33539,7 +33549,7 @@ function disposeTensorsInLogs(logs) {
 }
 exports.disposeTensorsInLogs = disposeTensorsInLogs;
 
-},{"@tensorflow/tfjs-core":59}],218:[function(require,module,exports){
+},{"@tensorflow/tfjs-core":60}],219:[function(require,module,exports){
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
 var tfc = require("@tensorflow/tfjs-core");
@@ -33731,7 +33741,7 @@ function get(identifierOrFn) {
 }
 exports.get = get;
 
-},{"./backend/common":184,"./backend/state":185,"./backend/tfjs_backend":186,"./errors":196,"@tensorflow/tfjs-core":59}],219:[function(require,module,exports){
+},{"./backend/common":185,"./backend/state":186,"./backend/tfjs_backend":187,"./errors":197,"@tensorflow/tfjs-core":60}],220:[function(require,module,exports){
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
 var tfc = require("@tensorflow/tfjs-core");
@@ -33804,7 +33814,7 @@ function get(identifier) {
 }
 exports.get = get;
 
-},{"./backend/state":185,"./backend/tfjs_backend":186,"./errors":196,"./losses":218,"@tensorflow/tfjs-core":59}],220:[function(require,module,exports){
+},{"./backend/state":186,"./backend/tfjs_backend":187,"./errors":197,"./losses":219,"@tensorflow/tfjs-core":60}],221:[function(require,module,exports){
 "use strict";
 var __extends = (this && this.__extends) || (function () {
     var extendStatics = Object.setPrototypeOf ||
@@ -34211,7 +34221,7 @@ var Sequential = (function (_super) {
 exports.Sequential = Sequential;
 tfjs_core_1.serialization.SerializationMap.register(Sequential);
 
-},{"./backend/state":185,"./engine/input_layer":193,"./engine/topology":194,"./engine/training":195,"./errors":196,"./layers/serialization":215,"./utils/generic_utils":224,"./utils/serialization_utils":227,"./utils/types_utils":228,"@tensorflow/tfjs-core":59}],221:[function(require,module,exports){
+},{"./backend/state":186,"./engine/input_layer":194,"./engine/topology":195,"./engine/training":196,"./errors":197,"./layers/serialization":216,"./utils/generic_utils":225,"./utils/serialization_utils":228,"./utils/types_utils":229,"@tensorflow/tfjs-core":60}],222:[function(require,module,exports){
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
 var tfjs_core_1 = require("@tensorflow/tfjs-core");
@@ -34239,7 +34249,7 @@ function getOptimizer(identifier) {
 }
 exports.getOptimizer = getOptimizer;
 
-},{"./backend/common":184,"./errors":196,"@tensorflow/tfjs-core":59}],222:[function(require,module,exports){
+},{"./backend/common":185,"./errors":197,"@tensorflow/tfjs-core":60}],223:[function(require,module,exports){
 "use strict";
 var __extends = (this && this.__extends) || (function () {
     var extendStatics = Object.setPrototypeOf ||
@@ -34342,7 +34352,7 @@ function getRegularizer(identifier) {
 }
 exports.getRegularizer = getRegularizer;
 
-},{"./backend/state":185,"./backend/tfjs_backend":186,"./utils/generic_utils":224,"@tensorflow/tfjs-core":59}],223:[function(require,module,exports){
+},{"./backend/state":186,"./backend/tfjs_backend":187,"./utils/generic_utils":225,"@tensorflow/tfjs-core":60}],224:[function(require,module,exports){
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
 var errors_1 = require("../errors");
@@ -34402,7 +34412,7 @@ function deconvLength(dimSize, strideSize, kernelSize, padding) {
 }
 exports.deconvLength = deconvLength;
 
-},{"../errors":196,"./generic_utils":224,"./math_utils":226}],224:[function(require,module,exports){
+},{"../errors":197,"./generic_utils":225,"./math_utils":227}],225:[function(require,module,exports){
 "use strict";
 var __assign = (this && this.__assign) || Object.assign || function(t) {
     for (var s, i = 1, n = arguments.length; i < n; i++) {
@@ -34657,7 +34667,7 @@ function checkArrayTypeAndLength(x, expectedType, minLength, maxLength) {
 }
 exports.checkArrayTypeAndLength = checkArrayTypeAndLength;
 
-},{"../errors":196}],225:[function(require,module,exports){
+},{"../errors":197}],226:[function(require,module,exports){
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
 var variable_utils_1 = require("./variable_utils");
@@ -34817,7 +34827,7 @@ function printLayerSummaryWithConnections(layer, positions, relevantNodes, print
     }
 }
 
-},{"./variable_utils":229}],226:[function(require,module,exports){
+},{"./variable_utils":230}],227:[function(require,module,exports){
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
 var tfc = require("@tensorflow/tfjs-core");
@@ -34889,7 +34899,7 @@ function range(begin, end) {
 }
 exports.range = range;
 
-},{"../errors":196,"@tensorflow/tfjs-core":59}],227:[function(require,module,exports){
+},{"../errors":197,"@tensorflow/tfjs-core":60}],228:[function(require,module,exports){
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
 var generic_utils = require("../utils/generic_utils");
@@ -34983,7 +34993,7 @@ function convertTsToPythonic(tsConfig, key) {
 }
 exports.convertTsToPythonic = convertTsToPythonic;
 
-},{"../utils/generic_utils":224}],228:[function(require,module,exports){
+},{"../utils/generic_utils":225}],229:[function(require,module,exports){
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
 var errors_1 = require("../errors");
@@ -35031,7 +35041,7 @@ function getExactlyOneShape(shapes) {
 }
 exports.getExactlyOneShape = getExactlyOneShape;
 
-},{"../errors":196}],229:[function(require,module,exports){
+},{"../errors":197}],230:[function(require,module,exports){
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
 function countParamsInWeights(weights) {
@@ -35049,7 +35059,7 @@ function countParamsInWeights(weights) {
 }
 exports.countParamsInWeights = countParamsInWeights;
 
-},{}],230:[function(require,module,exports){
+},{}],231:[function(require,module,exports){
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
 var tfc = require("@tensorflow/tfjs-core");
@@ -35188,1388 +35198,13 @@ function gradients(lossFn, variables) {
 }
 exports.gradients = gradients;
 
-},{"./backend/state":185,"./common":189,"./errors":196,"@tensorflow/tfjs-core":59}],231:[function(require,module,exports){
+},{"./backend/state":186,"./common":190,"./errors":197,"@tensorflow/tfjs-core":60}],232:[function(require,module,exports){
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
 var version = '0.7.4';
 exports.version = version;
 
-},{}],232:[function(require,module,exports){
-"use strict";
-Object.defineProperty(exports, "__esModule", { value: true });
-var tfc = require("@tensorflow/tfjs-core");
-var file_system_1 = require("./io/file_system");
-var io = require("./io/index");
-exports.io = io;
-var nodejs_kernel_backend_1 = require("./nodejs_kernel_backend");
-var bindings = require("bindings");
-tfc.ENV.registerBackend('tensorflow', function () {
-    return new nodejs_kernel_backend_1.NodeJSKernelBackend(bindings('tfjs_binding.node'));
-}, 3);
-if (tfc.ENV.findBackend('tensorflow') != null) {
-    tfc.setBackend('tensorflow');
-}
-tfc.io.registerSaveRouter(file_system_1.nodeFileSystemRouter);
-tfc.io.registerLoadRouter(file_system_1.nodeFileSystemRouter);
-var version_1 = require("./version");
-exports.version = version_1.version;
-
-},{"./io/file_system":233,"./io/index":234,"./nodejs_kernel_backend":236,"./version":238,"@tensorflow/tfjs-core":59,"bindings":241}],233:[function(require,module,exports){
-(function (Buffer){
-"use strict";
-var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, generator) {
-    return new (P || (P = Promise))(function (resolve, reject) {
-        function fulfilled(value) { try { step(generator.next(value)); } catch (e) { reject(e); } }
-        function rejected(value) { try { step(generator["throw"](value)); } catch (e) { reject(e); } }
-        function step(result) { result.done ? resolve(result.value) : new P(function (resolve) { resolve(result.value); }).then(fulfilled, rejected); }
-        step((generator = generator.apply(thisArg, _arguments || [])).next());
-    });
-};
-var __generator = (this && this.__generator) || function (thisArg, body) {
-    var _ = { label: 0, sent: function() { if (t[0] & 1) throw t[1]; return t[1]; }, trys: [], ops: [] }, f, y, t, g;
-    return g = { next: verb(0), "throw": verb(1), "return": verb(2) }, typeof Symbol === "function" && (g[Symbol.iterator] = function() { return this; }), g;
-    function verb(n) { return function (v) { return step([n, v]); }; }
-    function step(op) {
-        if (f) throw new TypeError("Generator is already executing.");
-        while (_) try {
-            if (f = 1, y && (t = y[op[0] & 2 ? "return" : op[0] ? "throw" : "next"]) && !(t = t.call(y, op[1])).done) return t;
-            if (y = 0, t) op = [0, t.value];
-            switch (op[0]) {
-                case 0: case 1: t = op; break;
-                case 4: _.label++; return { value: op[1], done: false };
-                case 5: _.label++; y = op[1]; op = [0]; continue;
-                case 7: op = _.ops.pop(); _.trys.pop(); continue;
-                default:
-                    if (!(t = _.trys, t = t.length > 0 && t[t.length - 1]) && (op[0] === 6 || op[0] === 2)) { _ = 0; continue; }
-                    if (op[0] === 3 && (!t || (op[1] > t[0] && op[1] < t[3]))) { _.label = op[1]; break; }
-                    if (op[0] === 6 && _.label < t[1]) { _.label = t[1]; t = op; break; }
-                    if (t && _.label < t[2]) { _.label = t[2]; _.ops.push(op); break; }
-                    if (t[2]) _.ops.pop();
-                    _.trys.pop(); continue;
-            }
-            op = body.call(thisArg, _);
-        } catch (e) { op = [6, e]; y = 0; } finally { f = t = 0; }
-        if (op[0] & 5) throw op[1]; return { value: op[0] ? op[1] : void 0, done: true };
-    }
-};
-Object.defineProperty(exports, "__esModule", { value: true });
-var tfc = require("@tensorflow/tfjs-core");
-var fs = require("fs");
-var path_1 = require("path");
-var util_1 = require("util");
-var stat = util_1.promisify(fs.stat);
-var writeFile = util_1.promisify(fs.writeFile);
-var readFile = util_1.promisify(fs.readFile);
-var mkdir = util_1.promisify(fs.mkdir);
-var io_utils_1 = require("./io_utils");
-function doesNotExistHandler(name) {
-    return function (e) {
-        switch (e.code) {
-            case 'ENOENT':
-                throw new Error(name + " " + e.path + " does not exist: loading failed");
-            default:
-                throw e;
-        }
-    };
-}
-var NodeFileSystem = (function () {
-    function NodeFileSystem(path) {
-        this.MODEL_JSON_FILENAME = 'model.json';
-        this.WEIGHTS_BINARY_FILENAME = 'weights.bin';
-        this.MODEL_BINARY_FILENAME = 'tensorflowjs.pb';
-        if (Array.isArray(path)) {
-            tfc.util.assert(path.length === 2, 'file paths must have a length of 2, ' +
-                ("(actual length is " + path.length + ")."));
-            this.path = path.map(function (p) { return path_1.resolve(p); });
-        }
-        else {
-            this.path = path_1.resolve(path);
-        }
-    }
-    NodeFileSystem.prototype.save = function (modelArtifacts) {
-        return __awaiter(this, void 0, void 0, function () {
-            var weightsBinPath, weightsManifest, modelJSON, modelJSONPath;
-            return __generator(this, function (_a) {
-                switch (_a.label) {
-                    case 0:
-                        if (Array.isArray(this.path)) {
-                            throw new Error('Cannot perform saving to multiple paths.');
-                        }
-                        return [4, this.createOrVerifyDirectory()];
-                    case 1:
-                        _a.sent();
-                        if (!(modelArtifacts.modelTopology instanceof ArrayBuffer)) return [3, 2];
-                        throw new Error('NodeFileSystem.save() does not support saving model topology ' +
-                            'in binary format yet.');
-                    case 2:
-                        weightsBinPath = path_1.join(this.path, this.WEIGHTS_BINARY_FILENAME);
-                        weightsManifest = [{
-                                paths: [this.WEIGHTS_BINARY_FILENAME],
-                                weights: modelArtifacts.weightSpecs
-                            }];
-                        modelJSON = {
-                            modelTopology: modelArtifacts.modelTopology,
-                            weightsManifest: weightsManifest,
-                        };
-                        modelJSONPath = path_1.join(this.path, this.MODEL_JSON_FILENAME);
-                        return [4, writeFile(modelJSONPath, JSON.stringify(modelJSON), 'utf8')];
-                    case 3:
-                        _a.sent();
-                        return [4, writeFile(weightsBinPath, Buffer.from(modelArtifacts.weightData), 'binary')];
-                    case 4:
-                        _a.sent();
-                        return [2, {
-                                modelArtifactsInfo: io_utils_1.getModelArtifactsInfoForJSON(modelArtifacts)
-                            }];
-                }
-            });
-        });
-    };
-    NodeFileSystem.prototype.load = function () {
-        return __awaiter(this, void 0, void 0, function () {
-            return __generator(this, function (_a) {
-                return [2, Array.isArray(this.path) ? this.loadBinaryModel() :
-                        this.loadJSONModel()];
-            });
-        });
-    };
-    NodeFileSystem.prototype.loadBinaryModel = function () {
-        return __awaiter(this, void 0, void 0, function () {
-            var topologyPath, weightManifestPath, topology, weightManifest, modelTopology, weightsManifest, _a, _b, modelArtifacts, _c, weightSpecs, weightData;
-            return __generator(this, function (_d) {
-                switch (_d.label) {
-                    case 0:
-                        topologyPath = this.path[0];
-                        weightManifestPath = this.path[1];
-                        return [4, stat(topologyPath).catch(doesNotExistHandler('Topology Path'))];
-                    case 1:
-                        topology = _d.sent();
-                        return [4, stat(weightManifestPath)
-                                .catch(doesNotExistHandler('Weight Manifest Path'))];
-                    case 2:
-                        weightManifest = _d.sent();
-                        if (!topology.isFile()) {
-                            throw new Error('File specified for topology is not a file!');
-                        }
-                        if (!weightManifest.isFile()) {
-                            throw new Error('File specified for the weight manifest is not a file!');
-                        }
-                        return [4, readFile(this.path[0])];
-                    case 3:
-                        modelTopology = _d.sent();
-                        _b = (_a = JSON).parse;
-                        return [4, readFile(this.path[1], 'utf8')];
-                    case 4:
-                        weightsManifest = _b.apply(_a, [_d.sent()]);
-                        modelArtifacts = {
-                            modelTopology: modelTopology,
-                        };
-                        return [4, this.loadWeights(weightsManifest, this.path[1])];
-                    case 5:
-                        _c = _d.sent(), weightSpecs = _c[0], weightData = _c[1];
-                        modelArtifacts.weightSpecs = weightSpecs;
-                        modelArtifacts.weightData = weightData;
-                        return [2, modelArtifacts];
-                }
-            });
-        });
-    };
-    NodeFileSystem.prototype.loadJSONModel = function () {
-        return __awaiter(this, void 0, void 0, function () {
-            var path, info, modelJSON, _a, _b, modelArtifacts, _c, weightSpecs, weightData;
-            return __generator(this, function (_d) {
-                switch (_d.label) {
-                    case 0:
-                        path = this.path;
-                        return [4, stat(path).catch(doesNotExistHandler('Path'))];
-                    case 1:
-                        info = _d.sent();
-                        if (!info.isFile()) return [3, 5];
-                        _b = (_a = JSON).parse;
-                        return [4, readFile(path, 'utf8')];
-                    case 2:
-                        modelJSON = _b.apply(_a, [_d.sent()]);
-                        modelArtifacts = {
-                            modelTopology: modelJSON.modelTopology,
-                        };
-                        if (!(modelJSON.weightsManifest != null)) return [3, 4];
-                        return [4, this.loadWeights(modelJSON.weightsManifest, path)];
-                    case 3:
-                        _c = _d.sent(), weightSpecs = _c[0], weightData = _c[1];
-                        modelArtifacts.weightSpecs = weightSpecs;
-                        modelArtifacts.weightData = weightData;
-                        _d.label = 4;
-                    case 4: return [2, modelArtifacts];
-                    case 5: throw new Error('The path to load from must be a file. Loading from a directory ' +
-                        'is not supported.');
-                }
-            });
-        });
-    };
-    NodeFileSystem.prototype.loadWeights = function (weightsManifest, path) {
-        return __awaiter(this, void 0, void 0, function () {
-            var dirName, buffers, weightSpecs, _i, weightsManifest_1, group, _a, _b, path_2, weightFilePath, buffer;
-            return __generator(this, function (_c) {
-                switch (_c.label) {
-                    case 0:
-                        dirName = path_1.dirname(path);
-                        buffers = [];
-                        weightSpecs = [];
-                        _i = 0, weightsManifest_1 = weightsManifest;
-                        _c.label = 1;
-                    case 1:
-                        if (!(_i < weightsManifest_1.length)) return [3, 7];
-                        group = weightsManifest_1[_i];
-                        _a = 0, _b = group.paths;
-                        _c.label = 2;
-                    case 2:
-                        if (!(_a < _b.length)) return [3, 5];
-                        path_2 = _b[_a];
-                        weightFilePath = path_1.join(dirName, path_2);
-                        return [4, readFile(weightFilePath)
-                                .catch(doesNotExistHandler('Weight file'))];
-                    case 3:
-                        buffer = _c.sent();
-                        buffers.push(buffer);
-                        _c.label = 4;
-                    case 4:
-                        _a++;
-                        return [3, 2];
-                    case 5:
-                        weightSpecs.push.apply(weightSpecs, group.weights);
-                        _c.label = 6;
-                    case 6:
-                        _i++;
-                        return [3, 1];
-                    case 7: return [2, [weightSpecs, io_utils_1.toArrayBuffer(buffers)]];
-                }
-            });
-        });
-    };
-    NodeFileSystem.prototype.createOrVerifyDirectory = function () {
-        return __awaiter(this, void 0, void 0, function () {
-            var paths, _i, paths_1, path, e_1;
-            return __generator(this, function (_a) {
-                switch (_a.label) {
-                    case 0:
-                        paths = Array.isArray(this.path) ? this.path : [this.path];
-                        _i = 0, paths_1 = paths;
-                        _a.label = 1;
-                    case 1:
-                        if (!(_i < paths_1.length)) return [3, 9];
-                        path = paths_1[_i];
-                        _a.label = 2;
-                    case 2:
-                        _a.trys.push([2, 4, , 8]);
-                        return [4, mkdir(path)];
-                    case 3:
-                        _a.sent();
-                        return [3, 8];
-                    case 4:
-                        e_1 = _a.sent();
-                        if (!(e_1.code === 'EEXIST')) return [3, 6];
-                        return [4, stat(path)];
-                    case 5:
-                        if ((_a.sent()).isFile()) {
-                            throw new Error("Path " + path + " exists as a file. The path must be " +
-                                "nonexistent or point to a directory.");
-                        }
-                        return [3, 7];
-                    case 6: throw e_1;
-                    case 7: return [3, 8];
-                    case 8:
-                        _i++;
-                        return [3, 1];
-                    case 9: return [2];
-                }
-            });
-        });
-    };
-    NodeFileSystem.URL_SCHEME = 'file://';
-    return NodeFileSystem;
-}());
-exports.NodeFileSystem = NodeFileSystem;
-exports.nodeFileSystemRouter = function (url) {
-    if (Array.isArray(url)) {
-        if (url.every(function (urlElement) { return urlElement.startsWith(NodeFileSystem.URL_SCHEME); })) {
-            return new NodeFileSystem(url.map(function (urlElement) { return urlElement.slice(NodeFileSystem.URL_SCHEME.length); }));
-        }
-        else {
-            return null;
-        }
-    }
-    else {
-        if (url.startsWith(NodeFileSystem.URL_SCHEME)) {
-            return new NodeFileSystem(url.slice(NodeFileSystem.URL_SCHEME.length));
-        }
-        else {
-            return null;
-        }
-    }
-};
-
-}).call(this,require("buffer").Buffer)
-},{"./io_utils":235,"@tensorflow/tfjs-core":59,"buffer":265,"fs":264,"path":267,"util":271}],234:[function(require,module,exports){
-"use strict";
-Object.defineProperty(exports, "__esModule", { value: true });
-var file_system_1 = require("./file_system");
-exports.NodeFileSystem = file_system_1.NodeFileSystem;
-
-},{"./file_system":233}],235:[function(require,module,exports){
-(function (Buffer){
-"use strict";
-Object.defineProperty(exports, "__esModule", { value: true });
-function toBuffer(ab) {
-    var view = new Uint8Array(ab);
-    return Buffer.from(view);
-}
-exports.toBuffer = toBuffer;
-function toArrayBuffer(buf) {
-    if (Array.isArray(buf)) {
-        var totalLength = 0;
-        for (var _i = 0, buf_1 = buf; _i < buf_1.length; _i++) {
-            var buffer = buf_1[_i];
-            totalLength += buffer.length;
-        }
-        var ab = new ArrayBuffer(totalLength);
-        var view = new Uint8Array(ab);
-        var pos = 0;
-        for (var _a = 0, buf_2 = buf; _a < buf_2.length; _a++) {
-            var buffer = buf_2[_a];
-            pos += buffer.copy(view, pos);
-        }
-        return ab;
-    }
-    else {
-        return buf.buffer.slice(buf.byteOffset, buf.byteOffset + buf.byteLength);
-    }
-}
-exports.toArrayBuffer = toArrayBuffer;
-function getModelArtifactsInfoForJSON(modelArtifacts) {
-    if (modelArtifacts.modelTopology instanceof ArrayBuffer) {
-        throw new Error('Expected JSON model topology, received ArrayBuffer.');
-    }
-    return {
-        dateSaved: new Date(),
-        modelTopologyType: 'JSON',
-        modelTopologyBytes: modelArtifacts.modelTopology == null ?
-            0 :
-            Buffer.byteLength(JSON.stringify(modelArtifacts.modelTopology), 'utf8'),
-        weightSpecsBytes: modelArtifacts.weightSpecs == null ?
-            0 :
-            Buffer.byteLength(JSON.stringify(modelArtifacts.weightSpecs), 'utf8'),
-        weightDataBytes: modelArtifacts.weightData == null ?
-            0 :
-            modelArtifacts.weightData.byteLength,
-    };
-}
-exports.getModelArtifactsInfoForJSON = getModelArtifactsInfoForJSON;
-
-}).call(this,require("buffer").Buffer)
-},{"buffer":265}],236:[function(require,module,exports){
-(function (process){
-"use strict";
-var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, generator) {
-    return new (P || (P = Promise))(function (resolve, reject) {
-        function fulfilled(value) { try { step(generator.next(value)); } catch (e) { reject(e); } }
-        function rejected(value) { try { step(generator["throw"](value)); } catch (e) { reject(e); } }
-        function step(result) { result.done ? resolve(result.value) : new P(function (resolve) { resolve(result.value); }).then(fulfilled, rejected); }
-        step((generator = generator.apply(thisArg, _arguments || [])).next());
-    });
-};
-var __generator = (this && this.__generator) || function (thisArg, body) {
-    var _ = { label: 0, sent: function() { if (t[0] & 1) throw t[1]; return t[1]; }, trys: [], ops: [] }, f, y, t, g;
-    return g = { next: verb(0), "throw": verb(1), "return": verb(2) }, typeof Symbol === "function" && (g[Symbol.iterator] = function() { return this; }), g;
-    function verb(n) { return function (v) { return step([n, v]); }; }
-    function step(op) {
-        if (f) throw new TypeError("Generator is already executing.");
-        while (_) try {
-            if (f = 1, y && (t = y[op[0] & 2 ? "return" : op[0] ? "throw" : "next"]) && !(t = t.call(y, op[1])).done) return t;
-            if (y = 0, t) op = [0, t.value];
-            switch (op[0]) {
-                case 0: case 1: t = op; break;
-                case 4: _.label++; return { value: op[1], done: false };
-                case 5: _.label++; y = op[1]; op = [0]; continue;
-                case 7: op = _.ops.pop(); _.trys.pop(); continue;
-                default:
-                    if (!(t = _.trys, t = t.length > 0 && t[t.length - 1]) && (op[0] === 6 || op[0] === 2)) { _ = 0; continue; }
-                    if (op[0] === 3 && (!t || (op[1] > t[0] && op[1] < t[3]))) { _.label = op[1]; break; }
-                    if (op[0] === 6 && _.label < t[1]) { _.label = t[1]; t = op; break; }
-                    if (t && _.label < t[2]) { _.label = t[2]; _.ops.push(op); break; }
-                    if (t[2]) _.ops.pop();
-                    _.trys.pop(); continue;
-            }
-            op = body.call(thisArg, _);
-        } catch (e) { op = [6, e]; y = 0; } finally { f = t = 0; }
-        if (op[0] & 5) throw op[1]; return { value: op[0] ? op[1] : void 0, done: true };
-    }
-};
-Object.defineProperty(exports, "__esModule", { value: true });
-var tfjs_core_1 = require("@tensorflow/tfjs-core");
-var types_1 = require("@tensorflow/tfjs-core/dist/types");
-var util_1 = require("util");
-var op_utils_1 = require("./ops/op_utils");
-var NodeJSKernelBackend = (function () {
-    function NodeJSKernelBackend(binding) {
-        this.tensorMap = new WeakMap();
-        this.binding = binding;
-    }
-    NodeJSKernelBackend.prototype.createOutputTensor = function (metadata) {
-        var newId = {};
-        this.tensorMap.set(newId, {
-            shape: metadata.shape,
-            dtype: metadata.dtype,
-            id: metadata.id,
-            values: null
-        });
-        var dtype;
-        switch (metadata.dtype) {
-            case this.binding.TF_FLOAT:
-                dtype = 'float32';
-                break;
-            case this.binding.TF_INT32:
-                dtype = 'int32';
-                break;
-            case this.binding.TF_BOOL:
-                dtype = 'bool';
-                break;
-            default:
-                throw new Error("Unknown dtype enum " + metadata.dtype);
-        }
-        return tfjs_core_1.Tensor.make(metadata.shape, { dataId: newId }, dtype);
-    };
-    NodeJSKernelBackend.prototype.getInputTensorIds = function (tensors) {
-        var ids = [];
-        for (var i = 0; i < tensors.length; i++) {
-            var info = this.tensorMap.get(tensors[i].dataId);
-            if (info.values != null) {
-                info.id =
-                    this.binding.createTensor(info.shape, info.dtype, info.values);
-                info.values = null;
-                this.tensorMap.set(tensors[i].dataId, info);
-            }
-            ids.push(info.id);
-        }
-        return ids;
-    };
-    NodeJSKernelBackend.prototype.createReductionOpAttrs = function (tensor) {
-        return [
-            { name: 'keep_dims', type: this.binding.TF_ATTR_BOOL, value: false },
-            op_utils_1.createTypeOpAttr('T', tensor.dtype), op_utils_1.createTypeOpAttr('Tidx', 'int32')
-        ];
-    };
-    NodeJSKernelBackend.prototype.executeSingleInput = function (name, input) {
-        var opAttrs = [op_utils_1.createTypeOpAttr('T', input.dtype)];
-        return this.executeSingleOutput(name, opAttrs, [input]);
-    };
-    NodeJSKernelBackend.prototype.floatPrecision = function () {
-        return 32;
-    };
-    NodeJSKernelBackend.prototype.executeSingleOutput = function (name, opAttrs, inputs) {
-        var outputMetadata = this.binding.executeOp(name, opAttrs, this.getInputTensorIds(inputs), 1);
-        return this.createOutputTensor(outputMetadata[0]);
-    };
-    NodeJSKernelBackend.prototype.executeMultipleOutputs = function (name, opAttrs, inputs, numOutputs) {
-        var _this = this;
-        var outputMetadata = this.binding.executeOp(name, opAttrs, this.getInputTensorIds(inputs), numOutputs);
-        return outputMetadata.map(function (m) { return _this.createOutputTensor(m); });
-    };
-    NodeJSKernelBackend.prototype.dispose = function () { };
-    NodeJSKernelBackend.prototype.read = function (dataId) {
-        return __awaiter(this, void 0, void 0, function () {
-            return __generator(this, function (_a) {
-                return [2, this.readSync(dataId)];
-            });
-        });
-    };
-    NodeJSKernelBackend.prototype.readSync = function (dataId) {
-        if (!this.tensorMap.has(dataId)) {
-            throw new Error("Tensor " + dataId + " was not registered!");
-        }
-        var info = this.tensorMap.get(dataId);
-        if (info.values != null) {
-            return info.values;
-        }
-        else {
-            return this.binding.tensorDataSync(info.id);
-        }
-    };
-    NodeJSKernelBackend.prototype.disposeData = function (dataId) {
-        var id = this.tensorMap.get(dataId).id;
-        if (id != null && id >= 0) {
-            this.binding.deleteTensor(id);
-        }
-        this.tensorMap.delete(dataId);
-    };
-    NodeJSKernelBackend.prototype.write = function (dataId, values) {
-        if (!this.tensorMap.has(dataId)) {
-            throw new Error("Tensor " + dataId + " was not registered!");
-        }
-        var info = this.tensorMap.get(dataId);
-        info.values = values;
-        this.tensorMap.set(dataId, info);
-    };
-    NodeJSKernelBackend.prototype.register = function (dataId, shape, dtype) {
-        if (!this.tensorMap.has(dataId)) {
-            this.tensorMap.set(dataId, { shape: shape, dtype: op_utils_1.getTFDType(dtype), values: null, id: -1 });
-        }
-    };
-    NodeJSKernelBackend.prototype.matMul = function (a, b, transposeA, transposeB) {
-        var opAttrs = [
-            { name: 'transpose_a', type: this.binding.TF_ATTR_BOOL, value: transposeA },
-            { name: 'transpose_b', type: this.binding.TF_ATTR_BOOL, value: transposeB },
-            op_utils_1.createTypeOpAttr('T', types_1.upcastType(a.dtype, b.dtype))
-        ];
-        return this.executeSingleOutput('MatMul', opAttrs, [a, b]);
-    };
-    NodeJSKernelBackend.prototype.stridedSlice = function (x, begin, end, strides, beginMask, endMask, ellipsisMask, newAxisMask, shrinkAxisMask) {
-        var beginTensor = tfjs_core_1.tensor1d(begin, 'int32');
-        var endTensor = tfjs_core_1.tensor1d(end, 'int32');
-        var stridesTensor = tfjs_core_1.tensor1d(strides, 'int32');
-        var opAttrs = [
-            op_utils_1.createTypeOpAttr('T', x.dtype), op_utils_1.createTypeOpAttr('Index', 'int32'),
-            { name: 'begin_mask', type: this.binding.TF_ATTR_INT, value: beginMask },
-            { name: 'end_mask', type: this.binding.TF_ATTR_INT, value: endMask }, {
-                name: 'ellipsis_mask',
-                type: this.binding.TF_ATTR_INT,
-                value: ellipsisMask
-            },
-            {
-                name: 'new_axis_mask',
-                type: this.binding.TF_ATTR_INT,
-                value: newAxisMask
-            },
-            {
-                name: 'shrink_axis_mask',
-                type: this.binding.TF_ATTR_INT,
-                value: shrinkAxisMask
-            }
-        ];
-        return this.executeSingleOutput('StridedSlice', opAttrs, [x, beginTensor, endTensor, stridesTensor]);
-    };
-    NodeJSKernelBackend.prototype.slice = function (x, begin, size) {
-        var opAttrs = [op_utils_1.createTypeOpAttr('T', x.dtype), op_utils_1.createTypeOpAttr('Index', 'int32')];
-        var beginTensor = tfjs_core_1.tensor1d(begin, 'int32');
-        var sizeTensor = tfjs_core_1.tensor1d(size, 'int32');
-        return this.executeSingleOutput('Slice', opAttrs, [x, beginTensor, sizeTensor]);
-    };
-    NodeJSKernelBackend.prototype.reverse = function (a, axis) {
-        var opAttrs = [op_utils_1.createTypeOpAttr('Tidx', 'int32'), op_utils_1.createTypeOpAttr('T', a.dtype)];
-        var axisTensor = tfjs_core_1.tensor1d(axis, 'int32');
-        return this.executeSingleOutput('ReverseV2', opAttrs, [a, axisTensor]);
-    };
-    NodeJSKernelBackend.prototype.concat = function (a, b) {
-        var opAttrs = [
-            { name: 'N', type: this.binding.TF_ATTR_INT, value: 2 },
-            op_utils_1.createTypeOpAttr('Tidx', 'int32'), op_utils_1.createTypeOpAttr('T', a.dtype)
-        ];
-        var axisTensor = tfjs_core_1.scalar(1, 'int32');
-        return this.executeSingleOutput('ConcatV2', opAttrs, [a, b, axisTensor]);
-    };
-    NodeJSKernelBackend.prototype.neg = function (a) {
-        return this.executeSingleInput('Neg', a);
-    };
-    NodeJSKernelBackend.prototype.add = function (a, b) {
-        var opAttrs = [op_utils_1.createTypeOpAttr('T', types_1.upcastType(a.dtype, b.dtype))];
-        return this.executeSingleOutput('Add', opAttrs, [a, b]);
-    };
-    NodeJSKernelBackend.prototype.select = function (condition, a, b) {
-        var opAttrs = [op_utils_1.createTypeOpAttr('T', types_1.upcastType(a.dtype, b.dtype))];
-        return this.executeSingleOutput('Select', opAttrs, [condition, a, b]);
-    };
-    NodeJSKernelBackend.prototype.addN = function (tensors) {
-        var opAttrs = [
-            op_utils_1.createTypeOpAttr('T', tensors[0].dtype),
-            { name: 'N', type: this.binding.TF_ATTR_INT, value: tensors.length }
-        ];
-        return this.executeSingleOutput('AddN', opAttrs, tensors);
-    };
-    NodeJSKernelBackend.prototype.subtract = function (a, b) {
-        var opAttrs = [op_utils_1.createTypeOpAttr('T', types_1.upcastType(a.dtype, b.dtype))];
-        return this.executeSingleOutput('Sub', opAttrs, [a, b]);
-    };
-    NodeJSKernelBackend.prototype.multiply = function (a, b) {
-        var opAttrs = [op_utils_1.createTypeOpAttr('T', types_1.upcastType(a.dtype, b.dtype))];
-        return this.executeSingleOutput('Mul', opAttrs, [a, b]);
-    };
-    NodeJSKernelBackend.prototype.realDivide = function (a, b) {
-        var opAttrs = [op_utils_1.createTypeOpAttr('T', types_1.upcastType(a.dtype, b.dtype))];
-        return this.executeSingleOutput('RealDiv', opAttrs, [a, b]);
-    };
-    NodeJSKernelBackend.prototype.floorDiv = function (a, b) {
-        var opAttrs = [op_utils_1.createTypeOpAttr('T', types_1.upcastType(a.dtype, b.dtype))];
-        return this.executeSingleOutput('FloorDiv', opAttrs, [a, b]);
-    };
-    NodeJSKernelBackend.prototype.divide = function (a, b) {
-        var opAttrs = [op_utils_1.createTypeOpAttr('T', types_1.upcastType(a.dtype, b.dtype))];
-        return this.executeSingleOutput('Div', opAttrs, [a, b]);
-    };
-    NodeJSKernelBackend.prototype.unsortedSegmentSum = function (x, segmentIds, numSegments) {
-        var opAttrs = [
-            op_utils_1.createTypeOpAttr('T', x.dtype), op_utils_1.createTypeOpAttr('Tindices', 'int32'),
-            op_utils_1.createTypeOpAttr('Tnumsegments', 'int32')
-        ];
-        return this.executeSingleOutput('UnsortedSegmentSum', opAttrs, [x, segmentIds, tfjs_core_1.scalar(numSegments, 'int32')]);
-    };
-    NodeJSKernelBackend.prototype.sum = function (x, axes) {
-        var axisTensor = tfjs_core_1.tensor1d(axes, 'int32');
-        return this.executeSingleOutput('Sum', this.createReductionOpAttrs(x), [x, axisTensor]);
-    };
-    NodeJSKernelBackend.prototype.argMin = function (x, axis) {
-        var axisScalar = tfjs_core_1.scalar(axis, 'int32');
-        var opAttrs = [
-            op_utils_1.createTypeOpAttr('T', x.dtype), op_utils_1.createTypeOpAttr('Tidx', 'int32'),
-            op_utils_1.createTypeOpAttr('output_type', 'int32')
-        ];
-        return this.executeSingleOutput('ArgMin', opAttrs, [x, axisScalar]);
-    };
-    NodeJSKernelBackend.prototype.argMax = function (x, axis) {
-        var axisScalar = tfjs_core_1.scalar(axis, 'int32');
-        var opAttrs = [
-            op_utils_1.createTypeOpAttr('T', x.dtype), op_utils_1.createTypeOpAttr('Tidx', 'int32'),
-            op_utils_1.createTypeOpAttr('output_type', 'int32')
-        ];
-        return this.executeSingleOutput('ArgMax', opAttrs, [x, axisScalar]);
-    };
-    NodeJSKernelBackend.prototype.equal = function (a, b) {
-        var opAttrs = [op_utils_1.createTypeOpAttr('T', types_1.upcastType(a.dtype, b.dtype))];
-        return this.executeSingleOutput('Equal', opAttrs, [a, b]);
-    };
-    NodeJSKernelBackend.prototype.notEqual = function (a, b) {
-        var opAttrs = [op_utils_1.createTypeOpAttr('T', types_1.upcastType(a.dtype, b.dtype))];
-        return this.executeSingleOutput('NotEqual', opAttrs, [a, b]);
-    };
-    NodeJSKernelBackend.prototype.less = function (a, b) {
-        var opAttrs = [op_utils_1.createTypeOpAttr('T', types_1.upcastType(a.dtype, b.dtype))];
-        return this.executeSingleOutput('Less', opAttrs, [a, b]);
-    };
-    NodeJSKernelBackend.prototype.lessEqual = function (a, b) {
-        var opAttrs = [op_utils_1.createTypeOpAttr('T', types_1.upcastType(a.dtype, b.dtype))];
-        return this.executeSingleOutput('LessEqual', opAttrs, [a, b]);
-    };
-    NodeJSKernelBackend.prototype.greater = function (a, b) {
-        var opAttrs = [op_utils_1.createTypeOpAttr('T', types_1.upcastType(a.dtype, b.dtype))];
-        return this.executeSingleOutput('Greater', opAttrs, [a, b]);
-    };
-    NodeJSKernelBackend.prototype.greaterEqual = function (a, b) {
-        var opAttrs = [op_utils_1.createTypeOpAttr('T', types_1.upcastType(a.dtype, b.dtype))];
-        return this.executeSingleOutput('GreaterEqual', opAttrs, [a, b]);
-    };
-    NodeJSKernelBackend.prototype.logicalNot = function (a) {
-        return this.executeSingleOutput('LogicalNot', [], [a]);
-    };
-    NodeJSKernelBackend.prototype.logicalAnd = function (a, b) {
-        return this.executeSingleOutput('LogicalAnd', [], [a, b]);
-    };
-    NodeJSKernelBackend.prototype.logicalOr = function (a, b) {
-        return this.executeSingleOutput('LogicalOr', [], [a, b]);
-    };
-    NodeJSKernelBackend.prototype.where = function (condition) {
-        return this.executeSingleOutput('Where', [], [condition]);
-    };
-    NodeJSKernelBackend.prototype.topKValues = function (x, k) {
-        throw new Error('Method not implemented.');
-    };
-    NodeJSKernelBackend.prototype.topKIndices = function (x, k) {
-        throw new Error('Method not implemented.');
-    };
-    NodeJSKernelBackend.prototype.topk = function (x, k, sorted) {
-        var kCount = util_1.isNullOrUndefined(k) ? 1 : k;
-        var isSorted = util_1.isNullOrUndefined(sorted) ? true : sorted;
-        var opAttrs = [
-            { name: 'sorted', type: this.binding.TF_ATTR_BOOL, value: isSorted },
-            op_utils_1.createTypeOpAttr('T', x.dtype),
-        ];
-        var kTensor = tfjs_core_1.scalar(kCount, 'int32');
-        return this.executeMultipleOutputs('TopKV2', opAttrs, [x, kTensor], 2);
-    };
-    NodeJSKernelBackend.prototype.min = function (x, axes) {
-        var axesTensor = tfjs_core_1.tensor1d(axes, 'int32');
-        return this.executeSingleOutput('Min', this.createReductionOpAttrs(x), [x, axesTensor]);
-    };
-    NodeJSKernelBackend.prototype.minimum = function (a, b) {
-        var opAttrs = [op_utils_1.createTypeOpAttr('T', types_1.upcastType(a.dtype, b.dtype))];
-        return this.executeSingleOutput('Minimum', opAttrs, [a, b]);
-    };
-    NodeJSKernelBackend.prototype.max = function (x, axes) {
-        var axesTensor = tfjs_core_1.tensor1d(axes, 'int32');
-        return this.executeSingleOutput('Max', this.createReductionOpAttrs(x), [x, axesTensor]);
-    };
-    NodeJSKernelBackend.prototype.maximum = function (a, b) {
-        var opAttrs = [op_utils_1.createTypeOpAttr('T', types_1.upcastType(a.dtype, b.dtype))];
-        return this.executeSingleOutput('Maximum', opAttrs, [a, b]);
-    };
-    NodeJSKernelBackend.prototype.all = function (x, axes) {
-        var opAttrs = [
-            { name: 'keep_dims', type: this.binding.TF_ATTR_BOOL, value: false },
-            op_utils_1.createTypeOpAttr('Tidx', 'int32')
-        ];
-        var axesTensor = tfjs_core_1.tensor1d(axes, 'int32');
-        return this.executeSingleOutput('All', opAttrs, [x, axesTensor]);
-    };
-    NodeJSKernelBackend.prototype.any = function (x, axes) {
-        var opAttrs = [
-            { name: 'keep_dims', type: this.binding.TF_ATTR_BOOL, value: false },
-            op_utils_1.createTypeOpAttr('Tidx', 'int32')
-        ];
-        var axesTensor = tfjs_core_1.tensor1d(axes, 'int32');
-        return this.executeSingleOutput('Any', opAttrs, [x, axesTensor]);
-    };
-    NodeJSKernelBackend.prototype.ceil = function (x) {
-        return this.executeSingleInput('Ceil', x);
-    };
-    NodeJSKernelBackend.prototype.floor = function (x) {
-        return this.executeSingleInput('Floor', x);
-    };
-    NodeJSKernelBackend.prototype.pow = function (a, b) {
-        var dtype = types_1.upcastType(a.dtype, b.dtype);
-        var opAttrs = [op_utils_1.createTypeOpAttr('T', dtype)];
-        return this.executeSingleOutput('Pow', opAttrs, [a.cast(dtype), b.cast(dtype)]);
-    };
-    NodeJSKernelBackend.prototype.exp = function (x) {
-        var xTensor = x.dtype === 'int32' ? x.toFloat() : x;
-        return this.executeSingleInput('Exp', xTensor);
-    };
-    NodeJSKernelBackend.prototype.log = function (x) {
-        return this.executeSingleInput('Log', x);
-    };
-    NodeJSKernelBackend.prototype.log1p = function (x) {
-        return this.executeSingleInput('Log1p', x);
-    };
-    NodeJSKernelBackend.prototype.sqrt = function (x) {
-        return this.executeSingleInput('Sqrt', x);
-    };
-    NodeJSKernelBackend.prototype.square = function (x) {
-        return this.executeSingleInput('Square', x);
-    };
-    NodeJSKernelBackend.prototype.relu = function (x) {
-        return this.executeSingleInput('Relu', x);
-    };
-    NodeJSKernelBackend.prototype.elu = function (x) {
-        return this.executeSingleInput('Elu', x);
-    };
-    NodeJSKernelBackend.prototype.eluDer = function (dy, y) {
-        var opAttrs = [op_utils_1.createTypeOpAttr('T', y.dtype)];
-        return this.executeSingleOutput('EluGrad', opAttrs, [dy, y]);
-    };
-    NodeJSKernelBackend.prototype.selu = function (x) {
-        return this.executeSingleInput('Selu', x);
-    };
-    NodeJSKernelBackend.prototype.int = function (x) {
-        throw new Error('Method not implemented.');
-    };
-    NodeJSKernelBackend.prototype.clip = function (x, min, max) {
-        var xMin = this.minimum(x, tfjs_core_1.scalar(max));
-        return this.maximum(xMin, tfjs_core_1.scalar(min));
-    };
-    NodeJSKernelBackend.prototype.abs = function (x) {
-        return this.executeSingleInput('Abs', x);
-    };
-    NodeJSKernelBackend.prototype.sigmoid = function (x) {
-        return this.executeSingleInput('Sigmoid', x);
-    };
-    NodeJSKernelBackend.prototype.sin = function (x) {
-        return this.executeSingleInput('Sin', x);
-    };
-    NodeJSKernelBackend.prototype.cos = function (x) {
-        return this.executeSingleInput('Cos', x);
-    };
-    NodeJSKernelBackend.prototype.tan = function (x) {
-        return this.executeSingleInput('Tan', x);
-    };
-    NodeJSKernelBackend.prototype.asin = function (x) {
-        return this.executeSingleInput('Asin', x);
-    };
-    NodeJSKernelBackend.prototype.acos = function (x) {
-        return this.executeSingleInput('Acos', x);
-    };
-    NodeJSKernelBackend.prototype.atan = function (x) {
-        return this.executeSingleInput('Atan', x);
-    };
-    NodeJSKernelBackend.prototype.sinh = function (x) {
-        return this.executeSingleInput('Sinh', x);
-    };
-    NodeJSKernelBackend.prototype.cosh = function (x) {
-        return this.executeSingleInput('Cosh', x);
-    };
-    NodeJSKernelBackend.prototype.tanh = function (x) {
-        return this.executeSingleInput('Tanh', x);
-    };
-    NodeJSKernelBackend.prototype.mod = function (a, b) {
-        var opAttrs = [op_utils_1.createTypeOpAttr('T', a.dtype)];
-        return this.executeSingleOutput('FloorMod', opAttrs, [a, b]);
-    };
-    NodeJSKernelBackend.prototype.round = function (x) {
-        return this.executeSingleInput('Round', x);
-    };
-    NodeJSKernelBackend.prototype.sign = function (x) {
-        return this.executeSingleInput('Sign', x);
-    };
-    NodeJSKernelBackend.prototype.rsqrt = function (x) {
-        return this.executeSingleInput('Rsqrt', x);
-    };
-    NodeJSKernelBackend.prototype.reciprocal = function (x) {
-        return this.executeSingleInput('Reciprocal', x);
-    };
-    NodeJSKernelBackend.prototype.asinh = function (x) {
-        return this.executeSingleInput('Asinh', x);
-    };
-    NodeJSKernelBackend.prototype.acosh = function (x) {
-        return this.executeSingleInput('Acosh', x);
-    };
-    NodeJSKernelBackend.prototype.atanh = function (x) {
-        return this.executeSingleInput('Atanh', x);
-    };
-    NodeJSKernelBackend.prototype.erf = function (x) {
-        return this.executeSingleInput('Erf', x);
-    };
-    NodeJSKernelBackend.prototype.squaredDifference = function (a, b) {
-        var opAttrs = [op_utils_1.createTypeOpAttr('T', a.dtype)];
-        return this.executeSingleOutput('SquaredDifference', opAttrs, [a, b]);
-    };
-    NodeJSKernelBackend.prototype.expm1 = function (x) {
-        return this.executeSingleInput('Expm1', x);
-    };
-    NodeJSKernelBackend.prototype.softplus = function (x) {
-        return this.executeSingleInput('Softplus', x);
-    };
-    NodeJSKernelBackend.prototype.atan2 = function (a, b) {
-        var opAttrs = [op_utils_1.createTypeOpAttr('T', a.dtype)];
-        return this.executeSingleOutput('Atan2', opAttrs, [a, b]);
-    };
-    NodeJSKernelBackend.prototype.step = function (x, alpha) {
-        var dtype = x.dtype;
-        var nans = this.isNaN(x);
-        var stepNoNans = this.select(this.greater(x, tfjs_core_1.scalar(0, dtype)), tfjs_core_1.ones(x.shape), tfjs_core_1.fill(x.shape, alpha, dtype));
-        return this.select(nans, x, stepNoNans);
-    };
-    NodeJSKernelBackend.prototype.conv2d = function (x, filter, convInfo) {
-        if (convInfo.padInfo.type !== 'VALID' && convInfo.padInfo.type !== 'SAME') {
-            throw new Error("TF Backend supports only 'valid' and 'same' padding " +
-                ("while padding was " + convInfo.padInfo.type));
-        }
-        var strides = [1, convInfo.strideHeight, convInfo.strideWidth, 1];
-        var padding = convInfo.padInfo.type;
-        var dataFormat = convInfo.dataFormat === 'channelsLast' ? 'NHWC' : 'NCHW';
-        var dilations = [1, convInfo.dilationHeight, convInfo.dilationWidth, 1];
-        var opAttrs = [
-            op_utils_1.createTypeOpAttr('T', x.dtype),
-            { name: 'strides', type: this.binding.TF_ATTR_INT, value: strides },
-            { name: 'padding', type: this.binding.TF_ATTR_STRING, value: padding },
-            {
-                name: 'data_format',
-                type: this.binding.TF_ATTR_STRING,
-                value: dataFormat
-            },
-            { name: 'use_cudnn_on_gpu', type: this.binding.TF_ATTR_BOOL, value: true },
-            { name: 'dilations', type: this.binding.TF_ATTR_INT, value: dilations },
-        ];
-        return this.executeSingleOutput('Conv2D', opAttrs, [x, filter]);
-    };
-    NodeJSKernelBackend.prototype.conv2dDerInput = function (dy, filter, convInfo) {
-        if (convInfo.padInfo.type !== 'VALID' && convInfo.padInfo.type !== 'SAME') {
-            throw new Error("TF Backend supports only 'valid' and 'same' padding " +
-                ("while padding was " + convInfo.padInfo.type));
-        }
-        var strides = [1, convInfo.strideHeight, convInfo.strideWidth, 1];
-        var padding = convInfo.padInfo.type;
-        var dataFormat = convInfo.dataFormat === 'channelsLast' ? 'NHWC' : 'NCHW';
-        var dilations = [1, convInfo.dilationHeight, convInfo.dilationWidth, 1];
-        var opAttrs = [
-            op_utils_1.createTypeOpAttr('T', 'float32'),
-            { name: 'strides', type: this.binding.TF_ATTR_INT, value: strides },
-            { name: 'padding', type: this.binding.TF_ATTR_STRING, value: padding }, {
-                name: 'data_format',
-                type: this.binding.TF_ATTR_STRING,
-                value: dataFormat
-            },
-            { name: 'use_cudnn_on_gpu', type: this.binding.TF_ATTR_BOOL, value: true },
-            { name: 'dilations', type: this.binding.TF_ATTR_INT, value: dilations }
-        ];
-        var inputSizes = tfjs_core_1.tensor1d(convInfo.inShape, 'int32');
-        return this.executeSingleOutput('Conv2DBackpropInput', opAttrs, [inputSizes, filter, dy]);
-    };
-    NodeJSKernelBackend.prototype.conv2dDerFilter = function (x, dy, convInfo) {
-        if (convInfo.padInfo.type !== 'VALID' && convInfo.padInfo.type !== 'SAME') {
-            throw new Error("TF Backend supports only 'valid' and 'same' padding " +
-                ("while padding was " + convInfo.padInfo.type));
-        }
-        var strides = [1, convInfo.strideHeight, convInfo.strideWidth, 1];
-        var padding = convInfo.padInfo.type;
-        var dataFormat = convInfo.dataFormat === 'channelsLast' ? 'NHWC' : 'NCHW';
-        var dilations = [1, convInfo.dilationHeight, convInfo.dilationWidth, 1];
-        var opAttrs = [
-            op_utils_1.createTypeOpAttr('T', 'float32'),
-            { name: 'strides', type: this.binding.TF_ATTR_INT, value: strides },
-            { name: 'padding', type: this.binding.TF_ATTR_STRING, value: padding }, {
-                name: 'data_format',
-                type: this.binding.TF_ATTR_STRING,
-                value: dataFormat
-            },
-            { name: 'use_cudnn_on_gpu', type: this.binding.TF_ATTR_BOOL, value: true },
-            { name: 'dilations', type: this.binding.TF_ATTR_INT, value: dilations }
-        ];
-        var filterSizes = tfjs_core_1.tensor1d(convInfo.filterShape, 'int32');
-        return this.executeSingleOutput('Conv2DBackpropFilter', opAttrs, [x, filterSizes, dy]);
-    };
-    NodeJSKernelBackend.prototype.depthwiseConv2DDerInput = function (dy, filter, convInfo) {
-        var strides = [1, convInfo.strideHeight, convInfo.strideWidth, 1];
-        var padding = convInfo.padInfo.type;
-        var dataFormat = convInfo.dataFormat === 'channelsLast' ? 'NHWC' : 'NCHW';
-        var dilations = [1, convInfo.dilationHeight, convInfo.dilationWidth, 1];
-        var opAttrs = [
-            op_utils_1.createTypeOpAttr('T', 'float32'),
-            { name: 'strides', type: this.binding.TF_ATTR_INT, value: strides },
-            { name: 'padding', type: this.binding.TF_ATTR_STRING, value: padding }, {
-                name: 'data_format',
-                type: this.binding.TF_ATTR_STRING,
-                value: dataFormat
-            },
-            { name: 'dilations', type: this.binding.TF_ATTR_INT, value: dilations }
-        ];
-        var inputSizes = tfjs_core_1.tensor1d(convInfo.inShape, 'int32');
-        return this.executeSingleOutput('DepthwiseConv2dNativeBackpropInput', opAttrs, [inputSizes, filter, dy]);
-    };
-    NodeJSKernelBackend.prototype.depthwiseConv2DDerFilter = function (x, dY, convInfo) {
-        var strides = [1, convInfo.strideHeight, convInfo.strideWidth, 1];
-        var padding = convInfo.padInfo.type;
-        var dataFormat = convInfo.dataFormat === 'channelsLast' ? 'NHWC' : 'NCHW';
-        var dilations = [1, convInfo.dilationHeight, convInfo.dilationWidth, 1];
-        var opAttrs = [
-            op_utils_1.createTypeOpAttr('T', 'float32'),
-            { name: 'strides', type: this.binding.TF_ATTR_INT, value: strides },
-            { name: 'padding', type: this.binding.TF_ATTR_STRING, value: padding }, {
-                name: 'data_format',
-                type: this.binding.TF_ATTR_STRING,
-                value: dataFormat
-            },
-            { name: 'dilations', type: this.binding.TF_ATTR_INT, value: dilations }
-        ];
-        var filterSizes = tfjs_core_1.tensor1d(convInfo.filterShape, 'int32');
-        return this.executeSingleOutput('DepthwiseConv2dNativeBackpropFilter', opAttrs, [x, filterSizes, dY]);
-    };
-    NodeJSKernelBackend.prototype.depthwiseConv2D = function (input, filter, convInfo) {
-        if (convInfo.padInfo.type !== 'VALID' && convInfo.padInfo.type !== 'SAME') {
-            throw new Error("TF Backend supports only 'valid' and 'same' padding " +
-                ("while padding was " + convInfo.padInfo.type));
-        }
-        var strides = [1, convInfo.strideHeight, convInfo.strideWidth, 1];
-        var padding = convInfo.padInfo.type;
-        var dataFormat = convInfo.dataFormat === 'channelsLast' ? 'NHWC' : 'NCHW';
-        var dilations = [1, convInfo.dilationHeight, convInfo.dilationWidth, 1];
-        var opAttrs = [
-            op_utils_1.createTypeOpAttr('T', input.dtype),
-            { name: 'strides', type: this.binding.TF_ATTR_INT, value: strides },
-            { name: 'padding', type: this.binding.TF_ATTR_STRING, value: padding }, {
-                name: 'data_format',
-                type: this.binding.TF_ATTR_STRING,
-                value: dataFormat
-            },
-            { name: 'dilations', type: this.binding.TF_ATTR_INT, value: dilations }
-        ];
-        return this.executeSingleOutput('DepthwiseConv2dNative', opAttrs, [input, filter]);
-    };
-    NodeJSKernelBackend.prototype.maxPool = function (x, convInfo) {
-        if (convInfo.padInfo.type !== 'VALID' && convInfo.padInfo.type !== 'SAME') {
-            throw new Error("TF Backend supports only 'valid' and 'same' padding " +
-                ("while padding was " + convInfo.padInfo.type));
-        }
-        var ksize = [1, convInfo.filterHeight, convInfo.filterWidth, 1];
-        var strides = [1, convInfo.strideHeight, convInfo.strideWidth, 1];
-        var padding = convInfo.padInfo.type;
-        var dataFormat = convInfo.dataFormat === 'channelsLast' ? 'NHWC' : 'NCHW';
-        var opAttrs = [
-            op_utils_1.createTypeOpAttr('T', x.dtype),
-            { name: 'ksize', type: this.binding.TF_ATTR_INT, value: ksize },
-            { name: 'strides', type: this.binding.TF_ATTR_INT, value: strides },
-            { name: 'padding', type: this.binding.TF_ATTR_STRING, value: padding }, {
-                name: 'data_format',
-                type: this.binding.TF_ATTR_STRING,
-                value: dataFormat
-            }
-        ];
-        return this.executeSingleOutput('MaxPool', opAttrs, [x]);
-    };
-    NodeJSKernelBackend.prototype.maxPoolBackprop = function (dy, x, y, convInfo) {
-        if (convInfo.padInfo.type !== 'VALID' && convInfo.padInfo.type !== 'SAME') {
-            throw new Error("TF Backend supports only 'valid' and 'same' padding " +
-                ("while padding type was " + convInfo.padInfo.type));
-        }
-        var ksize = [1, convInfo.filterHeight, convInfo.filterWidth, 1];
-        var strides = [1, convInfo.strideHeight, convInfo.strideWidth, 1];
-        var padding = convInfo.padInfo.type;
-        var dataFormat = convInfo.dataFormat === 'channelsLast' ? 'NHWC' : 'NCHW';
-        var opAttrs = [
-            op_utils_1.createTypeOpAttr('T', x.dtype),
-            { name: 'ksize', type: this.binding.TF_ATTR_INT, value: ksize },
-            { name: 'strides', type: this.binding.TF_ATTR_INT, value: strides },
-            { name: 'padding', type: this.binding.TF_ATTR_STRING, value: padding },
-            {
-                name: 'data_format',
-                type: this.binding.TF_ATTR_STRING,
-                value: dataFormat
-            },
-        ];
-        return this.executeSingleOutput('MaxPoolGrad', opAttrs, [x, y, dy]);
-    };
-    NodeJSKernelBackend.prototype.avgPool = function (x, convInfo) {
-        if (convInfo.padInfo.type !== 'VALID' && convInfo.padInfo.type !== 'SAME') {
-            throw new Error("TF Backend supports only 'valid' and 'same' padding " +
-                ("while padding was " + convInfo.padInfo.type));
-        }
-        var ksize = [1, convInfo.filterHeight, convInfo.filterWidth, 1];
-        var strides = [1, convInfo.strideHeight, convInfo.strideWidth, 1];
-        var padding = convInfo.padInfo.type;
-        var dataFormat = convInfo.dataFormat === 'channelsLast' ? 'NHWC' : 'NCHW';
-        var opAttrs = [
-            op_utils_1.createTypeOpAttr('T', x.dtype),
-            { name: 'ksize', type: this.binding.TF_ATTR_INT, value: ksize },
-            { name: 'strides', type: this.binding.TF_ATTR_INT, value: strides },
-            { name: 'padding', type: this.binding.TF_ATTR_STRING, value: padding },
-            {
-                name: 'data_format',
-                type: this.binding.TF_ATTR_STRING,
-                value: dataFormat
-            },
-        ];
-        return this.executeSingleOutput('AvgPool', opAttrs, [x]);
-    };
-    NodeJSKernelBackend.prototype.avgPoolBackprop = function (dy, x, convInfo) {
-        if (convInfo.padInfo.type !== 'VALID' && convInfo.padInfo.type !== 'SAME') {
-            throw new Error("TF Backend supports only 'valid' and 'same' padding " +
-                ("while padding type was " + convInfo.padInfo.type));
-        }
-        var ksize = [1, convInfo.filterHeight, convInfo.filterWidth, 1];
-        var strides = [1, convInfo.strideHeight, convInfo.strideWidth, 1];
-        var padding = convInfo.padInfo.type;
-        var dataFormat = convInfo.dataFormat === 'channelsLast' ? 'NHWC' : 'NCHW';
-        var opAttrs = [
-            op_utils_1.createTypeOpAttr('T', x.dtype),
-            { name: 'ksize', type: this.binding.TF_ATTR_INT, value: ksize },
-            { name: 'strides', type: this.binding.TF_ATTR_INT, value: strides },
-            { name: 'padding', type: this.binding.TF_ATTR_STRING, value: padding },
-            {
-                name: 'data_format',
-                type: this.binding.TF_ATTR_STRING,
-                value: dataFormat
-            },
-        ];
-        var origInputShape = tfjs_core_1.tensor1d(x.shape, 'int32');
-        return this.executeSingleOutput('AvgPoolGrad', opAttrs, [origInputShape, dy]);
-    };
-    NodeJSKernelBackend.prototype.reshape = function (x, shape) {
-        var shapeTensor = tfjs_core_1.tensor1d(shape, 'int32');
-        var opAttrs = [
-            op_utils_1.createTypeOpAttr('T', x.dtype),
-            op_utils_1.createTypeOpAttr('Tshape', shapeTensor.dtype)
-        ];
-        return this.executeSingleOutput('Reshape', opAttrs, [x, shapeTensor]);
-    };
-    NodeJSKernelBackend.prototype.cast = function (x, dtype) {
-        var opAttrs = [op_utils_1.createTypeOpAttr('SrcT', x.dtype), op_utils_1.createTypeOpAttr('DstT', dtype)];
-        return this.executeSingleOutput('Cast', opAttrs, [x]);
-    };
-    NodeJSKernelBackend.prototype.tile = function (x, reps) {
-        var opAttrs = [
-            op_utils_1.createTypeOpAttr('T', x.dtype), op_utils_1.createTypeOpAttr('Tmultiples', 'int32')
-        ];
-        var multiples = tfjs_core_1.tensor1d(reps, 'int32');
-        return this.executeSingleOutput('Tile', opAttrs, [x, multiples]);
-    };
-    NodeJSKernelBackend.prototype.pad = function (x, paddings, constantValue) {
-        var paddingsTensor = tfjs_core_1.tensor2d(paddings, [paddings.length, 2], 'int32');
-        var constantTensor = tfjs_core_1.scalar(constantValue, x.dtype);
-        var opAttrs = [
-            op_utils_1.createTypeOpAttr('T', x.dtype),
-            op_utils_1.createTypeOpAttr('Tpaddings', paddingsTensor.dtype)
-        ];
-        return this.executeSingleOutput('PadV2', opAttrs, [x, paddingsTensor, constantTensor]);
-    };
-    NodeJSKernelBackend.prototype.transpose = function (x, perm) {
-        var permTensor = tfjs_core_1.tensor1d(perm, 'int32');
-        var opAttrs = [op_utils_1.createTypeOpAttr('T', x.dtype), op_utils_1.createTypeOpAttr('Tperm', 'int32')];
-        return this.executeSingleOutput('Transpose', opAttrs, [x, permTensor]);
-    };
-    NodeJSKernelBackend.prototype.gather = function (x, indices, axis) {
-        var axisTensor = tfjs_core_1.scalar(axis, 'int32');
-        var opAttrs = [
-            op_utils_1.createTypeOpAttr('Tparams', x.dtype),
-            op_utils_1.createTypeOpAttr('Tindices', indices.dtype),
-            op_utils_1.createTypeOpAttr('Taxis', 'int32')
-        ];
-        return this.executeSingleOutput('GatherV2', opAttrs, [x, indices, axisTensor]);
-    };
-    NodeJSKernelBackend.prototype.batchToSpaceND = function (x, blockShape, crops) {
-        var blockShapeTensor = tfjs_core_1.tensor1d(blockShape, 'int32');
-        var cropsTensor = tfjs_core_1.tensor2d(crops, [crops.length, crops[0].length], 'int32');
-        var opAttrs = [
-            op_utils_1.createTypeOpAttr('T', x.dtype), op_utils_1.createTypeOpAttr('Tblock_shape', 'int32'),
-            op_utils_1.createTypeOpAttr('Tcrops', cropsTensor.dtype)
-        ];
-        return this.executeSingleOutput('BatchToSpaceND', opAttrs, [x, blockShapeTensor, cropsTensor]);
-    };
-    NodeJSKernelBackend.prototype.spaceToBatchND = function (x, blockShape, paddings) {
-        var blockShapeTensor = tfjs_core_1.tensor1d(blockShape, 'int32');
-        var paddingsTensor = tfjs_core_1.tensor2d(paddings, [paddings.length, paddings[0].length], 'int32');
-        var opAttrs = [
-            op_utils_1.createTypeOpAttr('T', x.dtype), op_utils_1.createTypeOpAttr('Tblock_shape', 'int32'),
-            op_utils_1.createTypeOpAttr('Tpaddings', paddingsTensor.dtype)
-        ];
-        return this.executeSingleOutput('SpaceToBatchND', opAttrs, [x, blockShapeTensor, paddingsTensor]);
-    };
-    NodeJSKernelBackend.prototype.resizeBilinear = function (x, newHeight, newWidth, alignCorners) {
-        var opAttrs = [
-            op_utils_1.createTypeOpAttr('T', x.dtype),
-            {
-                name: 'align_corners',
-                type: this.binding.TF_ATTR_BOOL,
-                value: alignCorners
-            },
-        ];
-        var size = tfjs_core_1.tensor1d([newHeight, newWidth], 'int32');
-        return this.executeSingleOutput('ResizeBilinear', opAttrs, [x, size]);
-    };
-    NodeJSKernelBackend.prototype.resizeBilinearBackprop = function (dy, x, alignCorners) {
-        var opAttrs = [
-            op_utils_1.createTypeOpAttr('T', x.dtype), {
-                name: 'align_corners',
-                type: this.binding.TF_ATTR_BOOL,
-                value: alignCorners
-            }
-        ];
-        return this.executeSingleOutput('ResizeBilinearGrad', opAttrs, [dy, x]);
-    };
-    NodeJSKernelBackend.prototype.resizeNearestNeighbor = function (x, newHeight, newWidth, alignCorners) {
-        var opAttrs = [
-            op_utils_1.createTypeOpAttr('T', x.dtype),
-            {
-                name: 'align_corners',
-                type: this.binding.TF_ATTR_BOOL,
-                value: alignCorners
-            },
-        ];
-        var size = tfjs_core_1.tensor1d([newHeight, newWidth], 'int32');
-        return this.executeSingleOutput('ResizeNearestNeighbor', opAttrs, [x, size]);
-    };
-    NodeJSKernelBackend.prototype.resizeNearestNeighborBackprop = function (dy, x, alignCorners) {
-        var opAttrs = [
-            op_utils_1.createTypeOpAttr('T', x.dtype), {
-                name: 'align_corners',
-                type: this.binding.TF_ATTR_BOOL,
-                value: alignCorners
-            }
-        ];
-        var _a = x.shape, origHeight = _a[1], origWidth = _a[2];
-        var size = tfjs_core_1.tensor1d([origHeight, origWidth], 'int32');
-        return this.executeSingleOutput('ResizeNearestNeighborGrad', opAttrs, [dy, size]);
-    };
-    NodeJSKernelBackend.prototype.batchNormalization = function (x, mean, variance, varianceEpsilon, scale, offset) {
-        if (mean.rank > 1) {
-            var inv = tfjs_core_1.rsqrt(variance.add(tfjs_core_1.scalar(varianceEpsilon)));
-            if (scale != null) {
-                inv = inv.mul(scale);
-            }
-            var xNorm = x.sub(mean).mul(inv);
-            return offset != null ? xNorm.add(offset) : xNorm;
-        }
-        var dataFormat = 'NHWC';
-        var depth = x.shape[3];
-        var opAttrs = [
-            op_utils_1.createTypeOpAttr('T', x.dtype),
-            {
-                name: 'epsilon',
-                type: this.binding.TF_ATTR_FLOAT,
-                value: varianceEpsilon
-            },
-            {
-                name: 'data_format',
-                type: this.binding.TF_ATTR_STRING,
-                value: dataFormat
-            },
-            { name: 'is_training', type: this.binding.TF_ATTR_BOOL, value: false },
-        ];
-        var numOutputs = 5;
-        if (scale == null) {
-            scale = tfjs_core_1.fill([depth], 1);
-        }
-        if (offset == null) {
-            offset = tfjs_core_1.fill([depth], 0);
-        }
-        return this.executeMultipleOutputs('FusedBatchNorm', opAttrs, [x, scale, offset, mean, variance], numOutputs)[0];
-    };
-    NodeJSKernelBackend.prototype.localResponseNormalization4D = function (x, radius, bias, alpha, beta) {
-        var opAttrs = [
-            op_utils_1.createTypeOpAttr('T', x.dtype),
-            { name: 'depth_radius', type: this.binding.TF_ATTR_INT, value: radius },
-            { name: 'bias', type: this.binding.TF_ATTR_FLOAT, value: bias },
-            { name: 'alpha', type: this.binding.TF_ATTR_FLOAT, value: alpha },
-            { name: 'beta', type: this.binding.TF_ATTR_FLOAT, value: beta },
-        ];
-        return this.executeSingleOutput('LRN', opAttrs, [x]);
-    };
-    NodeJSKernelBackend.prototype.LRNGrad = function (dy, inputImage, outputImage, radius, bias, alpha, beta) {
-        var opAttrs = [
-            op_utils_1.createTypeOpAttr('T', dy.dtype),
-            { name: 'depth_radius', type: this.binding.TF_ATTR_INT, value: radius },
-            { name: 'bias', type: this.binding.TF_ATTR_FLOAT, value: bias },
-            { name: 'alpha', type: this.binding.TF_ATTR_FLOAT, value: alpha },
-            { name: 'beta', type: this.binding.TF_ATTR_FLOAT, value: beta },
-        ];
-        return this.executeSingleOutput('LRNGrad', opAttrs, [dy, inputImage, outputImage]);
-    };
-    NodeJSKernelBackend.prototype.multinomial = function (logits, normalized, numSamples, seed) {
-        if (normalized) {
-            throw new Error('TF Node backend does not support normalized logits ' +
-                'passed to multinomial');
-        }
-        var opAttrs = [
-            op_utils_1.createTypeOpAttr('T', logits.dtype),
-            op_utils_1.createTypeOpAttr('output_dtype', 'int32'),
-            { name: 'seed', type: this.binding.TF_ATTR_INT, value: seed },
-            { name: 'seed2', type: this.binding.TF_ATTR_INT, value: seed * seed },
-        ];
-        return this.executeSingleOutput('Multinomial', opAttrs, [logits, tfjs_core_1.scalar(numSamples, 'int32')]);
-    };
-    NodeJSKernelBackend.prototype.oneHot = function (indices, depth, onValue, offValue) {
-        var depthTensor = tfjs_core_1.scalar(depth, 'int32');
-        var onValueTensor = tfjs_core_1.scalar(onValue, 'int32');
-        var offValueTensor = tfjs_core_1.scalar(offValue, 'int32');
-        var opAttrs = [
-            { name: 'axis', type: this.binding.TF_ATTR_INT, value: -1 },
-            op_utils_1.createTypeOpAttr('T', indices.dtype),
-            op_utils_1.createTypeOpAttr('TI', indices.dtype)
-        ];
-        return this.executeSingleOutput('OneHot', opAttrs, [
-            indices, depthTensor, onValueTensor, offValueTensor
-        ]);
-    };
-    NodeJSKernelBackend.prototype.cumsum = function (x, axis, exclusive, reverse) {
-        var axisTensor = tfjs_core_1.scalar(axis, 'int32');
-        var opAttrs = [
-            { name: 'exclusive', type: this.binding.TF_ATTR_BOOL, value: exclusive },
-            { name: 'reverse', type: this.binding.TF_ATTR_BOOL, value: reverse },
-            op_utils_1.createTypeOpAttr('T', x.dtype), op_utils_1.createTypeOpAttr('Tidx', 'int32')
-        ];
-        return this.executeSingleOutput('Cumsum', opAttrs, [x, axisTensor]);
-    };
-    NodeJSKernelBackend.prototype.nonMaxSuppression = function (boxes, scores, maxOutputSize, iouThreshold, scoreThreshold) {
-        var opAttrs = [];
-        var maxOutputSizeTensor = tfjs_core_1.scalar(maxOutputSize, 'int32');
-        var iouThresholdTensor = tfjs_core_1.scalar(iouThreshold);
-        var scoreThresholdTensor = tfjs_core_1.scalar(scoreThreshold);
-        return this.executeSingleOutput('NonMaxSuppressionV3', opAttrs, [
-            boxes, scores, maxOutputSizeTensor, iouThresholdTensor,
-            scoreThresholdTensor
-        ]);
-    };
-    NodeJSKernelBackend.prototype.fromPixels = function (pixels, numChannels) {
-        if (pixels == null) {
-            throw new Error('pixels passed to tf.fromPixels() can not be null');
-        }
-        if (pixels.getContext == null) {
-            throw new Error('When running in node, pixels must be an HTMLCanvasElement ' +
-                'like the one returned by the `canvas` npm package');
-        }
-        var vals = pixels
-            .getContext('2d')
-            .getImageData(0, 0, pixels.width, pixels.height)
-            .data;
-        var values;
-        if (numChannels === 4) {
-            values = new Int32Array(vals);
-        }
-        else {
-            var numPixels = pixels.width * pixels.height;
-            values = new Int32Array(numPixels * numChannels);
-            for (var i = 0; i < numPixels; i++) {
-                for (var channel = 0; channel < numChannels; ++channel) {
-                    values[i * numChannels + channel] = vals[i * 4 + channel];
-                }
-            }
-        }
-        var outShape = [pixels.height, pixels.width, numChannels];
-        return tfjs_core_1.tensor3d(values, outShape, 'int32');
-    };
-    NodeJSKernelBackend.prototype.memory = function () {
-        return { unreliable: true };
-    };
-    NodeJSKernelBackend.prototype.time = function (f) {
-        return __awaiter(this, void 0, void 0, function () {
-            var start, elapsed;
-            return __generator(this, function (_a) {
-                start = process.hrtime();
-                f();
-                elapsed = process.hrtime(start);
-                return [2, { kernelMs: elapsed[0] * 1000 + elapsed[1] / 1000000 }];
-            });
-        });
-    };
-    NodeJSKernelBackend.prototype.isNaN = function (x) {
-        return this.executeSingleInput('IsNan', x);
-    };
-    return NodeJSKernelBackend;
-}());
-exports.NodeJSKernelBackend = NodeJSKernelBackend;
-
-}).call(this,require('_process'))
-},{"./ops/op_utils":237,"@tensorflow/tfjs-core":59,"@tensorflow/tfjs-core/dist/types":179,"_process":268,"util":271}],237:[function(require,module,exports){
-"use strict";
-Object.defineProperty(exports, "__esModule", { value: true });
-var tfc = require("@tensorflow/tfjs-core");
-var util_1 = require("util");
-var gBackend = null;
-function nodeBackend() {
-    if (gBackend === null) {
-        gBackend = tfc.ENV.findBackend('tensorflow');
-    }
-    return gBackend;
-}
-exports.nodeBackend = nodeBackend;
-function getTFDType(dataType) {
-    var binding = nodeBackend().binding;
-    switch (dataType) {
-        case 'float32':
-            return binding.TF_FLOAT;
-        case 'int32':
-            return binding.TF_INT32;
-        case 'bool':
-            return binding.TF_BOOL;
-        default:
-            throw new Error('Unknown dtype `${dtype}`');
-    }
-}
-exports.getTFDType = getTFDType;
-function createTypeOpAttr(attrName, dtype) {
-    return {
-        name: attrName,
-        type: nodeBackend().binding.TF_ATTR_TYPE,
-        value: getTFDType(dtype)
-    };
-}
-exports.createTypeOpAttr = createTypeOpAttr;
-function getTFDTypeForInputs(tensors) {
-    if (util_1.isNullOrUndefined(tensors)) {
-        throw new Error('Invalid input tensors value.');
-    }
-    if (util_1.isArray(tensors)) {
-        for (var i = 0; i < tensors.length; i++) {
-            return getTFDType(tensors[i].dtype);
-        }
-        return -1;
-    }
-    else {
-        return getTFDType(tensors.dtype);
-    }
-}
-exports.getTFDTypeForInputs = getTFDTypeForInputs;
-
-},{"@tensorflow/tfjs-core":59,"util":271}],238:[function(require,module,exports){
-"use strict";
-Object.defineProperty(exports, "__esModule", { value: true });
-var version = '0.1.13';
-exports.version = version;
-
-},{}],239:[function(require,module,exports){
+},{}],233:[function(require,module,exports){
 "use strict";
 function __export(m) {
     for (var p in m) if (!exports.hasOwnProperty(p)) exports[p] = m[p];
@@ -36589,188 +35224,13 @@ exports.version = {
     'tfjs': version_1.version
 };
 
-},{"./version":240,"@tensorflow/tfjs-converter":17,"@tensorflow/tfjs-core":59,"@tensorflow/tfjs-layers":203}],240:[function(require,module,exports){
+},{"./version":234,"@tensorflow/tfjs-converter":18,"@tensorflow/tfjs-core":60,"@tensorflow/tfjs-layers":204}],234:[function(require,module,exports){
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
 var version = '0.12.5';
 exports.version = version;
 
-},{}],241:[function(require,module,exports){
-(function (process,__filename){
-
-/**
- * Module dependencies.
- */
-
-var fs = require('fs')
-  , path = require('path')
-  , join = path.join
-  , dirname = path.dirname
-  , exists = ((fs.accessSync && function (path) { try { fs.accessSync(path); } catch (e) { return false; } return true; })
-      || fs.existsSync || path.existsSync)
-  , defaults = {
-        arrow: process.env.NODE_BINDINGS_ARROW || ' → '
-      , compiled: process.env.NODE_BINDINGS_COMPILED_DIR || 'compiled'
-      , platform: process.platform
-      , arch: process.arch
-      , version: process.versions.node
-      , bindings: 'bindings.node'
-      , try: [
-          // node-gyp's linked version in the "build" dir
-          [ 'module_root', 'build', 'bindings' ]
-          // node-waf and gyp_addon (a.k.a node-gyp)
-        , [ 'module_root', 'build', 'Debug', 'bindings' ]
-        , [ 'module_root', 'build', 'Release', 'bindings' ]
-          // Debug files, for development (legacy behavior, remove for node v0.9)
-        , [ 'module_root', 'out', 'Debug', 'bindings' ]
-        , [ 'module_root', 'Debug', 'bindings' ]
-          // Release files, but manually compiled (legacy behavior, remove for node v0.9)
-        , [ 'module_root', 'out', 'Release', 'bindings' ]
-        , [ 'module_root', 'Release', 'bindings' ]
-          // Legacy from node-waf, node <= 0.4.x
-        , [ 'module_root', 'build', 'default', 'bindings' ]
-          // Production "Release" buildtype binary (meh...)
-        , [ 'module_root', 'compiled', 'version', 'platform', 'arch', 'bindings' ]
-        ]
-    }
-
-/**
- * The main `bindings()` function loads the compiled bindings for a given module.
- * It uses V8's Error API to determine the parent filename that this function is
- * being invoked from, which is then used to find the root directory.
- */
-
-function bindings (opts) {
-
-  // Argument surgery
-  if (typeof opts == 'string') {
-    opts = { bindings: opts }
-  } else if (!opts) {
-    opts = {}
-  }
-
-  // maps `defaults` onto `opts` object
-  Object.keys(defaults).map(function(i) {
-    if (!(i in opts)) opts[i] = defaults[i];
-  });
-
-  // Get the module root
-  if (!opts.module_root) {
-    opts.module_root = exports.getRoot(exports.getFileName())
-  }
-
-  // Ensure the given bindings name ends with .node
-  if (path.extname(opts.bindings) != '.node') {
-    opts.bindings += '.node'
-  }
-
-  var tries = []
-    , i = 0
-    , l = opts.try.length
-    , n
-    , b
-    , err
-
-  for (; i<l; i++) {
-    n = join.apply(null, opts.try[i].map(function (p) {
-      return opts[p] || p
-    }))
-    tries.push(n)
-    try {
-      b = opts.path ? require.resolve(n) : require(n)
-      if (!opts.path) {
-        b.path = n
-      }
-      return b
-    } catch (e) {
-      if (!/not find/i.test(e.message)) {
-        throw e
-      }
-    }
-  }
-
-  err = new Error('Could not locate the bindings file. Tried:\n'
-    + tries.map(function (a) { return opts.arrow + a }).join('\n'))
-  err.tries = tries
-  throw err
-}
-module.exports = exports = bindings
-
-
-/**
- * Gets the filename of the JavaScript file that invokes this function.
- * Used to help find the root directory of a module.
- * Optionally accepts an filename argument to skip when searching for the invoking filename
- */
-
-exports.getFileName = function getFileName (calling_file) {
-  var origPST = Error.prepareStackTrace
-    , origSTL = Error.stackTraceLimit
-    , dummy = {}
-    , fileName
-
-  Error.stackTraceLimit = 10
-
-  Error.prepareStackTrace = function (e, st) {
-    for (var i=0, l=st.length; i<l; i++) {
-      fileName = st[i].getFileName()
-      if (fileName !== __filename) {
-        if (calling_file) {
-            if (fileName !== calling_file) {
-              return
-            }
-        } else {
-          return
-        }
-      }
-    }
-  }
-
-  // run the 'prepareStackTrace' function above
-  Error.captureStackTrace(dummy)
-  dummy.stack
-
-  // cleanup
-  Error.prepareStackTrace = origPST
-  Error.stackTraceLimit = origSTL
-
-  return fileName
-}
-
-/**
- * Gets the root directory of a module, given an arbitrary filename
- * somewhere in the module tree. The "root directory" is the directory
- * containing the `package.json` file.
- *
- *   In:  /home/nate/node-native-module/lib/index.js
- *   Out: /home/nate/node-native-module
- */
-
-exports.getRoot = function getRoot (file) {
-  var dir = dirname(file)
-    , prev
-  while (true) {
-    if (dir === '.') {
-      // Avoids an infinite loop in rare cases, like the REPL
-      dir = process.cwd()
-    }
-    if (exists(join(dir, 'package.json')) || exists(join(dir, 'node_modules'))) {
-      // Found the 'package.json' file or 'node_modules' dir; we're done
-      return dir
-    }
-    if (prev === dir) {
-      // Got to the top
-      throw new Error('Could not find module root given file: "' + file
-                    + '". Do you have a `package.json` file? ')
-    }
-    // Try the parent dir next
-    prev = dir
-    dir = join(dir, '..')
-  }
-}
-
-}).call(this,require('_process'),"/node_modules/bindings/bindings.js")
-},{"_process":268,"fs":264,"path":267}],242:[function(require,module,exports){
+},{}],235:[function(require,module,exports){
 "use strict";
 
 module.exports = exports = self.fetch;
@@ -36782,13 +35242,13 @@ exports.Headers = self.Headers;
 exports.Request = self.Request;
 exports.Response = self.Response;
 
-},{}],243:[function(require,module,exports){
+},{}],236:[function(require,module,exports){
 // minimal library entry point.
 
 "use strict";
 module.exports = require("./src/index-minimal");
 
-},{"./src/index-minimal":244}],244:[function(require,module,exports){
+},{"./src/index-minimal":237}],237:[function(require,module,exports){
 "use strict";
 var protobuf = exports;
 
@@ -36826,7 +35286,7 @@ function configure() {
 protobuf.Writer._configure(protobuf.BufferWriter);
 configure();
 
-},{"./reader":245,"./reader_buffer":246,"./roots":247,"./rpc":248,"./util/minimal":251,"./writer":252,"./writer_buffer":253}],245:[function(require,module,exports){
+},{"./reader":238,"./reader_buffer":239,"./roots":240,"./rpc":241,"./util/minimal":244,"./writer":245,"./writer_buffer":246}],238:[function(require,module,exports){
 "use strict";
 module.exports = Reader;
 
@@ -37233,7 +35693,7 @@ Reader._configure = function(BufferReader_) {
     });
 };
 
-},{"./util/minimal":251}],246:[function(require,module,exports){
+},{"./util/minimal":244}],239:[function(require,module,exports){
 "use strict";
 module.exports = BufferReader;
 
@@ -37279,7 +35739,7 @@ BufferReader.prototype.string = function read_string_buffer() {
  * @returns {Buffer} Value read
  */
 
-},{"./reader":245,"./util/minimal":251}],247:[function(require,module,exports){
+},{"./reader":238,"./util/minimal":244}],240:[function(require,module,exports){
 "use strict";
 module.exports = {};
 
@@ -37299,7 +35759,7 @@ module.exports = {};
  * var root = protobuf.roots["myroot"];
  */
 
-},{}],248:[function(require,module,exports){
+},{}],241:[function(require,module,exports){
 "use strict";
 
 /**
@@ -37337,7 +35797,7 @@ var rpc = exports;
 
 rpc.Service = require("./rpc/service");
 
-},{"./rpc/service":249}],249:[function(require,module,exports){
+},{"./rpc/service":242}],242:[function(require,module,exports){
 "use strict";
 module.exports = Service;
 
@@ -37481,7 +35941,7 @@ Service.prototype.end = function end(endedByRPC) {
     return this;
 };
 
-},{"../util/minimal":251}],250:[function(require,module,exports){
+},{"../util/minimal":244}],243:[function(require,module,exports){
 "use strict";
 module.exports = LongBits;
 
@@ -37683,7 +36143,7 @@ LongBits.prototype.length = function length() {
          : part2 < 128 ? 9 : 10;
 };
 
-},{"../util/minimal":251}],251:[function(require,module,exports){
+},{"../util/minimal":244}],244:[function(require,module,exports){
 (function (global){
 "use strict";
 var util = exports;
@@ -38101,7 +36561,7 @@ util._configure = function() {
 };
 
 }).call(this,typeof global !== "undefined" ? global : typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
-},{"./longbits":250,"@protobufjs/aspromise":3,"@protobufjs/base64":4,"@protobufjs/eventemitter":5,"@protobufjs/float":6,"@protobufjs/inquire":7,"@protobufjs/pool":8,"@protobufjs/utf8":9}],252:[function(require,module,exports){
+},{"./longbits":243,"@protobufjs/aspromise":4,"@protobufjs/base64":5,"@protobufjs/eventemitter":6,"@protobufjs/float":7,"@protobufjs/inquire":8,"@protobufjs/pool":9,"@protobufjs/utf8":10}],245:[function(require,module,exports){
 "use strict";
 module.exports = Writer;
 
@@ -38562,7 +37022,7 @@ Writer._configure = function(BufferWriter_) {
     BufferWriter = BufferWriter_;
 };
 
-},{"./util/minimal":251}],253:[function(require,module,exports){
+},{"./util/minimal":244}],246:[function(require,module,exports){
 "use strict";
 module.exports = BufferWriter;
 
@@ -38645,7 +37105,7 @@ BufferWriter.prototype.string = function write_string_buffer(value) {
  * @returns {Buffer} Finished buffer
  */
 
-},{"./util/minimal":251,"./writer":252}],254:[function(require,module,exports){
+},{"./util/minimal":244,"./writer":245}],247:[function(require,module,exports){
 // A library of seedable RNGs implemented in Javascript.
 //
 // Usage:
@@ -38707,7 +37167,7 @@ sr.tychei = tychei;
 
 module.exports = sr;
 
-},{"./lib/alea":255,"./lib/tychei":256,"./lib/xor128":257,"./lib/xor4096":258,"./lib/xorshift7":259,"./lib/xorwow":260,"./seedrandom":261}],255:[function(require,module,exports){
+},{"./lib/alea":248,"./lib/tychei":249,"./lib/xor128":250,"./lib/xor4096":251,"./lib/xorshift7":252,"./lib/xorwow":253,"./seedrandom":254}],248:[function(require,module,exports){
 // A port of an algorithm by Johannes Baagøe <baagoe@baagoe.com>, 2010
 // http://baagoe.com/en/RandomMusings/javascript/
 // https://github.com/nquinlan/better-random-numbers-for-javascript-mirror
@@ -38823,7 +37283,7 @@ if (module && module.exports) {
 
 
 
-},{}],256:[function(require,module,exports){
+},{}],249:[function(require,module,exports){
 // A Javascript implementaion of the "Tyche-i" prng algorithm by
 // Samuel Neves and Filipe Araujo.
 // See https://eden.dei.uc.pt/~sneves/pubs/2011-snfa2.pdf
@@ -38928,7 +37388,7 @@ if (module && module.exports) {
 
 
 
-},{}],257:[function(require,module,exports){
+},{}],250:[function(require,module,exports){
 // A Javascript implementaion of the "xor128" prng algorithm by
 // George Marsaglia.  See http://www.jstatsoft.org/v08/i14/paper
 
@@ -39011,7 +37471,7 @@ if (module && module.exports) {
 
 
 
-},{}],258:[function(require,module,exports){
+},{}],251:[function(require,module,exports){
 // A Javascript implementaion of Richard Brent's Xorgens xor4096 algorithm.
 //
 // This fast non-cryptographic random number generator is designed for
@@ -39159,7 +37619,7 @@ if (module && module.exports) {
   (typeof define) == 'function' && define   // present with an AMD loader
 );
 
-},{}],259:[function(require,module,exports){
+},{}],252:[function(require,module,exports){
 // A Javascript implementaion of the "xorshift7" algorithm by
 // François Panneton and Pierre L'ecuyer:
 // "On the Xorgshift Random Number Generators"
@@ -39258,7 +37718,7 @@ if (module && module.exports) {
 );
 
 
-},{}],260:[function(require,module,exports){
+},{}],253:[function(require,module,exports){
 // A Javascript implementaion of the "xorwow" prng algorithm by
 // George Marsaglia.  See http://www.jstatsoft.org/v08/i14/paper
 
@@ -39346,7 +37806,7 @@ if (module && module.exports) {
 
 
 
-},{}],261:[function(require,module,exports){
+},{}],254:[function(require,module,exports){
 /*
 Copyright 2014 David Bau.
 
@@ -39598,7 +38058,7 @@ if ((typeof module) == 'object' && module.exports) {
   Math    // math: package containing random, pow, and seedrandom
 );
 
-},{"crypto":263}],262:[function(require,module,exports){
+},{"crypto":256}],255:[function(require,module,exports){
 'use strict'
 
 exports.byteLength = byteLength
@@ -39716,11 +38176,9 @@ function fromByteArray (uint8) {
   return parts.join('')
 }
 
-},{}],263:[function(require,module,exports){
+},{}],256:[function(require,module,exports){
 
-},{}],264:[function(require,module,exports){
-arguments[4][263][0].apply(exports,arguments)
-},{"dup":263}],265:[function(require,module,exports){
+},{}],257:[function(require,module,exports){
 /*!
  * The buffer module from node.js, for the browser.
  *
@@ -41458,7 +39916,7 @@ function numberIsNaN (obj) {
   return obj !== obj // eslint-disable-line no-self-compare
 }
 
-},{"base64-js":262,"ieee754":266}],266:[function(require,module,exports){
+},{"base64-js":255,"ieee754":258}],258:[function(require,module,exports){
 exports.read = function (buffer, offset, isLE, mLen, nBytes) {
   var e, m
   var eLen = (nBytes * 8) - mLen - 1
@@ -41544,235 +40002,7 @@ exports.write = function (buffer, value, offset, isLE, mLen, nBytes) {
   buffer[offset + i - d] |= s * 128
 }
 
-},{}],267:[function(require,module,exports){
-(function (process){
-// Copyright Joyent, Inc. and other Node contributors.
-//
-// Permission is hereby granted, free of charge, to any person obtaining a
-// copy of this software and associated documentation files (the
-// "Software"), to deal in the Software without restriction, including
-// without limitation the rights to use, copy, modify, merge, publish,
-// distribute, sublicense, and/or sell copies of the Software, and to permit
-// persons to whom the Software is furnished to do so, subject to the
-// following conditions:
-//
-// The above copyright notice and this permission notice shall be included
-// in all copies or substantial portions of the Software.
-//
-// THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS
-// OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF
-// MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN
-// NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM,
-// DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR
-// OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE
-// USE OR OTHER DEALINGS IN THE SOFTWARE.
-
-// resolves . and .. elements in a path array with directory names there
-// must be no slashes, empty elements, or device names (c:\) in the array
-// (so also no leading and trailing slashes - it does not distinguish
-// relative and absolute paths)
-function normalizeArray(parts, allowAboveRoot) {
-  // if the path tries to go above the root, `up` ends up > 0
-  var up = 0;
-  for (var i = parts.length - 1; i >= 0; i--) {
-    var last = parts[i];
-    if (last === '.') {
-      parts.splice(i, 1);
-    } else if (last === '..') {
-      parts.splice(i, 1);
-      up++;
-    } else if (up) {
-      parts.splice(i, 1);
-      up--;
-    }
-  }
-
-  // if the path is allowed to go above the root, restore leading ..s
-  if (allowAboveRoot) {
-    for (; up--; up) {
-      parts.unshift('..');
-    }
-  }
-
-  return parts;
-}
-
-// Split a filename into [root, dir, basename, ext], unix version
-// 'root' is just a slash, or nothing.
-var splitPathRe =
-    /^(\/?|)([\s\S]*?)((?:\.{1,2}|[^\/]+?|)(\.[^.\/]*|))(?:[\/]*)$/;
-var splitPath = function(filename) {
-  return splitPathRe.exec(filename).slice(1);
-};
-
-// path.resolve([from ...], to)
-// posix version
-exports.resolve = function() {
-  var resolvedPath = '',
-      resolvedAbsolute = false;
-
-  for (var i = arguments.length - 1; i >= -1 && !resolvedAbsolute; i--) {
-    var path = (i >= 0) ? arguments[i] : process.cwd();
-
-    // Skip empty and invalid entries
-    if (typeof path !== 'string') {
-      throw new TypeError('Arguments to path.resolve must be strings');
-    } else if (!path) {
-      continue;
-    }
-
-    resolvedPath = path + '/' + resolvedPath;
-    resolvedAbsolute = path.charAt(0) === '/';
-  }
-
-  // At this point the path should be resolved to a full absolute path, but
-  // handle relative paths to be safe (might happen when process.cwd() fails)
-
-  // Normalize the path
-  resolvedPath = normalizeArray(filter(resolvedPath.split('/'), function(p) {
-    return !!p;
-  }), !resolvedAbsolute).join('/');
-
-  return ((resolvedAbsolute ? '/' : '') + resolvedPath) || '.';
-};
-
-// path.normalize(path)
-// posix version
-exports.normalize = function(path) {
-  var isAbsolute = exports.isAbsolute(path),
-      trailingSlash = substr(path, -1) === '/';
-
-  // Normalize the path
-  path = normalizeArray(filter(path.split('/'), function(p) {
-    return !!p;
-  }), !isAbsolute).join('/');
-
-  if (!path && !isAbsolute) {
-    path = '.';
-  }
-  if (path && trailingSlash) {
-    path += '/';
-  }
-
-  return (isAbsolute ? '/' : '') + path;
-};
-
-// posix version
-exports.isAbsolute = function(path) {
-  return path.charAt(0) === '/';
-};
-
-// posix version
-exports.join = function() {
-  var paths = Array.prototype.slice.call(arguments, 0);
-  return exports.normalize(filter(paths, function(p, index) {
-    if (typeof p !== 'string') {
-      throw new TypeError('Arguments to path.join must be strings');
-    }
-    return p;
-  }).join('/'));
-};
-
-
-// path.relative(from, to)
-// posix version
-exports.relative = function(from, to) {
-  from = exports.resolve(from).substr(1);
-  to = exports.resolve(to).substr(1);
-
-  function trim(arr) {
-    var start = 0;
-    for (; start < arr.length; start++) {
-      if (arr[start] !== '') break;
-    }
-
-    var end = arr.length - 1;
-    for (; end >= 0; end--) {
-      if (arr[end] !== '') break;
-    }
-
-    if (start > end) return [];
-    return arr.slice(start, end - start + 1);
-  }
-
-  var fromParts = trim(from.split('/'));
-  var toParts = trim(to.split('/'));
-
-  var length = Math.min(fromParts.length, toParts.length);
-  var samePartsLength = length;
-  for (var i = 0; i < length; i++) {
-    if (fromParts[i] !== toParts[i]) {
-      samePartsLength = i;
-      break;
-    }
-  }
-
-  var outputParts = [];
-  for (var i = samePartsLength; i < fromParts.length; i++) {
-    outputParts.push('..');
-  }
-
-  outputParts = outputParts.concat(toParts.slice(samePartsLength));
-
-  return outputParts.join('/');
-};
-
-exports.sep = '/';
-exports.delimiter = ':';
-
-exports.dirname = function(path) {
-  var result = splitPath(path),
-      root = result[0],
-      dir = result[1];
-
-  if (!root && !dir) {
-    // No dirname whatsoever
-    return '.';
-  }
-
-  if (dir) {
-    // It has a dirname, strip trailing slash
-    dir = dir.substr(0, dir.length - 1);
-  }
-
-  return root + dir;
-};
-
-
-exports.basename = function(path, ext) {
-  var f = splitPath(path)[2];
-  // TODO: make this comparison case-insensitive on windows?
-  if (ext && f.substr(-1 * ext.length) === ext) {
-    f = f.substr(0, f.length - ext.length);
-  }
-  return f;
-};
-
-
-exports.extname = function(path) {
-  return splitPath(path)[3];
-};
-
-function filter (xs, f) {
-    if (xs.filter) return xs.filter(f);
-    var res = [];
-    for (var i = 0; i < xs.length; i++) {
-        if (f(xs[i], i, xs)) res.push(xs[i]);
-    }
-    return res;
-}
-
-// String.prototype.substr - negative index don't work in IE8
-var substr = 'ab'.substr(-1) === 'b'
-    ? function (str, start, len) { return str.substr(start, len) }
-    : function (str, start, len) {
-        if (start < 0) start = str.length + start;
-        return str.substr(start, len);
-    }
-;
-
-}).call(this,require('_process'))
-},{"_process":268}],268:[function(require,module,exports){
+},{}],259:[function(require,module,exports){
 // shim for using process in browser
 var process = module.exports = {};
 
@@ -41958,627 +40188,5 @@ process.chdir = function (dir) {
 };
 process.umask = function() { return 0; };
 
-},{}],269:[function(require,module,exports){
-if (typeof Object.create === 'function') {
-  // implementation from standard node.js 'util' module
-  module.exports = function inherits(ctor, superCtor) {
-    ctor.super_ = superCtor
-    ctor.prototype = Object.create(superCtor.prototype, {
-      constructor: {
-        value: ctor,
-        enumerable: false,
-        writable: true,
-        configurable: true
-      }
-    });
-  };
-} else {
-  // old school shim for old browsers
-  module.exports = function inherits(ctor, superCtor) {
-    ctor.super_ = superCtor
-    var TempCtor = function () {}
-    TempCtor.prototype = superCtor.prototype
-    ctor.prototype = new TempCtor()
-    ctor.prototype.constructor = ctor
-  }
-}
-
-},{}],270:[function(require,module,exports){
-module.exports = function isBuffer(arg) {
-  return arg && typeof arg === 'object'
-    && typeof arg.copy === 'function'
-    && typeof arg.fill === 'function'
-    && typeof arg.readUInt8 === 'function';
-}
-},{}],271:[function(require,module,exports){
-(function (process,global){
-// Copyright Joyent, Inc. and other Node contributors.
-//
-// Permission is hereby granted, free of charge, to any person obtaining a
-// copy of this software and associated documentation files (the
-// "Software"), to deal in the Software without restriction, including
-// without limitation the rights to use, copy, modify, merge, publish,
-// distribute, sublicense, and/or sell copies of the Software, and to permit
-// persons to whom the Software is furnished to do so, subject to the
-// following conditions:
-//
-// The above copyright notice and this permission notice shall be included
-// in all copies or substantial portions of the Software.
-//
-// THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS
-// OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF
-// MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN
-// NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM,
-// DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR
-// OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE
-// USE OR OTHER DEALINGS IN THE SOFTWARE.
-
-var formatRegExp = /%[sdj%]/g;
-exports.format = function(f) {
-  if (!isString(f)) {
-    var objects = [];
-    for (var i = 0; i < arguments.length; i++) {
-      objects.push(inspect(arguments[i]));
-    }
-    return objects.join(' ');
-  }
-
-  var i = 1;
-  var args = arguments;
-  var len = args.length;
-  var str = String(f).replace(formatRegExp, function(x) {
-    if (x === '%%') return '%';
-    if (i >= len) return x;
-    switch (x) {
-      case '%s': return String(args[i++]);
-      case '%d': return Number(args[i++]);
-      case '%j':
-        try {
-          return JSON.stringify(args[i++]);
-        } catch (_) {
-          return '[Circular]';
-        }
-      default:
-        return x;
-    }
-  });
-  for (var x = args[i]; i < len; x = args[++i]) {
-    if (isNull(x) || !isObject(x)) {
-      str += ' ' + x;
-    } else {
-      str += ' ' + inspect(x);
-    }
-  }
-  return str;
-};
-
-
-// Mark that a method should not be used.
-// Returns a modified function which warns once by default.
-// If --no-deprecation is set, then it is a no-op.
-exports.deprecate = function(fn, msg) {
-  // Allow for deprecating things in the process of starting up.
-  if (isUndefined(global.process)) {
-    return function() {
-      return exports.deprecate(fn, msg).apply(this, arguments);
-    };
-  }
-
-  if (process.noDeprecation === true) {
-    return fn;
-  }
-
-  var warned = false;
-  function deprecated() {
-    if (!warned) {
-      if (process.throwDeprecation) {
-        throw new Error(msg);
-      } else if (process.traceDeprecation) {
-        console.trace(msg);
-      } else {
-        console.error(msg);
-      }
-      warned = true;
-    }
-    return fn.apply(this, arguments);
-  }
-
-  return deprecated;
-};
-
-
-var debugs = {};
-var debugEnviron;
-exports.debuglog = function(set) {
-  if (isUndefined(debugEnviron))
-    debugEnviron = process.env.NODE_DEBUG || '';
-  set = set.toUpperCase();
-  if (!debugs[set]) {
-    if (new RegExp('\\b' + set + '\\b', 'i').test(debugEnviron)) {
-      var pid = process.pid;
-      debugs[set] = function() {
-        var msg = exports.format.apply(exports, arguments);
-        console.error('%s %d: %s', set, pid, msg);
-      };
-    } else {
-      debugs[set] = function() {};
-    }
-  }
-  return debugs[set];
-};
-
-
-/**
- * Echos the value of a value. Trys to print the value out
- * in the best way possible given the different types.
- *
- * @param {Object} obj The object to print out.
- * @param {Object} opts Optional options object that alters the output.
- */
-/* legacy: obj, showHidden, depth, colors*/
-function inspect(obj, opts) {
-  // default options
-  var ctx = {
-    seen: [],
-    stylize: stylizeNoColor
-  };
-  // legacy...
-  if (arguments.length >= 3) ctx.depth = arguments[2];
-  if (arguments.length >= 4) ctx.colors = arguments[3];
-  if (isBoolean(opts)) {
-    // legacy...
-    ctx.showHidden = opts;
-  } else if (opts) {
-    // got an "options" object
-    exports._extend(ctx, opts);
-  }
-  // set default options
-  if (isUndefined(ctx.showHidden)) ctx.showHidden = false;
-  if (isUndefined(ctx.depth)) ctx.depth = 2;
-  if (isUndefined(ctx.colors)) ctx.colors = false;
-  if (isUndefined(ctx.customInspect)) ctx.customInspect = true;
-  if (ctx.colors) ctx.stylize = stylizeWithColor;
-  return formatValue(ctx, obj, ctx.depth);
-}
-exports.inspect = inspect;
-
-
-// http://en.wikipedia.org/wiki/ANSI_escape_code#graphics
-inspect.colors = {
-  'bold' : [1, 22],
-  'italic' : [3, 23],
-  'underline' : [4, 24],
-  'inverse' : [7, 27],
-  'white' : [37, 39],
-  'grey' : [90, 39],
-  'black' : [30, 39],
-  'blue' : [34, 39],
-  'cyan' : [36, 39],
-  'green' : [32, 39],
-  'magenta' : [35, 39],
-  'red' : [31, 39],
-  'yellow' : [33, 39]
-};
-
-// Don't use 'blue' not visible on cmd.exe
-inspect.styles = {
-  'special': 'cyan',
-  'number': 'yellow',
-  'boolean': 'yellow',
-  'undefined': 'grey',
-  'null': 'bold',
-  'string': 'green',
-  'date': 'magenta',
-  // "name": intentionally not styling
-  'regexp': 'red'
-};
-
-
-function stylizeWithColor(str, styleType) {
-  var style = inspect.styles[styleType];
-
-  if (style) {
-    return '\u001b[' + inspect.colors[style][0] + 'm' + str +
-           '\u001b[' + inspect.colors[style][1] + 'm';
-  } else {
-    return str;
-  }
-}
-
-
-function stylizeNoColor(str, styleType) {
-  return str;
-}
-
-
-function arrayToHash(array) {
-  var hash = {};
-
-  array.forEach(function(val, idx) {
-    hash[val] = true;
-  });
-
-  return hash;
-}
-
-
-function formatValue(ctx, value, recurseTimes) {
-  // Provide a hook for user-specified inspect functions.
-  // Check that value is an object with an inspect function on it
-  if (ctx.customInspect &&
-      value &&
-      isFunction(value.inspect) &&
-      // Filter out the util module, it's inspect function is special
-      value.inspect !== exports.inspect &&
-      // Also filter out any prototype objects using the circular check.
-      !(value.constructor && value.constructor.prototype === value)) {
-    var ret = value.inspect(recurseTimes, ctx);
-    if (!isString(ret)) {
-      ret = formatValue(ctx, ret, recurseTimes);
-    }
-    return ret;
-  }
-
-  // Primitive types cannot have properties
-  var primitive = formatPrimitive(ctx, value);
-  if (primitive) {
-    return primitive;
-  }
-
-  // Look up the keys of the object.
-  var keys = Object.keys(value);
-  var visibleKeys = arrayToHash(keys);
-
-  if (ctx.showHidden) {
-    keys = Object.getOwnPropertyNames(value);
-  }
-
-  // IE doesn't make error fields non-enumerable
-  // http://msdn.microsoft.com/en-us/library/ie/dww52sbt(v=vs.94).aspx
-  if (isError(value)
-      && (keys.indexOf('message') >= 0 || keys.indexOf('description') >= 0)) {
-    return formatError(value);
-  }
-
-  // Some type of object without properties can be shortcutted.
-  if (keys.length === 0) {
-    if (isFunction(value)) {
-      var name = value.name ? ': ' + value.name : '';
-      return ctx.stylize('[Function' + name + ']', 'special');
-    }
-    if (isRegExp(value)) {
-      return ctx.stylize(RegExp.prototype.toString.call(value), 'regexp');
-    }
-    if (isDate(value)) {
-      return ctx.stylize(Date.prototype.toString.call(value), 'date');
-    }
-    if (isError(value)) {
-      return formatError(value);
-    }
-  }
-
-  var base = '', array = false, braces = ['{', '}'];
-
-  // Make Array say that they are Array
-  if (isArray(value)) {
-    array = true;
-    braces = ['[', ']'];
-  }
-
-  // Make functions say that they are functions
-  if (isFunction(value)) {
-    var n = value.name ? ': ' + value.name : '';
-    base = ' [Function' + n + ']';
-  }
-
-  // Make RegExps say that they are RegExps
-  if (isRegExp(value)) {
-    base = ' ' + RegExp.prototype.toString.call(value);
-  }
-
-  // Make dates with properties first say the date
-  if (isDate(value)) {
-    base = ' ' + Date.prototype.toUTCString.call(value);
-  }
-
-  // Make error with message first say the error
-  if (isError(value)) {
-    base = ' ' + formatError(value);
-  }
-
-  if (keys.length === 0 && (!array || value.length == 0)) {
-    return braces[0] + base + braces[1];
-  }
-
-  if (recurseTimes < 0) {
-    if (isRegExp(value)) {
-      return ctx.stylize(RegExp.prototype.toString.call(value), 'regexp');
-    } else {
-      return ctx.stylize('[Object]', 'special');
-    }
-  }
-
-  ctx.seen.push(value);
-
-  var output;
-  if (array) {
-    output = formatArray(ctx, value, recurseTimes, visibleKeys, keys);
-  } else {
-    output = keys.map(function(key) {
-      return formatProperty(ctx, value, recurseTimes, visibleKeys, key, array);
-    });
-  }
-
-  ctx.seen.pop();
-
-  return reduceToSingleString(output, base, braces);
-}
-
-
-function formatPrimitive(ctx, value) {
-  if (isUndefined(value))
-    return ctx.stylize('undefined', 'undefined');
-  if (isString(value)) {
-    var simple = '\'' + JSON.stringify(value).replace(/^"|"$/g, '')
-                                             .replace(/'/g, "\\'")
-                                             .replace(/\\"/g, '"') + '\'';
-    return ctx.stylize(simple, 'string');
-  }
-  if (isNumber(value))
-    return ctx.stylize('' + value, 'number');
-  if (isBoolean(value))
-    return ctx.stylize('' + value, 'boolean');
-  // For some reason typeof null is "object", so special case here.
-  if (isNull(value))
-    return ctx.stylize('null', 'null');
-}
-
-
-function formatError(value) {
-  return '[' + Error.prototype.toString.call(value) + ']';
-}
-
-
-function formatArray(ctx, value, recurseTimes, visibleKeys, keys) {
-  var output = [];
-  for (var i = 0, l = value.length; i < l; ++i) {
-    if (hasOwnProperty(value, String(i))) {
-      output.push(formatProperty(ctx, value, recurseTimes, visibleKeys,
-          String(i), true));
-    } else {
-      output.push('');
-    }
-  }
-  keys.forEach(function(key) {
-    if (!key.match(/^\d+$/)) {
-      output.push(formatProperty(ctx, value, recurseTimes, visibleKeys,
-          key, true));
-    }
-  });
-  return output;
-}
-
-
-function formatProperty(ctx, value, recurseTimes, visibleKeys, key, array) {
-  var name, str, desc;
-  desc = Object.getOwnPropertyDescriptor(value, key) || { value: value[key] };
-  if (desc.get) {
-    if (desc.set) {
-      str = ctx.stylize('[Getter/Setter]', 'special');
-    } else {
-      str = ctx.stylize('[Getter]', 'special');
-    }
-  } else {
-    if (desc.set) {
-      str = ctx.stylize('[Setter]', 'special');
-    }
-  }
-  if (!hasOwnProperty(visibleKeys, key)) {
-    name = '[' + key + ']';
-  }
-  if (!str) {
-    if (ctx.seen.indexOf(desc.value) < 0) {
-      if (isNull(recurseTimes)) {
-        str = formatValue(ctx, desc.value, null);
-      } else {
-        str = formatValue(ctx, desc.value, recurseTimes - 1);
-      }
-      if (str.indexOf('\n') > -1) {
-        if (array) {
-          str = str.split('\n').map(function(line) {
-            return '  ' + line;
-          }).join('\n').substr(2);
-        } else {
-          str = '\n' + str.split('\n').map(function(line) {
-            return '   ' + line;
-          }).join('\n');
-        }
-      }
-    } else {
-      str = ctx.stylize('[Circular]', 'special');
-    }
-  }
-  if (isUndefined(name)) {
-    if (array && key.match(/^\d+$/)) {
-      return str;
-    }
-    name = JSON.stringify('' + key);
-    if (name.match(/^"([a-zA-Z_][a-zA-Z_0-9]*)"$/)) {
-      name = name.substr(1, name.length - 2);
-      name = ctx.stylize(name, 'name');
-    } else {
-      name = name.replace(/'/g, "\\'")
-                 .replace(/\\"/g, '"')
-                 .replace(/(^"|"$)/g, "'");
-      name = ctx.stylize(name, 'string');
-    }
-  }
-
-  return name + ': ' + str;
-}
-
-
-function reduceToSingleString(output, base, braces) {
-  var numLinesEst = 0;
-  var length = output.reduce(function(prev, cur) {
-    numLinesEst++;
-    if (cur.indexOf('\n') >= 0) numLinesEst++;
-    return prev + cur.replace(/\u001b\[\d\d?m/g, '').length + 1;
-  }, 0);
-
-  if (length > 60) {
-    return braces[0] +
-           (base === '' ? '' : base + '\n ') +
-           ' ' +
-           output.join(',\n  ') +
-           ' ' +
-           braces[1];
-  }
-
-  return braces[0] + base + ' ' + output.join(', ') + ' ' + braces[1];
-}
-
-
-// NOTE: These type checking functions intentionally don't use `instanceof`
-// because it is fragile and can be easily faked with `Object.create()`.
-function isArray(ar) {
-  return Array.isArray(ar);
-}
-exports.isArray = isArray;
-
-function isBoolean(arg) {
-  return typeof arg === 'boolean';
-}
-exports.isBoolean = isBoolean;
-
-function isNull(arg) {
-  return arg === null;
-}
-exports.isNull = isNull;
-
-function isNullOrUndefined(arg) {
-  return arg == null;
-}
-exports.isNullOrUndefined = isNullOrUndefined;
-
-function isNumber(arg) {
-  return typeof arg === 'number';
-}
-exports.isNumber = isNumber;
-
-function isString(arg) {
-  return typeof arg === 'string';
-}
-exports.isString = isString;
-
-function isSymbol(arg) {
-  return typeof arg === 'symbol';
-}
-exports.isSymbol = isSymbol;
-
-function isUndefined(arg) {
-  return arg === void 0;
-}
-exports.isUndefined = isUndefined;
-
-function isRegExp(re) {
-  return isObject(re) && objectToString(re) === '[object RegExp]';
-}
-exports.isRegExp = isRegExp;
-
-function isObject(arg) {
-  return typeof arg === 'object' && arg !== null;
-}
-exports.isObject = isObject;
-
-function isDate(d) {
-  return isObject(d) && objectToString(d) === '[object Date]';
-}
-exports.isDate = isDate;
-
-function isError(e) {
-  return isObject(e) &&
-      (objectToString(e) === '[object Error]' || e instanceof Error);
-}
-exports.isError = isError;
-
-function isFunction(arg) {
-  return typeof arg === 'function';
-}
-exports.isFunction = isFunction;
-
-function isPrimitive(arg) {
-  return arg === null ||
-         typeof arg === 'boolean' ||
-         typeof arg === 'number' ||
-         typeof arg === 'string' ||
-         typeof arg === 'symbol' ||  // ES6 symbol
-         typeof arg === 'undefined';
-}
-exports.isPrimitive = isPrimitive;
-
-exports.isBuffer = require('./support/isBuffer');
-
-function objectToString(o) {
-  return Object.prototype.toString.call(o);
-}
-
-
-function pad(n) {
-  return n < 10 ? '0' + n.toString(10) : n.toString(10);
-}
-
-
-var months = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep',
-              'Oct', 'Nov', 'Dec'];
-
-// 26 Feb 16:19:34
-function timestamp() {
-  var d = new Date();
-  var time = [pad(d.getHours()),
-              pad(d.getMinutes()),
-              pad(d.getSeconds())].join(':');
-  return [d.getDate(), months[d.getMonth()], time].join(' ');
-}
-
-
-// log is just a thin wrapper to console.log that prepends a timestamp
-exports.log = function() {
-  console.log('%s - %s', timestamp(), exports.format.apply(exports, arguments));
-};
-
-
-/**
- * Inherit the prototype methods from one constructor into another.
- *
- * The Function.prototype.inherits from lang.js rewritten as a standalone
- * function (not on Function.prototype). NOTE: If this file is to be loaded
- * during bootstrapping this function needs to be rewritten using some native
- * functions as prototype setup using normal JavaScript does not work as
- * expected during bootstrapping (see mirror.js in r114903).
- *
- * @param {function} ctor Constructor function which needs to inherit the
- *     prototype.
- * @param {function} superCtor Constructor function to inherit prototype from.
- */
-exports.inherits = require('inherits');
-
-exports._extend = function(origin, add) {
-  // Don't do anything if add isn't an object
-  if (!add || !isObject(add)) return origin;
-
-  var keys = Object.keys(add);
-  var i = keys.length;
-  while (i--) {
-    origin[keys[i]] = add[keys[i]];
-  }
-  return origin;
-};
-
-function hasOwnProperty(obj, prop) {
-  return Object.prototype.hasOwnProperty.call(obj, prop);
-}
-
-}).call(this,require('_process'),typeof global !== "undefined" ? global : typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
-},{"./support/isBuffer":270,"_process":268,"inherits":269}]},{},[2,1])(2)
+},{}]},{},[3])(3)
 });

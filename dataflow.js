@@ -1,7 +1,6 @@
 // const fs = require("fs");
 const tf = require('@tensorflow/tfjs');
 const {loadFrozenModel} = require("@tensorflow/tfjs-converter");
-const tfjs = require("@tensorflow/tfjs-node");
 // const Canvas = require("canvas");
 const knn = require("@tensorflow-models/knn-classifier");
 // const request = require("request");
@@ -24,21 +23,22 @@ async function image(bin, size = 224) {
 }
 
 class DataFlow {
- constructor(model, weights) {
+ constructor(graph, weights) {
   this.classifier = knn.create();
-  this.model = model;
+  this.graph = graph;
   this.weights = weights;
  }
 
  async load() {
-  this.model = await loadFrozenModel(this.model, this.weights);
+  this.model = await loadFrozenModel(this.graph, this.weights);
  }
 
  async addExample(bin, label) {
-  let id = this.model.execute({
+  let id = await this.model.execute({
     images: await image(bin)
    });
   this.classifier.addExample(id, label);
+  return id;
  }
 
  async predict(bin) {

@@ -2,7 +2,7 @@
   "name": "deeplearn.jsonld",
   "scripts": {
     "test": "mocha -w",
-    "build": "watchify flickr.js dataflow.js -o build/index.js -s module"
+    "build": "watchify index.js -o build/index.js -s module"
   },
   "repository": {
     "type": "git",
@@ -18,9 +18,11 @@
     "@tensorflow/tfjs-converter": "^0.5.7",
     "@tensorflow/tfjs-node": "^0.1.13",
     "canvas": "^1.6.11",
+    "es6-promisify": "^6.0.0",
     "get-image-data": "^3.0.1",
     "node-fetch": "^2.2.0",
-    "sscanf": "^0.8.0"
+    "sscanf": "^0.8.0",
+    "util.promisify": "^1.0.0"
   },
   "devDependencies": {
     "chai": "^4.1.0",

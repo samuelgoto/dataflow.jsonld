@@ -222,7 +222,7 @@ describe("Deeplearn", function() {
     const model = await loadFrozenModel(MODEL_URL, WEIGHTS_URL);
 
     let result = await model.execute({
-      images: await image("./test/church.jpg")
+      images: await image(await load("./test/church.jpg"))
      });
 
     console.log(getTopKClasses(result, 5));
@@ -246,7 +246,7 @@ describe("Deeplearn", function() {
     const model = await loadFrozenModel(MODEL_URL, WEIGHTS_URL);
 
     let result = await model.execute({
-      Placeholder: await image("./test/daisy.jpg", 299)
+      Placeholder: await image(await load("./test/daisy.jpg", 299), 299)
      });
 
     // python benchmark:
@@ -278,13 +278,13 @@ describe("Deeplearn", function() {
 
     // 82% accuracy on training and 50% accuracy on validation
     let result = await model.execute({
-      Placeholder: await image("./test/leo.jpg", 224)
+      Placeholder: await image(await load("./test/leo.jpg"), 224)
      });
 
     result.print();
 
     result = await model.execute({
-      Placeholder: await image("./test/anna.jpg", 224)
+      Placeholder: await image(await load("./test/anna.jpg"), 224)
      });
 
     result.print();
@@ -303,7 +303,7 @@ describe("Deeplearn", function() {
     const model = await loadFrozenModel(MODEL_URL, WEIGHTS_URL);
 
     let result = await model.execute({
-      images: await image("./test/church.jpg")
+      images: await image(await load("./test/church.jpg"))
      });
 
     console.log(getTopKClasses(result, 5));
@@ -317,7 +317,7 @@ describe("Deeplearn", function() {
     const model = await loadFrozenModel(MODEL_URL, WEIGHTS_URL);
 
     let result = await model.execute({
-      images: await image("./test/church.jpg", 331)
+      images: await image(await load("./test/church.jpg", 331), 331)
      });
 
     console.log(getTopKClasses(result, 5));
@@ -357,7 +357,7 @@ describe("Deeplearn", function() {
     const model = await loadFrozenModel(MODEL_URL, WEIGHTS_URL);
 
     let result = await model.execute({
-      images: await image("./test/church.jpg")
+      images: await image(await load("./test/church.jpg"))
      });
 
     console.log(getTopKClasses(result, 5));
@@ -391,7 +391,7 @@ describe("Deeplearn", function() {
 
     let id = async (url) => {
      return model.execute({
-       images: await image(url)
+       images: await image(await load(url))
       })
     };
 
@@ -424,7 +424,7 @@ describe("Deeplearn", function() {
     }
   });
 
-  it.only("dataflow", async function() {
+  it("dataflow", async function() {
     this.timeout(10000);
 
     const MODEL_URL = "file://./test/mobilenet-features/tensorflowjs_model.pb";
@@ -455,7 +455,7 @@ describe("Deeplearn", function() {
 
     let id = async (url) => {
      return model.execute({
-       images: await image(url)
+       images: await image(await load(url))
       })
     };
 

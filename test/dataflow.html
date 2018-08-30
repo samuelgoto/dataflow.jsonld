@@ -1,0 +1,40 @@
+<script src="/build/index.js"></script>
+
+<img id="image" style="display: none;">
+<canvas id="canvas" width="224" height="224"></canvas>
+
+<script>
+
+  async function load(url) {
+    let img = document.getElementById("image");
+    let canvas = document.getElementById("canvas");
+    return new Promise(function(resolve, reject) {
+      img.src = url;
+      img.onload = function() {
+        let context = canvas.getContext("2d");
+        context.drawImage(img, 0, 0, 224, 224);
+        resolve(canvas);
+      }
+    });
+  }
+
+  async function go() {
+    let {DataFlow} = module;
+    const url = "/test/mobilenet-features/";
+    let dataflow = new DataFlow(
+       url + "tensorflowjs_model.pb", 
+       url + "weights_manifest.json");
+
+    await dataflow.load();
+    let leo = await dataflow.addExample(await load("leo.jpg"), 0);
+    console.log(leo);
+    let anna = await dataflow.addExample(await load("anna.jpg"), 1);
+    console.log(anna);
+ 
+    let prediction = await dataflow.predict(await load("anna2.jpg"));
+    console.log(prediction);
+  }
+
+  go();
+
+</script>
