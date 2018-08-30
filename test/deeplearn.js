@@ -466,15 +466,18 @@ describe("Deeplearn", function() {
     classifier.addExample(await id("./test/leo.jpg"), 1);
     classifier.addExample(await id("./test/leo2.jpg"), 1);
     classifier.addExample(await id("./test/church.jpg"), 2);
-    classifier.addExample(await id("./test/church2.jpg"), 2);
+    // classifier.addExample(await id("./test/church2.jpg"), 2);
     classifier.addExample(await id("./test/eiffel.jpg"), 3);
 
-    let query = await id("./test/eiffel.jpg");
+    let query = await id("./test/church2.jpg");
     let prediction = await classifier.predictClass(query);
 
     classifier.similarities(query).print();
 
-    console.log(prediction);
+    // console.log(classifier.classDatasetMatrices);
+    // console.log(classifier.classExampleCount[0]);
+
+    // console.log(prediction);
    });
 
 
