@@ -373,6 +373,7 @@
       right: 30px;
       top: 20px;
       font-weight: strong;
+      text-align: right;
     }
 
     #camera {
@@ -388,7 +389,6 @@
     <div id="go" class="fullscreen">
       <div id="instructions" class="instructions"></div>
       <img id="image" crossorigin="anonymous" class="image">
-
       <video autoplay="true" id="camera"></video>
     </div>
 
@@ -396,41 +396,39 @@
       const {Flickr} = module;
 
       async function instructions(message) {
-        document.getElementById("instructions").innerText = message;
+        document.getElementById("instructions").innerHTML = message;
       }
 
       async function go() {
         let query = document.getElementById("search").value;
-
-        instructions("Press 'J' if this image matches what you want to trigger on and 'K' if it doesn't. ESC to leave the training.");
 
         if (!query) {
           alert(`invalid query [${query}]`);
           return;
         }
 
-        document.getElementById("go").setAttribute("enabled", "true");
+        document.getElementById("go").setAttribute("enabled", "labeling");
 
         let photos = await new Flickr().search(query, 300);
-        console.log(photos);
+        // console.log(photos);
+
+        if (photos.length < 10) { 
+          alert(`Not enough examples found on flickr (${photos.length}). Search something else.`);
+          document.getElementById("go").removeAttribute("enabled");
+          return;
+        }
 
         let i = 0;
        
         let image = (index) => {
           document.getElementById("image").src = photos[index];
-        };
 
-        image(i);   
-
-        let good = [];
-        let bad = [];
-
-        function keyboard(e) {
-          // e.keyCode == 27 is ESC
-          let char = String.fromCharCode(e.keyCode);
-          if (e.keyCode == 27 || i == (photos.length - 1)) {
-            document.body.removeEventListener("keydown", keyboard);
-            document.getElementById("go").removeAttribute("enabled");
+          instructions(`
+            <br>Image ${index} out of ${photos.length}.
+            <br>Press 'J' if this image matches what you want to trigger on and 'K' if it doesn't. 
+            <br>ESC to leave the training.
+            <br>
+          `);
 
             document.getElementById("result").innerText = `
 {
@@ -443,20 +441,40 @@
 }
 `;
 
-            train();
+        };
 
-          } else if (char == "J" || char == "K") {
-            i++;
-            image(i);
+        let good = [];
+        let bad = [];
+
+        image(i);
+
+        function keyboard(e) {
+          // e.keyCode == 27 is ESC
+          let char = String.fromCharCode(e.keyCode);
+
+          if (char == "J" || char == "K") {
             let bucket = char == "J" ? good : bad;
             bucket.push(photos[i]);
-          } else {
-            // alert("unknown key: press J/K or ESC");
+            i++;
+            image(i);
+          }
+
+          if (i == photos.length) {
+            document.body.removeEventListener("keydown", keyboard);
+            train();
           }
         }
   
         document.body.addEventListener("keydown", keyboard);
       }
+
+      document.body.addEventListener("keydown", function(e) {
+        if (e.keyCode != 27) {
+          return;
+        }
+        document.getElementById("go").removeAttribute("enabled");
+      });
+
 
       // go();
 
@@ -484,9 +502,8 @@
         url + "tensorflowjs_model.pb", 
         url + "weights_manifest.json");
 
-
       async function train() {
-        document.getElementById("go").setAttribute("enabled", "true");
+        document.getElementById("go").setAttribute("enabled", "training");
         let data = JSON.parse(document.getElementById("result").value);
 
         instructions("loading the embedding");
@@ -564,7 +581,7 @@
           image.src = data.positive[best[0].i];
           image.style.opacity = best[0].score;
 
-          instructions(`Confidence level = ${best[0].score}%`);
+          instructions(`cosine distance = ${best[0].score}%`);
 
           setTimeout(predict, 250);
         }
