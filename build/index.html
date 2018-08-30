@@ -218,16 +218,16 @@
         });
       }
 
-      async function train() {
+      let {DataFlow} = module;
+      const url = "../test/mobilenet-features/";
+      let dataflow = new DataFlow(
+        url + "tensorflowjs_model.pb", 
+        url + "weights_manifest.json");
 
+
+      async function train() {
         document.getElementById("go").setAttribute("enabled", "true");
         let data = JSON.parse(document.getElementById("result").value);
-
-        let {DataFlow} = module;
-        const url = "../test/mobilenet-features/";
-        let dataflow = new DataFlow(
-           url + "tensorflowjs_model.pb", 
-           url + "weights_manifest.json");
 
         instructions("loading the embedding");
 
@@ -261,17 +261,34 @@
         await run();
       }
 
-      // train();
+      train();
     </script>
 
     <script>
 
+      async function screenshot() {
+        let video = document.getElementById("camera");
+        let canvas = document.getElementById("canvas");
+        let context = canvas.getContext("2d");
+        context.drawImage(video, 0, 0, 224, 224);
+        return canvas;
+      }
+
       async function run() {
+        // await dataflow.load();
+
         document.getElementById("go").setAttribute("enabled", "true");
         let video = document.getElementById("camera");
 
         let stream = await navigator.mediaDevices.getUserMedia({video: true});
         camera.srcObject = stream;
+
+        video.onloadeddata = async function() {
+          let bin = await screenshot();
+          let prediction = await dataflow.predict(bin);
+          prediction.print();
+          console.log(prediction);
+        }
       }
 
       // run();
