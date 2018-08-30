@@ -1,12 +1,12 @@
 const fetch = require("node-fetch");
 
 class Flickr {
- async search(query) {
+ async search(query, opt_size) {
   let endpoint = "https://api.flickr.com/services/rest";
   let method = "method=flickr.photos.search";
   let key = "73dcc158504f1a4c3c95203a1b55e235";
   let format = "format=json&nojsoncallback=1";
-  let size = "40";
+  let size = opt_size ? opt_size : "40";
   let text = encodeURIComponent(query);
   let api = `${endpoint}/?${method}&api_key=${key}&text=${text}&${format}&per_page=${size}&sort=relevance`;
 
