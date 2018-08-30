@@ -2,6 +2,12 @@
   <head>
     <script src="index.js"></script>
     <style>
+    body {
+      background-color: black;
+      color: green;
+      font-family: "Droid Sans Mono", "Courier New", monospace;
+      padding: 50px;
+    }
     input {
       border-color: black;
       padding: 10px;
@@ -13,7 +19,7 @@
   </head>
   <body>
 
-    <h1>Welcome to the tracked object generator!</h1>
+    <p>Welcome to the tracked object generator!</p>
 
     <p>Using this website, you can <a href="https://github.com/samuelgoto/arpub">AR landmarks</a> from images. Here is how it works:</p>
 
@@ -23,6 +29,49 @@
       <li>Using the data you collected, we'll create a JSON-LD that you can embed as a <a href="https://github.com/samuelgoto/arpub">landmark</a></li>
       <li>Using your web camera, you can see if it works</li>
     </ol>
+
+
+    <script src="https://www.gstatic.com/firebasejs/5.4.2/firebase.js"></script>
+    <script>
+      // Initialize Firebase
+      var config = {
+        apiKey: "AIzaSyBPI7s0SNoxkVJff12DbzRMWbMOu-fIVuU",
+        authDomain: "class-f751c.firebaseapp.com",
+        databaseURL: "https://class-f751c.firebaseio.com",
+        projectId: "class-f751c",
+        storageBucket: "",
+        messagingSenderId: "52068356773"
+      };
+      firebase.initializeApp(config);
+      let db = firebase.database();
+
+      class Database {
+        static write(key, value) {
+          return new Promise(function(resolve, reject) {
+            db.ref(key).set(value, function (error) {
+              if (error) {
+                reject();
+                return;
+              }
+              resolve(value);
+            });     
+          });
+        }
+
+        static read(key) {
+          return new Promise(function(resolve, reject) {
+            db.ref(key).once("value").then(function(snapshot) {
+              // console.log(snapshot.val());
+              resolve(snapshot.val());
+            });
+          });
+        }
+      }
+
+      Database.write("foo", "hello");
+      Database.read("foo").then(value => console.log(value));
+
+    </script>
 
     <p>Ready? Set? </p> <input id="search" value="coke can"><button onclick="go()">go!</button>
 
@@ -367,8 +416,6 @@
       transform: perspective(1px) translateY(-50%);
     }
     .instructions {
-      color: green;
-      font-family: "Droid Sans Mono", "Courier New", monospace;
       position: absolute;
       right: 30px;
       top: 20px;
