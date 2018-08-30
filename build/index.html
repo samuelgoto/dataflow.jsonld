@@ -124,6 +124,10 @@
     <script>
       const {Flickr} = module;
 
+      async function instructions(message) {
+        document.getElementById("instructions").innerText = message;
+      }
+
       async function go() {
         let query = document.getElementById("search").value;
 
@@ -155,7 +159,7 @@
           let char = String.fromCharCode(e.keyCode);
           if (e.keyCode == 27 || i == (photos.length - 1)) {
             document.body.removeEventListener("keydown", keyboard);
-            document.getElementById("fullscreen").removeAttribute("enabled");
+            document.getElementById("go").removeAttribute("enabled");
 
             document.getElementById("result").innerText = `
 {
@@ -167,6 +171,8 @@
   "negative": ${JSON.stringify(bad, undefined, 4)}
 }
 `;
+
+            train();
 
           } else if (char == "J" || char == "K") {
             i++;
@@ -199,10 +205,6 @@
             resolve(canvas);
           }
         });
-      }
-
-      async function instructions(message) {
-        document.getElementById("instructions").innerText = message;
       }
 
       async function train() {
@@ -247,7 +249,7 @@
         // prediction.print();
       }
 
-      train();
+      // train();
     </script>
 
     <!--
