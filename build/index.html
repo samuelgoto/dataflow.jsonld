@@ -114,11 +114,22 @@
       top: 20px;
       font-weight: strong;
     }
+
+    #camera {
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 244;
+      height: 244;
+    }
+
     </style>
 
     <div id="go" class="fullscreen">
       <div id="instructions" class="instructions"></div>
       <img id="image" crossorigin="anonymous" class="image">
+
+      <video autoplay="true" id="camera"></video>
     </div>
 
     <script>
@@ -247,10 +258,26 @@
         // let prediction = await dataflow.predict(await load("/test/anna2.jpg"));
         // console.log(prediction);
         // prediction.print();
+        await run();
       }
 
       // train();
     </script>
+
+    <script>
+
+      async function run() {
+        document.getElementById("go").setAttribute("enabled", "true");
+        let video = document.getElementById("camera");
+
+        let stream = await navigator.mediaDevices.getUserMedia({video: true});
+        camera.srcObject = stream;
+      }
+
+      // run();
+
+    </script>
+
 
     <!--
     <button onclick="register()">register</button>
