@@ -2,7 +2,6 @@
 // const fs = require("fs");
 const tf = require('@tensorflow/tfjs');
 const {loadFrozenModel} = require("@tensorflow/tfjs-converter");
-// const tfjs = require("@tensorflow/tfjs-node");
 // const Canvas = require("canvas");
 const knn = require("@tensorflow-models/knn-classifier");
 // const request = require("request");
@@ -49,8 +48,7 @@ class DataFlow {
    });
 
   let prediction = await this.classifier.predictClass(query);
-  // this.classifier.similarities(query).print();
-  return prediction;
+  return this.classifier.similarities(query);
  }
 }
 

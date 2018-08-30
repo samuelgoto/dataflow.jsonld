@@ -26,16 +26,61 @@
 
     <p>Ready? Set? </p> <input id="search" value="coke can"><button onclick="go()">go!</button>
 
-    <p>Here is the result:</p>
+    <p>Does this <a href="#" onclick="test()">work</a>?</p>
 
-    <textarea id="result" rows="30" cols="80">{
+    <p>Here is the result (with an initial example of coke cans):</p>
+
+    <textarea id="result" rows="30" cols="80">
+{
   "@context": "http://w3c.org/ns/ar",
   "@type": "TrackedObject",
+  "@id": "http://localhost:8080/build/index.html/coke can",
+  "name": "coke can",
   "positive": [
-  ],
+    "https://farm8.staticflickr.com/7459/14065931981_e3fbf5ebd9.jpg",
+    "https://farm9.staticflickr.com/8385/8648404658_922f076a56.jpg",
+    "https://farm5.staticflickr.com/4073/4825015776_ba65d5d617.jpg",
+    "https://farm4.staticflickr.com/3671/10912258763_2c6d79d871.jpg",
+    "https://farm3.staticflickr.com/2558/4104942788_744bb6dccf.jpg",
+    "https://farm6.staticflickr.com/5135/5390433735_829b09ae8f.jpg",
+    "https://farm8.staticflickr.com/7254/7644634218_afab5dfa31.jpg",
+    "https://farm8.staticflickr.com/7441/8904846371_67d60f104e.jpg",
+    "https://farm3.staticflickr.com/2409/2198719840_f2b26030ec.jpg",
+    "https://farm4.staticflickr.com/3826/11455888723_bb5dd0d987.jpg",
+    "https://farm4.staticflickr.com/3177/2794682987_493933c2a1.jpg",
+    "https://farm9.staticflickr.com/8376/8410015310_5fcf6b49b7.jpg",
+    "https://farm5.staticflickr.com/4084/5063615975_1342bc90eb.jpg",
+    "https://farm3.staticflickr.com/2290/2198719112_496e816c49.jpg",
+    "https://farm3.staticflickr.com/2904/14176400987_7c2da3a6d2.jpg",
+    "https://farm8.staticflickr.com/7143/6471646129_fa953961c6.jpg",
+    "https://farm9.staticflickr.com/8337/8209672322_4a4f6aa135.jpg",
+    "https://farm4.staticflickr.com/3035/2617610118_1267514c8a.jpg",
+    "https://farm8.staticflickr.com/7169/6484907863_059e3287f0.jpg",
+    "https://farm5.staticflickr.com/4097/4944667325_7c02300258.jpg",
+    "https://farm1.staticflickr.com/228/519931278_2e33aee6c5.jpg",
+    "https://farm5.staticflickr.com/4049/4263803088_64568ab497.jpg",
+    "https://farm8.staticflickr.com/7285/9475606277_6307159570.jpg",
+    "https://farm4.staticflickr.com/3634/3490405090_096fc34fe3.jpg",
+    "https://farm8.staticflickr.com/7409/9527054564_676238e0ae.jpg",
+    "https://farm9.staticflickr.com/8388/8582019760_34075d2574.jpg",
+    "https://farm6.staticflickr.com/5039/5805170577_38d3323a2b.jpg",
+    "https://farm5.staticflickr.com/4118/4849890659_b2b09fb5b8.jpg"
+],
   "negative": [
-  ]
-}</textarea>
+    "https://farm6.staticflickr.com/5177/5473295218_297dd30880.jpg",
+    "https://farm9.staticflickr.com/8144/7142865537_a26290e0cb.jpg",
+    "https://farm9.staticflickr.com/8684/17084430458_0f78d330cc.jpg",
+    "https://farm8.staticflickr.com/7286/8727268673_61425ec571.jpg",
+    "https://farm6.staticflickr.com/5107/5618311769_6e386d9b2b.jpg",
+    "https://farm9.staticflickr.com/8337/8252915543_e982af4d22.jpg",
+    "https://farm6.staticflickr.com/5564/14972702786_ee42a806dc.jpg",
+    "https://farm5.staticflickr.com/4107/5034753928_9d891cece3.jpg",
+    "https://farm4.staticflickr.com/3575/3383516971_86acd0fb2f.jpg",
+    "https://farm6.staticflickr.com/5222/5607779210_242091870d.jpg",
+    "https://farm4.staticflickr.com/3144/2859981714_c82940b8b8.jpg"
+]
+}
+</textarea>
 
     <style>
     #result {
@@ -71,9 +116,9 @@
     }
     </style>
 
-    <div id="fullscreen" class="fullscreen">
-      <div class="instructions">Press "J" if this image matches what you want to trigger on and "K" if it doesn't. ESC to leave the training.</div>
-      <img id="image" class="image">
+    <div id="go" class="fullscreen">
+      <div id="instructions" class="instructions"></div>
+      <img id="image" crossorigin="anonymous" class="image">
     </div>
 
     <script>
@@ -82,12 +127,14 @@
       async function go() {
         let query = document.getElementById("search").value;
 
+        instructions("Press 'J' if this image matches what you want to trigger on and 'K' if it doesn't. ESC to leave the training.");
+
         if (!query) {
           alert(`invalid query [${query}]`);
           return;
         }
 
-        document.getElementById("fullscreen").setAttribute("enabled", "true");
+        document.getElementById("go").setAttribute("enabled", "true");
 
         let photos = await new Flickr().search(query);
         console.log(photos);
@@ -113,7 +160,7 @@
             document.getElementById("result").innerText = `
 {
   "@context": "http://w3c.org/ns/ar",
-  "@type: "TrackedObject",
+  "@type": "TrackedObject",
   "@id": "${document.location.href}/${query}",
   "name": "${query}",
   "positive": ${JSON.stringify(good, undefined, 4)},
@@ -136,6 +183,71 @@
 
       // go();
 
+    </script>
+
+    <canvas id="canvas" width="224" height="224"></canvas>
+
+    <script>
+      async function load(url) {
+        let img = document.getElementById("image");
+        let canvas = document.getElementById("canvas");
+        return new Promise(function(resolve, reject) {
+          img.src = url;
+          img.onload = function() {
+            let context = canvas.getContext("2d");
+            context.drawImage(img, 0, 0, 224, 224);
+            resolve(canvas);
+          }
+        });
+      }
+
+      async function instructions(message) {
+        document.getElementById("instructions").innerText = message;
+      }
+
+      async function test() {
+
+        document.getElementById("go").setAttribute("enabled", "true");
+        let data = JSON.parse(document.getElementById("result").value);
+
+        let {DataFlow} = module;
+        const url = "/test/mobilenet-features/";
+        let dataflow = new DataFlow(
+           url + "tensorflowjs_model.pb", 
+           url + "weights_manifest.json");
+
+        instructions("loading the embedding");
+
+        await dataflow.load();
+
+        instructions("loading positive examples into the KNN");
+
+        for (let photo of data.positive) {
+          let bin = await load(photo);
+          // console.log(bin);
+          await dataflow.addExample(bin, 0);
+        }
+
+        instructions("loading negative examples into the KNN");
+
+        for (let photo of data.positive) {
+          let bin = await load(photo);
+          // console.log(bin);
+          await dataflow.addExample(bin, 0);
+        }
+
+        instructions("loading web camera");
+ 
+        // console.log(leo);
+        // let anna = await dataflow.addExample(await load("/test/anna.jpg"), 1);
+        // console.log(anna);
+ 
+        // let prediction = await dataflow.predict(await load("/test/anna2.jpg"));
+        // console.log(prediction);
+        // prediction.print();
+      }
+
+      test();
     </script>
 
     <!--

@@ -47,8 +47,7 @@ class DataFlow {
    });
 
   let prediction = await this.classifier.predictClass(query);
-  // this.classifier.similarities(query).print();
-  return prediction;
+  return this.classifier.similarities(query);
  }
 }
 
