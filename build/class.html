@@ -7,8 +7,8 @@
   </head>
   <body>
 
-    <p>Step 1) click <a href="javascript: void(0)" onclick="go() ">here</a> to add examples of <span class="clazz"></span>!</p>
-    <p>Step 2) click <a href="javascript: void(0)" onclick="alert('TODO: implement this')">here</a> to run <span class="clazz"></span>!</p>
+    <p>Step 1) click <a href="javascript: void(0)" onclick="go()">here</a> to add examples of <span class="clazz"></span>!</p>
+    <p>Step 2) click <a href="javascript: void(0)" onclick="window.location.href = 'run.html#' + window.location.hash.substring(1)">here</a> to run <span class="clazz"></span>!</p>
     <br>
 
     <textarea id="result" cols="80" rows="10">
@@ -21,10 +21,7 @@
     <div id="go" class="fullscreen">
       <div id="instructions" class="instructions"></div>
       <img id="image" crossorigin="anonymous" class="image">
-      <video autoplay="true" id="camera"></video>
     </div>
-
-    <canvas id="canvas" width="224" height="224" style="display: none;"></canvas>
 
     <script>
 

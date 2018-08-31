@@ -155,9 +155,9 @@ let dataflow = new DataFlow(
                             url + "tensorflowjs_model.pb", 
                             url + "weights_manifest.json");
 
-async function train() {
+async function run(examples) {
  document.getElementById("go").setAttribute("enabled", "training");
- let data = JSON.parse(document.getElementById("result").value);
+ // let data = JSON.parse(document.getElementById("result").value);
 
  instructions("loading the embedding");
 
@@ -165,7 +165,7 @@ async function train() {
 
  instructions("loading positive examples into the KNN");
 
- for (let photo of data.positive) {
+ for (let photo of examples) {
   let bin = await load(photo);
   // console.log(bin);
   await dataflow.addExample(bin, 0);
@@ -188,7 +188,7 @@ async function train() {
  // let prediction = await dataflow.predict(await load("/test/anna2.jpg"));
  // console.log(prediction);
  // prediction.print();
- await run();
+ await infer(examples);
 }
 
 // train();
@@ -201,14 +201,14 @@ async function screenshot() {
  return canvas;
 }
 
-async function run() {
+async function infer(examples) {
  document.getElementById("go").setAttribute("enabled", "true");
  let video = document.getElementById("camera");
 
  let stream = await navigator.mediaDevices.getUserMedia({video: true});
  camera.srcObject = stream;
 
- let data = JSON.parse(document.getElementById("result").value);
+ // let data = JSON.parse(document.getElementById("result").value);
  let image = document.getElementById("image");
 
  async function predict() {
@@ -228,7 +228,7 @@ async function run() {
 
   // displays the closest image
   let image = document.getElementById("image");
-  image.src = data.positive[best[0].i];
+  image.src = examples[best[0].i];
   image.style.opacity = best[0].score;
   
   instructions(`cosine distance = ${best[0].score}%`);
@@ -238,11 +238,9 @@ async function run() {
 
  video.onloadeddata = async function() {
   predict();
-  // setTimeout(predict, 250);
  }
 }
 
-// run();
 
 async function register() {
  console.log("registering");
