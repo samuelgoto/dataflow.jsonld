@@ -3,23 +3,17 @@
     <script src="index.js"></script>
     <script src="https://www.gstatic.com/firebasejs/5.4.2/firebase.js"></script>
     <link rel="stylesheet" href="main.css">
+    <script src="main.js"></script>
   </head>
   <body>
 
     <p>Welcome to the tracked object generator!</p>
 
-    <p>Using this website, you can use and create <a href="https://github.com/samuelgoto/arpub">AR landmarks</a> from images. You can use (and improve) one of these:</p>
-
-    <ul id="classes">
-    </ul>
-
-    <script src="main.js"></script>
-
-    <p>Or, if none of those are what you are looking for, you can create your own:</p>
+    <p>Using this website, you can use and create <a href="https://github.com/samuelgoto/arpub">AR landmarks</a> from images. Here is how it works:</p>
 
     <ol>
       <li>You search for pictures on flickr</li>
-      <li>We'll show you the pictures and you tell us if they match what you are trying to trigger on or not</li>
+      <li>We'll show you pictures and you tell us if they match what you are trying to trigger on or not</li>
       <li>Using the data you collected, we'll create a JSON-LD that you can embed as a <a href="https://github.com/samuelgoto/arpub">landmark</a></li>
       <li>Using your web camera, you can see if it works</li>
     </ol>
@@ -27,6 +21,12 @@
     <p>Ready? Set?</p>
 
     Click <a href="#" onclick="go()">here</a> to create a new class!
+
+
+    <p>Otherwise, you can re-use (and extend) some that have already been created:</p>
+
+    <ul id="classes">
+    </ul>
 
     <script>
       list();
