@@ -241,6 +241,92 @@ async function infer(examples) {
  }
 }
 
+async function classify(classes) {
+ document.getElementById("go").setAttribute("enabled", "training");
+
+ instructions("loading the embedding");
+ 
+ await dataflow.load();
+
+ instructions("loading examples into the KNN");
+
+ console.log(classes);
+
+ let labels = [];
+ for (let clazz in classes) {
+  // console.log(clazz);
+  labels.push({
+    name: clazz,
+    examples: classes[clazz]
+   });
+ }
+
+ for (let i = 0; i < labels.length; i++) {
+  let label = labels[i];
+  console.log(label.name);
+  let max = Math.min(50, label.examples.length);
+  // let max = label.examples.length;
+  for (let j = 0; j < max; j++) {
+   instructions(`loading examples of "${label.name}" [${j} of ${max}].`);
+
+   let photo = label.examples[j];
+   console.log(photo);
+
+   let bin = await load(photo);
+   await dataflow.addExample(bin, i);
+  }
+ };
+
+ instructions("loading web camera");
+
+ await nearest(labels);
+}
+
+async function nearest(labels) {
+ document.getElementById("go").setAttribute("enabled", "true");
+ let video = document.getElementById("camera");
+
+ let stream = await navigator.mediaDevices.getUserMedia({video: true});
+ camera.srcObject = stream;
+
+ let image = document.getElementById("image");
+
+ async function predict() {
+  let bin = await screenshot();
+  let classes = await dataflow.classify(bin);
+  
+  let label = labels[classes.classIndex].name;
+  let confidence = classes.confidences[classes.classIndex];
+  instructions(`I am ${confidence.toFixed(2)}% sure that this is a "${label}"`);
+
+  setTimeout(predict, 250);
+
+  return;
+
+  // return;
+  let scores = await prediction.data();
+  console.log(scores);
+
+  let best = [];
+  scores.map((score, i) => {
+    best[i] = {score: score, i: i};
+   });
+          
+  best.sort((a, b) => (b.score - a.score));
+
+  // console.log(best);
+
+  // displays the closest image
+  let image = document.getElementById("image");
+  image.src = examples[best[0].i];
+  image.style.opacity = best[0].score;
+  
+ }
+
+ video.onloadeddata = async function() {
+  predict();
+ }
+}
 
 async function register() {
  console.log("registering");

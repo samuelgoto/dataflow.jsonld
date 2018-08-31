@@ -47,8 +47,16 @@ class DataFlow {
     images: await image(bin)
    });
 
-  let prediction = await this.classifier.predictClass(query);
+  // let prediction = await this.classifier.predictClass(query);
   return this.classifier.similarities(query);
+ }
+
+ async classify(bin) {
+  let query = await this.model.execute({
+    images: await image(bin)
+   });
+
+  return await this.classifier.predictClass(query);
  }
 }
 

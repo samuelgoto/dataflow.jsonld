@@ -1,0 +1,31 @@
+<html>
+  <head>
+    <script src="index.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/5.4.2/firebase.js"></script>
+    <link rel="stylesheet" href="main.css">
+    <script src="main.js"></script>
+  </head>
+  <body>
+
+    <div id="go" class="fullscreen" enabled>
+      <div style="margin: 20px; text-align: left; position: absolute; bottom: 20px;">
+        <a href="index.html">Home</a>
+        <a href="javascript: void(0)" onclick="alert('TODO: implement loading JSON-LDs')">Load</a>
+      </div>
+      <div id="instructions" class="instructions"></div>
+      <img id="image" crossorigin="anonymous" class="image">
+      <video autoplay="true" id="camera"></video>
+    </div>
+
+    <canvas id="canvas" width="224" height="224" style="display: none;"></canvas>
+
+    <script>
+      (async function() {
+        let classes = await Database.read("/classes") || {};
+        classify(classes);
+      })();
+    </script>
+
+
+  </body>
+</html>
