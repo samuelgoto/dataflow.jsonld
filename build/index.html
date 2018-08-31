@@ -22,7 +22,6 @@
 
     Click <a href="#" onclick="go()">here</a> to create a new class!
 
-
     <p>Otherwise, you can re-use (and extend) some that have already been created:</p>
 
     <ul id="classes">
@@ -33,7 +32,7 @@
 
       async function go() {
         let name = prompt("What would you like your class to be called?");
-        window.location.href = "class.html#" + encodeURIComponent(name.replace(" ", "-"));
+        window.location.href = "class.html#" + encodeURIComponent(name.replace(/\s/g, "-"));
       }
     </script>
 

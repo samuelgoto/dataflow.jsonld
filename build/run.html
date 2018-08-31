@@ -7,7 +7,8 @@
   </head>
   <body>
 
-    <div id="go" class="fullscreen">
+    <div id="go" class="fullscreen" enabled>
+      <div style="margin: 20px; text-align: left; position: absolute; bottom: 20px;"><a href="index.html">Home</a> | <a href="javascript: window.location.href = 'class.html' + window.location.hash">Examples</a></div>
       <div id="instructions" class="instructions"></div>
       <img id="image" crossorigin="anonymous" class="image">
       <video autoplay="true" id="camera"></video>
@@ -17,6 +18,8 @@
 
     <script>
       (async function() {
+
+        // return;
 
         let clazz = document.location.hash.substring(1);
         let examples = await Database.read("/classes/" + clazz) || [];
