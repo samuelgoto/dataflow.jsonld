@@ -21,7 +21,12 @@
 
     <p>Welcome to the tracked object generator!</p>
 
-    <p>Using this website, you can <a href="https://github.com/samuelgoto/arpub">AR landmarks</a> from images. Here is how it works:</p>
+    <p>Using this website, you can use and create <a href="https://github.com/samuelgoto/arpub">AR landmarks</a> from images. You can use (and improve) one of these:</p>
+
+    <ul id="classes">
+    </ul>
+
+    <p>Or, if none of those are what you are looking for, you can create your own:</p>
 
     <ol>
       <li>You search for pictures on flickr</li>
@@ -58,6 +63,7 @@
           });
         }
 
+
         static read(key) {
           return new Promise(function(resolve, reject) {
             db.ref(key).once("value").then(function(snapshot) {
@@ -68,8 +74,25 @@
         }
       }
 
-      Database.write("foo", "hello");
-      Database.read("foo").then(value => console.log(value));
+      // Database.write("foo", "hello");
+      // Database.read("foo").then(value => console.log(value));
+
+      // Database.write("/classes/coke", {hello2: "world"});
+      // Database.read("/classes/").then(value => console.log(value));
+      // db.ref("/classes/").orderByKey().once("value");
+      async function list() {
+        let classes = await Database.read("/classes/");
+        console.log(classes);
+        let ul = document.getElementById("classes");
+
+        for (let clazz in classes) {
+          let li = document.createElement("li");
+          li.innerHTML = `<a href="javascript:alert('TODO: implement this;')">${clazz}</a>`;
+          ul.appendChild(li);
+        }
+      }
+
+      list();
 
     </script>
 
