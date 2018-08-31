@@ -253,11 +253,12 @@ async function classify(classes) {
  console.log(classes);
 
  let labels = [];
+ let max = 50;
  for (let clazz in classes) {
   // console.log(clazz);
   labels.push({
     name: clazz,
-    examples: classes[clazz].slice(0, Math.min(50, classes[clazz].length))
+    examples: classes[clazz].slice(0, Math.min(max, classes[clazz].length))
    });
  }
 
@@ -307,23 +308,31 @@ async function nearest(labels) {
           
   best.sort((a, b) => (b.score - a.score));
 
-  let image = document.getElementById("image");
-  // instructions(JSON.stringify(best[0]));
+  let images = [
+                document.getElementById("image"),
+                document.getElementById("image2"),
+                document.getElementById("image3"),
+  ];
 
-  let index = best[0].i;
-  let score = best[0].score;
-  let p = index;
-  for (let i = 0; i < labels.length; i++) {
-   if (p < labels[i].examples.length) {
-    image.src = labels[i].examples[p];
-    image.style.opacity = score;
-    break;
+  images[0].height = 244;
+  images[1].height = 244;
+  images[2].height = 244;
+
+  for (let q = 0; q < 3; q++) {
+   let index = best[q].i;
+   let score = best[q].score;
+   let p = index;
+   for (let i = 0; i < labels.length; i++) {
+    if (p < labels[i].examples.length) {
+     images[q].src = labels[i].examples[p];
+     images[q].style.opacity = score;
+     break;
+    }
+    p -= labels[i].examples.length;
    }
-   p -= labels[i].examples.length;
   }
 
-
-  setTimeout(predict, 250);
+  setTimeout(predict, 500);
  }
 
  video.onloadeddata = async function() {
