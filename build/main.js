@@ -257,20 +257,18 @@ async function classify(classes) {
   // console.log(clazz);
   labels.push({
     name: clazz,
-    examples: classes[clazz]
+    examples: classes[clazz].slice(0, Math.min(50, classes[clazz].length))
    });
  }
 
  for (let i = 0; i < labels.length; i++) {
   let label = labels[i];
-  console.log(label.name);
-  let max = Math.min(50, label.examples.length);
-  // let max = label.examples.length;
-  for (let j = 0; j < max; j++) {
-   instructions(`loading examples of "${label.name}" [${j} of ${max}].`);
+  // console.log(label.name);
+  for (let j = 0; j < label.examples.length; j++) {
+   instructions(`loading examples of "${label.name}" [${j} of ${label.examples.length}].`);
 
    let photo = label.examples[j];
-   console.log(photo);
+   // console.log(photo);
 
    let bin = await load(photo);
    await dataflow.addExample(bin, i);
@@ -299,13 +297,8 @@ async function nearest(labels) {
   let confidence = classes.confidences[classes.classIndex];
   instructions(`I am ${confidence.toFixed(2)}% sure that this is a "${label}"`);
 
-  setTimeout(predict, 250);
-
-  return;
-
-  // return;
-  let scores = await prediction.data();
-  console.log(scores);
+  let distances = await dataflow.predict(bin);
+  let scores = await distances.data();
 
   let best = [];
   scores.map((score, i) => {
@@ -314,13 +307,23 @@ async function nearest(labels) {
           
   best.sort((a, b) => (b.score - a.score));
 
-  // console.log(best);
-
-  // displays the closest image
   let image = document.getElementById("image");
-  image.src = examples[best[0].i];
-  image.style.opacity = best[0].score;
-  
+  // instructions(JSON.stringify(best[0]));
+
+  let index = best[0].i;
+  let score = best[0].score;
+  let p = index;
+  for (let i = 0; i < labels.length; i++) {
+   if (p < labels[i].examples.length) {
+    image.src = labels[i].examples[p];
+    image.style.opacity = score;
+    break;
+   }
+   p -= labels[i].examples.length;
+  }
+
+
+  setTimeout(predict, 250);
  }
 
  video.onloadeddata = async function() {
