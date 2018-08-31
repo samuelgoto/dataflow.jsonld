@@ -56,7 +56,10 @@ class DataFlow {
     images: await image(bin)
    });
 
-  return await this.classifier.predictClass(query);
+  return {
+   classes: await this.classifier.predictClass(query),
+   distances: await this.classifier.similarities(query)
+  };
  }
 }
 

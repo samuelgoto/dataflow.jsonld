@@ -292,13 +292,13 @@ async function nearest(labels) {
 
  async function predict() {
   let bin = await screenshot();
-  let classes = await dataflow.classify(bin);
+  let {classes, distances} = await dataflow.classify(bin);
   
   let label = labels[classes.classIndex].name;
   let confidence = classes.confidences[classes.classIndex];
   instructions(`I am ${confidence.toFixed(2)}% sure that this is a "${label}"`);
 
-  let distances = await dataflow.predict(bin);
+  // let distances = await dataflow.predict(bin);
   let scores = await distances.data();
 
   let best = [];
@@ -332,7 +332,7 @@ async function nearest(labels) {
    }
   }
 
-  setTimeout(predict, 500);
+  setTimeout(predict, 255);
  }
 
  video.onloadeddata = async function() {
