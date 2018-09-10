@@ -15,11 +15,15 @@ from six.moves.urllib.request import urlopen
 IMAGE_1_URL = 'https://upload.wikimedia.org/wikipedia/commons/2/28/Bridge_of_Sighs%2C_Oxford.jpg'
 IMAGE_2_URL = 'https://upload.wikimedia.org/wikipedia/commons/c/c3/The_Bridge_of_Sighs_and_Sheldonian_Theatre%2C_Oxford.jpg'
 
-IMAGE_1_URL = 'https://upload.wikimedia.org/wikipedia/commons/1/1e/Golden_gate2.jpg'
-IMAGE_2_URL = 'https://upload.wikimedia.org/wikipedia/commons/3/3e/GoldenGateBridge.jpg'
+#IMAGE_1_URL = 'https://upload.wikimedia.org/wikipedia/commons/1/1e/Golden_gate2.jpg'
+#IMAGE_2_URL = 'https://upload.wikimedia.org/wikipedia/commons/3/3e/GoldenGateBridge.jpg'
 
-IMAGE_1_URL = 'https://upload.wikimedia.org/wikipedia/commons/c/ce/2006_01_21_Ath%C3%A8nes_Parth%C3%A9non.JPG'
-IMAGE_2_URL = 'https://upload.wikimedia.org/wikipedia/commons/5/5c/ACROPOLIS_1969_-_panoramio_-_jean_melis.jpg'
+# IMAGE_1_URL = 'https://lh3.googleusercontent.com/lufPTxXeIGvtTGgZFnf_myC12tKzuHoz2Z5yW_q1C9qaJmrHJVk89vrTO1eDRGfVLahQXesTEAQjT5mJh_5fOcS0wDb1hJidpHyGbQW0-lfHycCI27jWN3hNgL-3nlsa4zrGB5w9wSQbj6zIskIYrXt8RaNWLjRS1qeTuib-bYIVYg_qia_iALFIvmr7pbXeYmJMwFGZsQDlR2Tg37fOCdFwNix96eh_hIe7ORSIZ7kTt-HyCAVHMurmnAykaLfBMM6WNeAB_GTBTGaMkQAureusxRn70dRPOzhgTIn0EMSiW0131pGTN3805H5cmRcW3RBpE06lEBwhG7XRo1qRjQUHvfABge0n05hcgfs7N-u6hX22CmksE16PiPs_WyQygfbnQ57TcdSQUP2eVm2tFOfFli7Gsb4PsqAB8HpPHv74QjF8lbECA41ZBF6BmspAXTHbssyaW_i9lOsIDCOhsgkUoEf0w7A6NfffndJtI6bxp62Q6d5_sW-KRYJurswGLT2UhBg8uSVwLAXUtKOhL7GM6wkNMPDPCioiFHoj2GbCAgnvwhAfn-qfMl2KKqiODvE-88xk8zjKuqJ6pdpWo2JYj5U9ZyafuPpyFJYG92MvH5v8hN5vtBnK86iFAZpU=w506-h674-no'
+#IMAGE_2_URL = 'https://lh3.googleusercontent.com/E2z3781R4iWW8Ijs-1Cw5K_pvo1dMJdzaORwvKdZLxLg2OsKEB6JJ5hUWEPrgYHDrAHJpVD1HOcj2pn9UlDSA6O-zLzHilK8xDv0PHMiQTqBWWQEDmrzM1Lr-yTaFjYQjOGdshxcLmRltehpudOfUQYcl5L0YHmBLnP190oTsUq-eAhgczj_K9gtM3s-qg5qD9kx2mS2EoZn5XnIJR5L75s_cArYbeRJkYIOL-jEhSvk2q2HZ7yzwM1_WaIcNJuybJziMvcdPPE24ApLx09TsWo9m7-Q7qsapI-KEopEoSPbD9KEW-oTORZkH9GHJmmNuNqAQ3FYabLIEq0fF9jhNtxfqWZNmOs45CRJxTZXgLuh6WXmyC0gSmkgRpL2mnSNJzIQgOx2wQre8PoInV9oSAREW-BiAsbJtIcIBtnutmNZLO4X0XZww8nOzi_qLiYaaLPmR_vw5wsm_AhVWLfVxNZWu2YEweIh76On1I6rA-6csnqNmkynb2MuT45NAcHryg1Jpm4F-7U-U9EVOdS_TnW5sN4aFWhSUI0WBH3uS3Gk2Bxm9byxHRIwQTmMy5PZJe7cu9qS6r0ZxIMXj_Ln2c2rEmIht51r0vclBjMIJdfHkFsyph-bkDSzImLiIW4o=w506-h674-no'
+#IMAGE_2_URL = 'https://lh3.googleusercontent.com/eag-O5LS2ghv-upnjiQJGVmUhYwuZ9NyglvRnHxqG1PY4E_pYsaJB7bOtVfqTQ_dk3KJfq9Zb60NCYsaoc6l4F4U0VEIBPJo-u2RP6dHvhB3w52M7x82Ry4MporCYHVFZ-eSeeWHG59Ze9YPnbWh77Lvug6l7FfvmDjNNxWTPUSEk7TBG4GTSt4droqofo1S_onukoei3CptdP9Sycev2fDHvdwXKtmr3nqZ9T4qEVOQPgr9RSU51lExAQG3IKlN6wVkDePGLwBL_dIyBAA4Q1yUZ0waDTOSW26Ow2dd6satdGfinbJe3aWj1LE8cLlVfmDDbJVijVHpt6730tPsefBsfU8nXT4AYEe2jb-s10gssyLEMcLMrIguim6iU9MmRU2G4iq_40tSPWymq9Uq8Qo_3mxi-WYCk_cjRQ_YRN0PL3eNryCOncICENIggpzWMpiVClWT2PJJ_vgJ9O7c_55umVAEDFfDAZyhcpFWkY-vLuC8MgRDpBJ91a8qJzfjfhjnJYRkZz8TTe3k7SLfjbEIviH0whjAaZ4IQ0jE45f5Jb_sokUzyVPvjoQyDvq1vVvavwtA8y_RtOBc-ogAItMZ5tNPhpYfR_8MkDj9ySFHd-t9zaJipO8bFGmnvPtm=w506-h674-no'
+
+#IMAGE_1_URL = 'https://upload.wikimedia.org/wikipedia/commons/c/ce/2006_01_21_Ath%C3%A8nes_Parth%C3%A9non.JPG'
+#IMAGE_2_URL = 'https://upload.wikimedia.org/wikipedia/commons/5/5c/ACROPOLIS_1969_-_panoramio_-_jean_melis.jpg'
 
 # IMAGE_1_URL = 'https://upload.wikimedia.org/wikipedia/commons/d/d8/Eiffel_Tower%2C_November_15%2C_2011.jpg'
 # IMAGE_2_URL = 'https://upload.wikimedia.org/wikipedia/commons/a/a8/Eiffel_Tower_from_immediately_beside_it%2C_Paris_May_2008.jpg'
