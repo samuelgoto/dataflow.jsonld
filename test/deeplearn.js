@@ -363,7 +363,23 @@ describe("Deeplearn", function() {
     console.log(getTopKClasses(result, 5));
    });
 
-  it("knn", async function() {
+  it("inaturalist", async function() {
+    // tensorflowjs_converter
+    //    --input_format=tf_hub 
+    //    'https://tfhub.dev/google/inaturalist/inception_v3/feature_vector/1' 
+    //    inaturalist
+    const MODEL_URL = "file://./test/inaturalist/tensorflowjs_model.pb";
+    const WEIGHTS_URL = "file://./test/inaturalist/weights_manifest.json";
+    const model = await loadFrozenModel(MODEL_URL, WEIGHTS_URL);
+
+    let result = await model.execute({
+      images: await image(await load("./test/church.jpg", 299))
+     });
+
+    result.print();
+   });
+
+  it.skip("knn", async function() {
     let path = "/tmp/family/";
 
     async function readdir(path) {
@@ -395,9 +411,9 @@ describe("Deeplearn", function() {
       })
     };
 
-    let img = await id(path + "leo/" + file);
-    img.print();
-    console.log(img);
+    // let img = await id(path + "leo/" + file);
+    // img.print();
+    // console.log(img);
    });
 
   it("flickr", async function() {
