@@ -228,6 +228,17 @@ describe("Deeplearn", function() {
     console.log(getTopKClasses(result, 5));
    });
 
+  it("dogs", async function() {
+    // python retrain.py --image_dir Images/ 
+    //   --tfhub_module https://tfhub.dev/google/imagenet/mobilenet_v1_100_224/quantops/feature_vector/1
+    // tensorflowjs_converter 
+    //  --input_format=tf_frozen_model 
+    //  --output_node_names="final_result" 
+    //  --saved_model_tags=serve /tmp/output_graph.pb 
+    //  dogs
+
+   });
+
   it("flowers", async function() {
     // creating the model:
     // https://www.tensorflow.org/hub/tutorials/image_retraining
