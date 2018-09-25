@@ -12,6 +12,8 @@ const fetch = require("node-fetch");
 const readline = require("readline");
 const sscanf = require("sscanf");
 const {DataFlow, image} = require("./../dataflow.js");
+const {Feed} = require("feeds");
+const {URL} = require("url");
 
 async function load(url, size = 224) {
  return new Promise(function(resolve, reject) {
@@ -22,7 +24,6 @@ async function load(url, size = 224) {
     }
     const img = new Canvas.Image()
     img.onload = () => {
-     
      let foo = new Canvas(size, size);
      let context = foo.getContext("2d");
      context.drawImage(img, 0, 0, size, size);
@@ -35,12 +36,79 @@ async function load(url, size = 224) {
     img.src = data;
    };
 
-   fs.readFile(url, callback);
+   if (typeof url == "string") {
+    fs.readFile(url, callback);
+    return;
+   }
+
+   callback(false, url);
  });
 }
 
-
 describe("Deeplearn", function() {
+
+  it("feeds", async function() {
+    this.timeout(100000);
+    
+    let url = "https://code.sgo.to/dogs/index.jsonld";
+
+    let response = await fetch(url);
+    assertThat(response.ok).equalsTo(true);
+    let dataset = await response.json();
+
+    assertThat(dataset["@context"])
+     .equalsTo("https://code.sgo.to/datasets");
+    assertThat(dataset["@type"])
+     .equalsTo("Dataset");
+
+    console.log(dataset.name);
+
+    const MODEL_URL = "file://./test/mobilenet-features/tensorflowjs_model.pb";
+    const WEIGHTS_URL = "file://./test/mobilenet-features/weights_manifest.json";
+
+    let dataflow = new DataFlow(MODEL_URL, WEIGHTS_URL);
+    await dataflow.load();
+
+    for (let i = 0; i < dataset.classes.length; i++) {
+     let clazz = dataset.classes[i];
+     let result = [];
+     if (typeof clazz.images == "string") {
+      // this is a url reference
+      let images = new URL(clazz.images, url);
+      let feed = new Feed(images, fetch);
+
+      await feed.foreach((entry) => {
+        result.push(entry);
+       });
+     }
+
+     // console.log();
+     for (let item of result) {
+      let image = (new URL(item.url, url)).toString();
+      // console.log(image);
+      let data = await fetch(image);
+      let buffer = await data.buffer();
+      // console.log(await load(buffer));
+      let id = await dataflow.infer(await load(buffer), 0);
+      let indices = await id.data();
+      // console.log(id);
+      // id.print();
+      
+      // pretends we are storing the indices on disk and
+      // reconstructing it.
+
+      let foo = tf.tensor(indices, [1, indices.length], "float32");
+
+      await dataflow.addExample(foo, i, true);
+
+      break;
+     }
+
+     console.log(`${clazz.name} with ${result.length} images`);
+     break;
+    }
+   });
+  
   it.skip("training", async function() {
     // Train a simple model:
     const model = tf.sequential();
@@ -511,7 +579,13 @@ describe("Deeplearn", function() {
   function assertThat(x) {
    return {
     equalsTo(y) {
-     Assert.equal(x.trim(), y.trim());
+     if (typeof x == "string") {
+      x = x.trim();
+     }
+     if (typeof y == "string") {
+      y = y.trim();
+     }
+     Assert.equal(x, y);
     }
    }
   }

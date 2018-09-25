@@ -33,10 +33,15 @@ class DataFlow {
   this.model = await loadFrozenModel(this.graph, this.weights);
  }
 
- async addExample(bin, label) {
-  let id = await this.model.execute({
+ async infer(bin) {
+  return this.model.execute({
     images: await image(bin)
    });
+ }
+
+ async addExample(bin, label, tensor) {
+  // console.log(tensor);
+  let id = tensor ? bin : await this.infer(bin);
   this.classifier.addExample(id, label);
   return id;
  }
