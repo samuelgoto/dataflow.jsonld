@@ -34,10 +34,15 @@ class DataFlow {
   this.model = await loadFrozenModel(this.graph, this.weights);
  }
 
- async addExample(bin, label) {
-  let id = await this.model.execute({
+ async infer(bin) {
+  return this.model.execute({
     images: await image(bin)
    });
+ }
+
+ async addExample(bin, label, tensor) {
+  // console.log(tensor);
+  let id = tensor ? bin : await this.infer(bin);
   this.classifier.addExample(id, label);
   return id;
  }
@@ -95,16 +100,18 @@ module.exports = {
  Flickr: Flickr
 };
 
-},{"node-fetch":235}],3:[function(require,module,exports){
+},{"node-fetch":236}],3:[function(require,module,exports){
 const {Flickr} = require("./flickr.js");
 const {DataFlow} = require("./dataflow.js");
+const {Feed} = require("feeds");
 
 module.exports = {
- Flickr: Flickr
- ,DataFlow: DataFlow
+ Flickr: Flickr,
+ DataFlow: DataFlow,
+ Feed: Feed
 };
 
-},{"./dataflow.js":1,"./flickr.js":2}],4:[function(require,module,exports){
+},{"./dataflow.js":1,"./flickr.js":2,"feeds":235}],4:[function(require,module,exports){
 "use strict";
 module.exports = asPromise;
 
@@ -2875,7 +2882,7 @@ $root.tensorflow = (function() {
 
 module.exports = $root;
 
-},{"protobufjs/minimal":236}],14:[function(require,module,exports){
+},{"protobufjs/minimal":237}],14:[function(require,module,exports){
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
 var ExecutionContext = (function () {
@@ -7570,7 +7577,7 @@ function getOrMakeEnvironment() {
 exports.ENV = getOrMakeEnvironment();
 
 }).call(this,require('_process'))
-},{"./device_util":54,"./engine":55,"./environment_util":57,"./tensor":174,"./tensor_util":176,"_process":259}],57:[function(require,module,exports){
+},{"./device_util":54,"./engine":55,"./environment_util":57,"./tensor":174,"./tensor_util":176,"_process":260}],57:[function(require,module,exports){
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
 var Type;
@@ -9034,7 +9041,7 @@ function getModelArtifactsInfoForJSON(modelArtifacts) {
 exports.getModelArtifactsInfoForJSON = getModelArtifactsInfoForJSON;
 
 }).call(this,require("buffer").Buffer)
-},{"../ops/tensor_ops":157,"../util":181,"./types":70,"buffer":257}],66:[function(require,module,exports){
+},{"../ops/tensor_ops":157,"../util":181,"./types":70,"buffer":258}],66:[function(require,module,exports){
 "use strict";
 var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, generator) {
     return new (P || (P = Promise))(function (resolve, reject) {
@@ -11668,7 +11675,7 @@ var MathBackendCPU = (function () {
 exports.MathBackendCPU = MathBackendCPU;
 environment_1.ENV.registerBackend('cpu', function () { return new MathBackendCPU(); }, 1, tensor_1.setTensorTracker);
 
-},{"../environment":56,"../log":120,"../ops/array_ops_util":122,"../ops/axis_util":123,"../ops/broadcast_util":126,"../ops/concat_util":129,"../ops/erf_util":132,"../ops/ops":143,"../ops/selu_util":152,"../ops/slice_util":154,"../tensor":174,"../types":180,"../util":181,"./backend_util":73,"./non_max_suppression_impl":75,"./topk_impl":76,"./where_impl":119,"seedrandom":247}],73:[function(require,module,exports){
+},{"../environment":56,"../log":120,"../ops/array_ops_util":122,"../ops/axis_util":123,"../ops/broadcast_util":126,"../ops/concat_util":129,"../ops/erf_util":132,"../ops/ops":143,"../ops/selu_util":152,"../ops/slice_util":154,"../tensor":174,"../types":180,"../util":181,"./backend_util":73,"./non_max_suppression_impl":75,"./topk_impl":76,"./where_impl":119,"seedrandom":248}],73:[function(require,module,exports){
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
 var tensor_ops_1 = require("../ops/tensor_ops");
@@ -19063,7 +19070,7 @@ var MPRandGauss = (function () {
 }());
 exports.MPRandGauss = MPRandGauss;
 
-},{"seedrandom":247}],146:[function(require,module,exports){
+},{"seedrandom":248}],146:[function(require,module,exports){
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
 var util_1 = require("../util");
@@ -23027,7 +23034,7 @@ function now() {
 exports.now = now;
 
 }).call(this,require('_process'))
-},{"_process":259}],182:[function(require,module,exports){
+},{"_process":260}],182:[function(require,module,exports){
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
 var version = '0.12.11';
@@ -35240,6 +35247,98 @@ var version = '0.12.5';
 exports.version = version;
 
 },{}],235:[function(require,module,exports){
+
+class Feed {
+
+ constructor(url, fetch, checkpoint) {
+  this.reader = Feed.getReader(url, fetch, checkpoint);
+ }
+
+ static getReader(url, fetch, checkpoint) {
+  let id = url;
+  let i = 0;
+  let current;
+
+  if (checkpoint) {
+   [id, i] = checkpoint.split("#");
+   // starts from the next entry.
+   i++;
+  }
+
+  return {
+   async read() {
+    if (!current) {
+     let response = await fetch(id);
+     if (!response.ok) {
+      return {done: true};
+     }
+     current = await response.json();
+    }
+
+    if (current["@context"] != "https://feeds.json-ld.io/2005/Atom" ||
+        current["@type"] != "Feed") {
+     throw new Error(`Invalid feed format`);
+    }
+
+    if (!current.entries) {
+     return {done: true};
+    }
+
+    if (i < current.entries.length) {
+     let value = {
+      url: id,
+      index: i,
+      value: current.entries[i]
+     };
+     i++;
+     return {done: false, value: value};
+    }
+
+    i = 0;
+
+    let next = (current.links || [])
+     .find(link => link.rel == "next");
+   
+    if (next) {
+     let response = await fetch(next.href);
+     if (!response.ok) {
+      return {done: true};
+     }
+     id = next.href;
+     current = await response.json();
+     return this.read();
+    }
+
+    return {done: true};
+   }
+  };
+ }
+ 
+ async foreach(body) {
+  return await this.loop(this.reader, body);
+ }
+
+ async loop(reader, body) {
+  while (true) {
+   const {done, value} = await reader.read();
+   if (done) {
+    return true;
+   }
+   try {
+    body(value.value, `${value.url}#${value.index}`);
+   } catch (e) {
+    // returns with an error and assumes that
+    // all continuation will be done in userland.
+    return false;
+   }
+  }
+ }
+}
+
+module.exports = {
+ Feed: Feed
+};
+},{}],236:[function(require,module,exports){
 "use strict";
 
 module.exports = exports = self.fetch;
@@ -35251,13 +35350,13 @@ exports.Headers = self.Headers;
 exports.Request = self.Request;
 exports.Response = self.Response;
 
-},{}],236:[function(require,module,exports){
+},{}],237:[function(require,module,exports){
 // minimal library entry point.
 
 "use strict";
 module.exports = require("./src/index-minimal");
 
-},{"./src/index-minimal":237}],237:[function(require,module,exports){
+},{"./src/index-minimal":238}],238:[function(require,module,exports){
 "use strict";
 var protobuf = exports;
 
@@ -35295,7 +35394,7 @@ function configure() {
 protobuf.Writer._configure(protobuf.BufferWriter);
 configure();
 
-},{"./reader":238,"./reader_buffer":239,"./roots":240,"./rpc":241,"./util/minimal":244,"./writer":245,"./writer_buffer":246}],238:[function(require,module,exports){
+},{"./reader":239,"./reader_buffer":240,"./roots":241,"./rpc":242,"./util/minimal":245,"./writer":246,"./writer_buffer":247}],239:[function(require,module,exports){
 "use strict";
 module.exports = Reader;
 
@@ -35702,7 +35801,7 @@ Reader._configure = function(BufferReader_) {
     });
 };
 
-},{"./util/minimal":244}],239:[function(require,module,exports){
+},{"./util/minimal":245}],240:[function(require,module,exports){
 "use strict";
 module.exports = BufferReader;
 
@@ -35748,7 +35847,7 @@ BufferReader.prototype.string = function read_string_buffer() {
  * @returns {Buffer} Value read
  */
 
-},{"./reader":238,"./util/minimal":244}],240:[function(require,module,exports){
+},{"./reader":239,"./util/minimal":245}],241:[function(require,module,exports){
 "use strict";
 module.exports = {};
 
@@ -35768,7 +35867,7 @@ module.exports = {};
  * var root = protobuf.roots["myroot"];
  */
 
-},{}],241:[function(require,module,exports){
+},{}],242:[function(require,module,exports){
 "use strict";
 
 /**
@@ -35806,7 +35905,7 @@ var rpc = exports;
 
 rpc.Service = require("./rpc/service");
 
-},{"./rpc/service":242}],242:[function(require,module,exports){
+},{"./rpc/service":243}],243:[function(require,module,exports){
 "use strict";
 module.exports = Service;
 
@@ -35950,7 +36049,7 @@ Service.prototype.end = function end(endedByRPC) {
     return this;
 };
 
-},{"../util/minimal":244}],243:[function(require,module,exports){
+},{"../util/minimal":245}],244:[function(require,module,exports){
 "use strict";
 module.exports = LongBits;
 
@@ -36152,7 +36251,7 @@ LongBits.prototype.length = function length() {
          : part2 < 128 ? 9 : 10;
 };
 
-},{"../util/minimal":244}],244:[function(require,module,exports){
+},{"../util/minimal":245}],245:[function(require,module,exports){
 (function (global){
 "use strict";
 var util = exports;
@@ -36570,7 +36669,7 @@ util._configure = function() {
 };
 
 }).call(this,typeof global !== "undefined" ? global : typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
-},{"./longbits":243,"@protobufjs/aspromise":4,"@protobufjs/base64":5,"@protobufjs/eventemitter":6,"@protobufjs/float":7,"@protobufjs/inquire":8,"@protobufjs/pool":9,"@protobufjs/utf8":10}],245:[function(require,module,exports){
+},{"./longbits":244,"@protobufjs/aspromise":4,"@protobufjs/base64":5,"@protobufjs/eventemitter":6,"@protobufjs/float":7,"@protobufjs/inquire":8,"@protobufjs/pool":9,"@protobufjs/utf8":10}],246:[function(require,module,exports){
 "use strict";
 module.exports = Writer;
 
@@ -37031,7 +37130,7 @@ Writer._configure = function(BufferWriter_) {
     BufferWriter = BufferWriter_;
 };
 
-},{"./util/minimal":244}],246:[function(require,module,exports){
+},{"./util/minimal":245}],247:[function(require,module,exports){
 "use strict";
 module.exports = BufferWriter;
 
@@ -37114,7 +37213,7 @@ BufferWriter.prototype.string = function write_string_buffer(value) {
  * @returns {Buffer} Finished buffer
  */
 
-},{"./util/minimal":244,"./writer":245}],247:[function(require,module,exports){
+},{"./util/minimal":245,"./writer":246}],248:[function(require,module,exports){
 // A library of seedable RNGs implemented in Javascript.
 //
 // Usage:
@@ -37176,7 +37275,7 @@ sr.tychei = tychei;
 
 module.exports = sr;
 
-},{"./lib/alea":248,"./lib/tychei":249,"./lib/xor128":250,"./lib/xor4096":251,"./lib/xorshift7":252,"./lib/xorwow":253,"./seedrandom":254}],248:[function(require,module,exports){
+},{"./lib/alea":249,"./lib/tychei":250,"./lib/xor128":251,"./lib/xor4096":252,"./lib/xorshift7":253,"./lib/xorwow":254,"./seedrandom":255}],249:[function(require,module,exports){
 // A port of an algorithm by Johannes Baagøe <baagoe@baagoe.com>, 2010
 // http://baagoe.com/en/RandomMusings/javascript/
 // https://github.com/nquinlan/better-random-numbers-for-javascript-mirror
@@ -37292,7 +37391,7 @@ if (module && module.exports) {
 
 
 
-},{}],249:[function(require,module,exports){
+},{}],250:[function(require,module,exports){
 // A Javascript implementaion of the "Tyche-i" prng algorithm by
 // Samuel Neves and Filipe Araujo.
 // See https://eden.dei.uc.pt/~sneves/pubs/2011-snfa2.pdf
@@ -37397,7 +37496,7 @@ if (module && module.exports) {
 
 
 
-},{}],250:[function(require,module,exports){
+},{}],251:[function(require,module,exports){
 // A Javascript implementaion of the "xor128" prng algorithm by
 // George Marsaglia.  See http://www.jstatsoft.org/v08/i14/paper
 
@@ -37480,7 +37579,7 @@ if (module && module.exports) {
 
 
 
-},{}],251:[function(require,module,exports){
+},{}],252:[function(require,module,exports){
 // A Javascript implementaion of Richard Brent's Xorgens xor4096 algorithm.
 //
 // This fast non-cryptographic random number generator is designed for
@@ -37628,7 +37727,7 @@ if (module && module.exports) {
   (typeof define) == 'function' && define   // present with an AMD loader
 );
 
-},{}],252:[function(require,module,exports){
+},{}],253:[function(require,module,exports){
 // A Javascript implementaion of the "xorshift7" algorithm by
 // François Panneton and Pierre L'ecuyer:
 // "On the Xorgshift Random Number Generators"
@@ -37727,7 +37826,7 @@ if (module && module.exports) {
 );
 
 
-},{}],253:[function(require,module,exports){
+},{}],254:[function(require,module,exports){
 // A Javascript implementaion of the "xorwow" prng algorithm by
 // George Marsaglia.  See http://www.jstatsoft.org/v08/i14/paper
 
@@ -37815,7 +37914,7 @@ if (module && module.exports) {
 
 
 
-},{}],254:[function(require,module,exports){
+},{}],255:[function(require,module,exports){
 /*
 Copyright 2014 David Bau.
 
@@ -38067,7 +38166,7 @@ if ((typeof module) == 'object' && module.exports) {
   Math    // math: package containing random, pow, and seedrandom
 );
 
-},{"crypto":256}],255:[function(require,module,exports){
+},{"crypto":257}],256:[function(require,module,exports){
 'use strict'
 
 exports.byteLength = byteLength
@@ -38185,9 +38284,9 @@ function fromByteArray (uint8) {
   return parts.join('')
 }
 
-},{}],256:[function(require,module,exports){
-
 },{}],257:[function(require,module,exports){
+
+},{}],258:[function(require,module,exports){
 /*!
  * The buffer module from node.js, for the browser.
  *
@@ -39925,7 +40024,7 @@ function numberIsNaN (obj) {
   return obj !== obj // eslint-disable-line no-self-compare
 }
 
-},{"base64-js":255,"ieee754":258}],258:[function(require,module,exports){
+},{"base64-js":256,"ieee754":259}],259:[function(require,module,exports){
 exports.read = function (buffer, offset, isLE, mLen, nBytes) {
   var e, m
   var eLen = (nBytes * 8) - mLen - 1
@@ -40011,7 +40110,7 @@ exports.write = function (buffer, value, offset, isLE, mLen, nBytes) {
   buffer[offset + i - d] |= s * 128
 }
 
-},{}],259:[function(require,module,exports){
+},{}],260:[function(require,module,exports){
 // shim for using process in browser
 var process = module.exports = {};
 

@@ -1,0 +1,70 @@
+<html>
+  <head>
+    <script src="index.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/5.4.2/firebase.js"></script>
+    <link rel="stylesheet" href="main.css">
+    <script src="main.js"></script>
+  </head>
+  <body>
+
+    <a href="index.html">Home</a>
+
+    <p>Step 1) click <a href="javascript: void(0)" onclick="go()">here</a> to add examples of <span class="clazz"></span>!</p>
+    <p>Step 2) click <a href="javascript: void(0)" onclick="window.location.href = 'run.html#' + window.location.hash.substring(1)">here</a> to run <span class="clazz"></span>!</p>
+    <br>
+
+    <textarea id="result" cols="80" rows="10">
+    </textarea>
+
+    <p>Examples of <span class="clazz"></span></p>
+
+    <div id="examples"></div>
+
+    <div id="go" class="fullscreen">
+      <div id="instructions" class="instructions"></div>
+      <img id="image" crossorigin="anonymous" class="image">
+    </div>
+
+    <script>
+
+      function render(name, examples) {
+        document.getElementById("result").innerText = `
+{
+  "@context": "http://w3c.org/ar",
+  "@type": "Class",
+  "name": "${name}",
+  "examples": ${JSON.stringify(examples, undefined, 2)}
+}
+`;
+
+        let container = document.getElementById("examples");
+        for (let img of examples) {
+          // console.log(img);
+          let el = document.createElement("img");
+          el.src = img;
+          // el.width = "224";
+          el.height = "100";
+          container.appendChild(el);
+        }
+      }
+
+      (async function() {
+
+        let clazz = document.location.hash.substring(1);
+        let names = document.getElementsByClassName("clazz");
+
+        for (var i = 0; i < names.length; i++) {
+          names[i].innerText = clazz;
+        }
+
+        let examples = await Database.read("/classes/" + clazz) || [];
+        console.log(examples);
+
+        render(clazz, examples);
+
+      })();
+    </script>
+
+
+  </body>
+</html>

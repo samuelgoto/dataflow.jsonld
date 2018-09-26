@@ -47,6 +47,39 @@ async function load(url, size = 224) {
 
 describe("Deeplearn", function() {
 
+  it("hands", async function() {
+    // https://github.com/victordibia/handtracking
+    const MODEL_URL = "file://./test/hands/tensorflowjs_model.pb";
+    const WEIGHTS_URL = "file://./test/hands/weights_manifest.json";
+    const model = await loadFrozenModel(MODEL_URL, WEIGHTS_URL);
+
+    // console.log(model);
+
+    // return;
+
+    // NOTE(goto): got this in the log. Unsure how to feel about it.
+    // The model contains control flow or dynamic shape ops, 
+    // please use executeAsync method
+    let result = await model.executeAsync({
+      image_tensor: await image(await load("./test/hands.jpg"))
+     });
+
+    result[0].print();
+    // result[1].print();
+    // tf.reduce_max(result[1]).print();
+    // console.log(tf.reduce_max);
+    // console.log(await result[1].data());
+    // console.log(Math.max(... await result[1].data()));
+    
+    // result[2].print();
+    // result[3].print();
+    // console.log(await result[0].data());
+    // result.print();
+
+    // console.log(getTopKClasses(result, 5));
+    // console.log("hi");
+   });
+
   it("feeds", async function() {
     this.timeout(100000);
     
