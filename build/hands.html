@@ -1,0 +1,128 @@
+<html>
+  <head>
+    <script src="https://cdn.jsdelivr.net/npm/@tensorflow/tfjs"> </script>
+    <script src="https://cdn.jsdelivr.net/npm/@tensorflow/tfjs-converter"></script>
+  </head>
+  <body>
+    hello world
+
+    <br>
+
+    <br><img id="image" width="600px">
+
+    <br><canvas id="center"></canvas>
+
+    <br><canvas id="canvas"></canvas>
+
+    hello world
+
+    <script>
+      async function main() {
+        const SIZE = 300;
+
+        let canvas = document.getElementById("canvas");
+        canvas.width = SIZE;
+        canvas.height = SIZE;
+        await new Promise(function(resolve, reject) {
+          let img = document.getElementById("image");
+          img.src = "../test/hands13.jpg";
+          img.onload = function() {
+            // console.log("image loaded");
+            // console.log(img.width);
+            // console.log(img.height);
+
+            let center = document.getElementById("center");
+            center.width = img.width;
+            center.height = img.height;
+            center.getContext("2d").drawImage(img, 0, 0, img.width, img.height);
+            if (img.width > img.height) {
+              center.getContext("2d").rect(
+                (img.width - img.height) / 2, 0, img.height, img.height);
+
+              center.getContext("2d").stroke();
+
+              let context = canvas.getContext("2d");
+              // console.log(img.naturalWidth);
+              // console.log(img.naturalHeight);
+              // console.log(img.width);
+              // console.log(img.height);
+              context.drawImage(img, 
+                (img.naturalWidth - img.naturalHeight) / 2, 0, img.naturalHeight, img.naturalHeight,
+                0, 0, SIZE, SIZE);
+
+            }
+            resolve(canvas);
+          }      
+        });
+
+        // return;
+
+        let bin = tf.fromPixels(canvas).asType("float32").expandDims();
+        // let bin = tf.fromPixels(canvas).asType("float32");
+
+        // tf.fromPixels(canvas, 3).asType("float32").print();
+
+        // const mean = 0;
+        // const std = 255;
+   
+        // let img = tf.div(tf.sub(bin, mean), std);
+        let img = bin;
+
+        // console.log(img);
+
+        const MODEL_URL = "../test/hands/tensorflowjs_model.pb";
+        const WEIGHTS_URL = "../test/hands/weights_manifest.json";
+        const {loadFrozenModel} = tf;
+        const model = await loadFrozenModel(MODEL_URL, WEIGHTS_URL);
+        // console.log(model);
+
+        let [boxes, scores, classes, num] = await model.executeAsync({
+          image_tensor: img
+        });
+
+        // console.log(result[0][0]);
+
+        // console.log(`scores: ${scores}`);
+
+        boxes = await boxes.data();
+        scores = await scores.data();
+
+        // console.log(scores);
+        // console.log(Math.max(scores));
+
+        foo = scores;
+
+        // console.log(boxes);
+
+        const threshold = 0.2;
+        for (let i = 0; i < 100; i++) {
+          if (scores[i] < threshold) {
+            break;
+          }
+
+          let box = boxes.slice(4 * i, 4 * i + 4);
+          // console.log(box);
+          // console.log(`score: ${scores[i]}`);
+
+          // console.log("drawing rectangle");
+          var context = canvas.getContext("2d");
+          let left = SIZE * box[1];
+          let right = SIZE * box[3];
+          let top = SIZE * box[0];
+          let bottom = SIZE * box[2];
+          let width = right - left;
+          let height = bottom - top;
+          // console.log(`${left} ${top} ${right} ${bottom} ${width} ${height}`);
+          context.rect(left, top, width, height);
+          context.stroke();
+        }
+
+        console.log("done");
+
+      }
+      main();
+    </script>
+
+  </body>
+</html>
+
