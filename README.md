@@ -1,6 +1,6 @@
 # Visual Object Description
 
-[Visual Object Description](#VisualDescription) is a JSON-LD ```@context``` that you can use as a [arpub target](#https://code.sgo.to/arpub#target) to publish a visual description of objects to be used as input to computer vision classification and localization pipelines.
+[Visual Object Description](#VisualDescription) is a JSON-LD ```@context``` that you can use as a [arpub target](https://code.sgo.to/arpub#target) to publish a visual description of objects to be used as input to computer vision classification and localization pipelines.
 
 Here is a concrete example:
 
@@ -51,7 +51,7 @@ Here is the schema:
 | createdDate   | [Date](#date)                         | The date the dataset was created                                 |
 | publishedDate | [Date](#date)                         | The date the dataset was published                               |
 | modifiedDate  | [Date](#date)                         | The date the dataset was last modified                           |
-| items         | [Artifact](#http://code.sgo.to/arpub#artifact)[] or [URL](#url)[]    | An array of classes in this dataset                              |
+| items         | [Artifact](http://code.sgo.to/arpub#artifact)[] or [URL](#url)[]    | An array of classes in this dataset                              |
       
 # VisualDescription
 
