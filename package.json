@@ -2,7 +2,7 @@
   "name": "deeplearn.jsonld",
   "scripts": {
     "test": "mocha -w",
-    "build": "watchify index.js -o build/index.js -s module"
+    "build": "watchify index.js -o docs/index.js -s module"
   },
   "repository": {
     "type": "git",
