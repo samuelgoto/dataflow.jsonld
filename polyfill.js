@@ -330,7 +330,7 @@ class Gallery extends React.Component {
               <br />
               <br />
 
-              <Typography className={classes.heading}>Asset</Typography>
+              <Typography className={classes.heading}>Content</Typography>
     
               <br />
               <br />
