@@ -318,7 +318,7 @@ class Gallery extends React.Component {
   let item = value;
   let clazz = item.target;
   // console.log(clazz.images);
-  let asset = item.asset;
+  let asset = item.content;
   asset.thumbnail = new URL(asset.thumbnail, clazz.url);
   // console.log(asset);
   // console.log(clazz.examples);
