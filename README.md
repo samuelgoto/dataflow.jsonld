@@ -1,6 +1,6 @@
 # Visual Object Description
 
-[Visual Object Description](#VisualDescription) is a JSON-LD ```@context``` that you can use to publish a visual description of objects to be used as input to computer vision classification and localization pipelines.
+[Visual Object Description](#VisualDescription) is a JSON-LD ```@context``` that you can use as a [arpub target](#https://code.sgo.to/arpub#target) to publish a visual description of objects to be used as input to computer vision classification and localization pipelines.
 
 Here is a concrete example:
 
