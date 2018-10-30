@@ -39,7 +39,7 @@ async function deps() {
 
  let base = window.location.href;
  document.querySelectorAll("script").forEach(script => {
-   if (!script.src.endsWith("vor.js")) {
+   if (!script.src.endsWith("vod.js")) {
     return;
    }
    base = script.src;
