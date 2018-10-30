@@ -51,7 +51,7 @@ Here is the schema:
 | createdDate   | [Date](#date)                         | The date the dataset was created                                 |
 | publishedDate | [Date](#date)                         | The date the dataset was published                               |
 | modifiedDate  | [Date](#date)                         | The date the dataset was last modified                           |
-| classes       | [Class](#class)[] or [URL](#url)[]    | An array of classes in this dataset                              |
+| items         | [Artifact](#http://code.sgo.to/arpub#artifact)[] or [URL](#url)[]    | An array of classes in this dataset                              |
       
 # VisualDescription
 
