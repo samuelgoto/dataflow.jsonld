@@ -109,7 +109,7 @@ class Dataset extends React.Component {
    feed.items = feed.items || [];
 
    let download = feed.download;
-   // console.log(dataset.classes);
+   // console.log(feed);
    return (
             <div className={classes.root}>
               <main className={classes.content}>
@@ -185,28 +185,31 @@ class Browser extends React.Component {
 
    // alert(props.dataset.classes);
    this.state.items = (props.feed.items || []).map(item => {
-     if (typeof item != "string") {
-      return {status: "loaded", value: item};
-     } else {
-      return {status: "loading", value: item};
-     }
+     // if (typeof item != "string") {
+     // return {status: "loaded", value: item};
+     // } else {
+     return {status: "loading", value: item};
+     // }
     });
 
    this.fetch();
   }
 
  async fetch() {
+  // console.log(this.state.items);
+  // return;
   let items = this.state.items;
   let expand = (image) => typeof image == "string" ? { url: image } : image;
   for (let i = 0; i < items.length; i++) {
    let item = items[i];
+   // console.log(item);
    if (item.status == "loaded") {
     // passed by value
     item.value.examples = item.value.target.examples.map(expand);
     continue;
    }
-   // console.log(clazz);
-   let url = item.value;
+   // console.log(item);
+   let url = item.value.arTarget.url;
    let result = await fetch(url);
    // console.log(result);
    if (!result.ok) {
@@ -214,10 +217,12 @@ class Browser extends React.Component {
     this.setState({items: items});
    } else {
     items[i].status = "loaded";
-    items[i].value = await result.json();
+    items[i].value.arTarget = await result.json();
     // console.log(url);
     // console.log(this.state.url);
-    items[i].value.target.url = new URL(url, this.state.url);
+    // console.log()
+    items[i].value.arTarget.url = new URL(url, this.state.url);
+    // console.log(items[i].value);
     this.setState({items: items});
    }
   }
@@ -246,6 +251,7 @@ class Browser extends React.Component {
 
   // console.log(offset);
   // console.log(list.length);
+  // console.log(page);
 
   return (
             <div>
@@ -260,8 +266,8 @@ class Browser extends React.Component {
                     <TableBody>
                       {
                       page.map((item, id) => {
-                        let key = item.status == "loaded" ? item.value.target.name : item.status;
-                        let value = item.status == "loaded" ? (item.value.target.examples || []).length : item.status;
+                        let key = item.status == "loaded" ? item.value.arTarget.name : item.status;
+                        let value = item.status == "loaded" ? (item.value.arTarget.images || []).length : item.status;
                         return (
                           <TableRow 
                              className={classes.row}
@@ -316,17 +322,17 @@ class Gallery extends React.Component {
    return (<div />);
   }
   let item = value;
-  let clazz = item.target;
+  let clazz = item.arTarget;
   // console.log(clazz.images);
-  let asset = item.content;
+  let asset = item.arContent;
   asset.thumbnail = new URL(asset.thumbnail, clazz.url);
   // console.log(asset);
   // console.log(clazz.examples);
   return (
             <div>
-              <Typography className={classes.heading}>{item.target.name || ""}</Typography>
+              <Typography className={classes.heading}>{item.arTarget.name || ""}</Typography>
               <br />
-              <Typography className={classes.heading}>{item.target.description || ""}</Typography>
+              <Typography className={classes.heading}>{item.arTarget.description || ""}</Typography>
               <br />
               <br />
 
@@ -353,7 +359,7 @@ class Gallery extends React.Component {
 
               <GridList cellHeight={160} className={classes.gridList} cols={5}>
               {
-                (clazz.examples || []).map((image, index) => {
+                (clazz.images || []).map((image, index) => {
                   // console.log(clazz);
                   let url = typeof image == "string" ? new URL(image, clazz.url) : new URL(image.url, clazz.url);
                   
@@ -374,7 +380,7 @@ class Gallery extends React.Component {
                     if (this.state.selected == undefined) {
                      return;
                     }
-                    let image = clazz.examples[this.state.selected];
+                    let image = clazz.images[this.state.selected];
                     let url = typeof image == "string" ? new URL(image, clazz.url) : new URL(image.url, clazz.url);
                     // let url = typeof image == "string" ? image : image.url;
                     return (<img src={url} style={{width: "100%"}} />);
